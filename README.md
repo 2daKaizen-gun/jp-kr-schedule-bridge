@@ -16,3 +16,35 @@
 - **Business Alert:** 골든위크, 오본(お盆), 추석 등 장기 연휴 사전 경고
 - **Scheduling Advice:** 상대국 언어로 된 적절한 비즈니스 메일 문구 제안 (예정)
 
+## ✅ Milestone
+- **Phase 1**: Foundation & Frontend Environment Setup
+  - [] Phase 1-1: Initialize GitHub Repository & Project Board
+  - [] Phase 1-2: Setup Next.js (App Router) & TypeScript Development Environment
+  - [] Phase 1-3: Configure Global Styling Strategy (Tailwind CSS & Business Theme)
+  - [] Phase 1-4: Security Setup (Environment Variables & .env Configuration)
+
+- **Phase 2**: Holiday Data Acquisition & Modeling
+  - [] Phase 2-1: Research & Integrate Public Holiday APIs (KR/JP)
+  - [] Phase 2-2: Define TypeScript Interfaces for Holiday & Schedule Models
+  - [] Phase 2-3: Develop Data Fetching Utilities with Error Handling
+  - [] Phase 2-4: Implement Local Caching Logic for Performance Optimization
+
+- **Phase 3**: Core Business & Comparison Logic
+  - [] Phase 3-1: Develop "Cross-Border Holiday Comparison" Engine
+  - [] Phase 3-2: Implement Long-term Vacation Detection (Golden Week, Chuseok, etc.)
+  - [] Phase 3-3: Build Context-Aware Alert Logic (Business Risk Assessment)
+  - [] Phase 3-4: Create Scheduling Recommendation Algorithm
+
+- **Phase 4**: Advanced Web Interface & UX Development
+  - [] Phase 4-1: Build Interactive Dual-Calendar Dashboard UI
+  - [] Phase 4-2: Implement Real-time Schedule Conflict Visualization
+  - [] Phase 4-3: Develop Business Email Template Generator (KR/JP Bilingual)
+  - [] Phase 4-4: Ensure Responsive Web Design (RWD) for Cross-Device Support
+
+- **Phase 5**: Deployment, Documentation & Portfolio Finalization
+  - [] Phase 5-1: Cloud Deployment & CI/CD Pipeline Setup (Vercel)
+  - [] Phase 5-2: Performance Optimization (Server-side Rendering & Static Generation)
+  - [] Phase 5-3: Comprehensive Technical Documentation (README & API Docs)
+  - [] Phase 5-4: Global Localization & UX Optimization 
+  - [] Phase 5-5: Code Refactoring & TypeScript Strict Mode Audit
+  - [] Phase 5-6: Final Project Retrospective
