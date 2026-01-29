@@ -18,8 +18,8 @@
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
-  - [] Phase 1-1: Initialize GitHub Repository & Project Board
-  - [] Phase 1-2: Setup Next.js (App Router) & TypeScript Development Environment
+  - [x] Phase 1-1: Initialize GitHub Repository & Project Board
+  - [x] Phase 1-2: Setup Next.js (App Router) & TypeScript Development Environment
   - [] Phase 1-3: Configure Global Styling Strategy (Tailwind CSS & Business Theme)
   - [] Phase 1-4: Security Setup (Environment Variables & .env Configuration)
 
