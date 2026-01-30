@@ -12,7 +12,25 @@ export default function Home() {
           <span>KR 🇰🇷</span>
         </div>
       </nav>
-      
+
+      <main className="max-w-7xl mx-auto p-8">
+        {/*header section*/}
+        <header className="mb-10">
+          <h2 className="text-3xl font-extrabold tracking-tight">Business Calender Dashboard</h2>
+          <p className="mt-2 text-gray-600">한국과 일본 공휴일 비교해 최적의 협업 일정을 제안합니다.</p>
+        </header>
+
+        
+
+      </main>
+
+
+
+
+
+
+
+
     </div>
         
   )
