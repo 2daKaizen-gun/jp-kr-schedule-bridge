@@ -1,13 +1,16 @@
-//(test sample code)
-async function getHolidays() {
-  const res = await fetch('https://date.nager.at/api/v3/PublicHolidays/2026/JP');
-  if (!res.ok) throw new Error('Failed to fetch data');
-  return res.json();
-}
+import { getHolidays } from "@/lib/holidays";
 
 export default async function Home() {
-  const holidays = await getHolidays();
-  console.log(holidays); // terminal
+  // 데이터 가져오기 (병렬)
+  const [jpHolidays, krHolidays] = await Promise.all([
+    getHolidays("JP"),
+    getHolidays("KR"),
+  ]);
+
+  // 가장 가까운 휴일 sample
+  const nextJp = jpHolidays[0];
+  const nextKr = krHolidays[0];
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Navigation bar */}
@@ -36,8 +39,9 @@ export default async function Home() {
             <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
               <span className="text-2xl">🇯🇵</span> Japan
             </div>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-dashed border-2 border-gray-200 text-gray-400">
-              Calendar View Coming Soon
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-blue-600 font-bold">{nextJp?.localName || "No data"}</p>
+              <p className="text-sm text-gray-500">{nextJp?.date}</p>
             </div>
           </div>
 
@@ -46,8 +50,9 @@ export default async function Home() {
             <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
               <span className="text-2xl">🇰🇷</span> South Korea
             </div>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-dashed border-2 border-gray-200 text-gray-400">
-              Calendar View Coming Soon
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-red-600 font-bold">{nextKr?.localName || "No data"}</p>
+              <p className="text-sm text-gray-500">{nextKr?.date}</p>
             </div>
           </div>
         </div>
