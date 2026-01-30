@@ -1,4 +1,13 @@
-export default function Home() {
+//(test sample code)
+async function getHolidays() {
+  const res = await fetch('https://date.nager.at/api/v3/PublicHolidays/2026/JP');
+  if (!res.ok) throw new Error('Failed to fetch data');
+  return res.json();
+}
+
+export default async function Home() {
+  const holidays = await getHolidays();
+  console.log(holidays); // terminal
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Navigation bar */}
