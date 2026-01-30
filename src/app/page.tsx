@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray 900">
-      {/*상단 네비게이션 바*/}
+      {/*Navigation bar*/}
       <nav className="border-b bg-white px-8 py-4 flex justify-between items-center shadow-sm">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-red-600 bg-clip-text text-transparent">
           JP-KR Schedule Bridge
@@ -41,22 +41,19 @@ export default function Home() {
               Calendar View Coming Soon
             </div>
           </div>
-
         </div>
 
-        
-
+        {/*Notice section (Phase 3 Business logic)*/}
+        <section className="mt-10 bg-blue-50 p-6 rounded-2xl border border-blue-100">
+          <h3 className="text-blue-800 font-bold mb-2 flex items-center gap-2">
+            Smart Business Advice
+          </h3>
+          <p className="text-blue-700 text-sm">
+            데이터를 연동하면 양국의 연휴 차이에 따른 일정 주의사항을 자동으로 알려드립니다.
+          </p>
+        </section>
       </main>
-
-
-
-
-
-
-
-
     </div>
-        
-  )
+  );
 }
 
