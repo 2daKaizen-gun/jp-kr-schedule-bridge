@@ -26,7 +26,7 @@
 - **Phase 2**: Holiday Data Acquisition & Modeling
   - [x] Phase 2-1: Research & Integrate Public Holiday APIs (KR/JP)
   - [x] Phase 2-2: Define TypeScript Interfaces for Holiday & Schedule Models
-  - [] Phase 2-3: Develop Data Fetching Utilities with Error Handling
+  - [x] Phase 2-3: Develop Data Fetching Utilities with Error Handling
   - [] Phase 2-4: Implement Local Caching Logic for Performance Optimization
 
 - **Phase 3**: Core Business & Comparison Logic
