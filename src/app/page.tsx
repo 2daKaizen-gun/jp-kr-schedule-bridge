@@ -49,7 +49,9 @@ export default function Home() {
             Smart Business Advice
           </h3>
           <p className="text-blue-700 text-sm">
-            데이터를 연동하면 양국 연휴 차이에 따른 일정 주의사항을 자동으로 알려드립니다.
+            {process.env.PUBLIC_HOLIDAY_API_KEY ? 
+              "보안 설정 완료: 데이터 연동 준비가 되었습니다." : 
+              "보안 설정 미완료: .env.local 파일을 확인해주세요."}
           </p>
         </section>
       </main>
