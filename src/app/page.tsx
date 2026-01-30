@@ -20,6 +20,30 @@ export default function Home() {
           <p className="mt-2 text-gray-600">한국과 일본 공휴일 비교해 최적의 협업 일정을 제안합니다.</p>
         </header>
 
+        {/*2 column layout(Calender)*/}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/*Japan section*/}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
+              <span className="text-2xl">🇯🇵</span> Japan
+            </div>
+            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-dashed border-2 border-gray-200 text-gray-400">
+              Calendar View Coming Soon
+            </div>
+          </div>
+
+          {/*Korea section*/}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
+              <span className="text-2xl">🇰🇷</span> South Korea
+            </div>
+            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg border-dashed border-2 border-gray-200 text-gray-400">
+              Calendar View Coming Soon
+            </div>
+          </div>
+
+        </div>
+
         
 
       </main>
