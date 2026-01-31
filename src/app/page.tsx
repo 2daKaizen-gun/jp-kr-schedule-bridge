@@ -1,15 +1,18 @@
-import { getHolidays } from "@/lib/holidays";
+import { getCachedHolidays, analyzeBusinessDay } from "@/lib/holidays";
 
 export default async function Home() {
   // 데이터 가져오기 (병렬)
   const [jpHolidays, krHolidays] = await Promise.all([
-    getHolidays("JP"),
-    getHolidays("KR"),
+    getCachedHolidays("JP"),
+    getCachedHolidays("KR"),
   ]);
 
-  // 가장 가까운 휴일 sample
   const nextJp = jpHolidays[0];
   const nextKr = krHolidays[0];
+
+  // 2026년 2월 11일 (일본 건국기념일) test
+  const testDate = "2026-02-11";
+  const advice = analyzeBusinessDay(testDate, krHolidays, jpHolidays);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -58,14 +61,12 @@ export default async function Home() {
         </div>
 
         {/* Notice section (Phase 3 Business logic) */}
-        <section className="mt-10 bg-blue-50 p-6 rounded-2xl border border-blue-100">
-          <h3 className="text-blue-800 font-bold mb-2 flex items-center gap-2">
-            Smart Business Advice
+        <section className={`mt-10 p-6 rounded-2xl border ${advice.color === 'blue' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50'}`}>
+          <h3 className={`font-bold mb-2 flex items-center gap-2 ${advice.color === 'blue' ? 'text-blue-800' : 'text-gray-800'}`}>
+            Business Coordination Advice ({testDate})
           </h3>
-          <p className="text-blue-700 text-sm">
-            {process.env.PUBLIC_HOLIDAY_API_KEY ? 
-              "보안 설정 완료: 데이터 연동 준비가 되었습니다." : 
-              "보안 설정 미완료: .env.local 파일을 확인해주세요."}
+          <p className={`${advice.status === 'jp-only' ? 'text-blue-700' : 'text-gray-700'} text-sm`}>
+            {advice.message}
           </p>
         </section>
       </main>
