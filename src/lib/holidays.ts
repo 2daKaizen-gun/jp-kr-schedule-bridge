@@ -12,7 +12,7 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
     try {
         const response = await fetch(url, {
             //data 변동 거의 없으므로 24hour cash
-            next: {revalidate: 86400}
+            next: {revalidate: 86400} // 나중에 강제로 캐시 비울 때 사용하는 태그
         });
 
         if (!response.ok) {
