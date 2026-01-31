@@ -1,4 +1,5 @@
 import { Holiday } from "@/types/holiday";
+import { cache } from "react"; // react 캐시 기능 불러오기
 
 /**
  * 특정 국가와 연도의 공휴일 데이터를 가져오는 함수
@@ -27,3 +28,8 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
         return [];
     }
 }
+
+// 같은 요청 여러 번 해도 한 번만 실행 (Memoization)
+export const getCachedHolidays = cache(async (countryCode: string, year: number = 2026) => {
+    return await getHolidays(countryCode, year);
+});
