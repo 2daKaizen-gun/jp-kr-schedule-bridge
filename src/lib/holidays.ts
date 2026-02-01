@@ -78,7 +78,7 @@ export function getVacationBlocks(holidays: Holiday[]) {
     new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    const blocks: {start: string; end: string; count: number; name: string }[] = [];
+    const blocks: {start: string; end: string; count: number; displayNames: string }[] = [];
 
     // 간단한 구현(3일 이상 연속되는 공휴일 덩어리부터)
     // 실제 주말 결합 로직 -> 복잡 -> 일단 기초 설계
@@ -96,11 +96,14 @@ export function getVacationBlocks(holidays: Holiday[]) {
         } else {
             // 2일 이상 연속된 휴일 -> 블록으로 인정
             if (currentBlock.length >= 2) {
+                // 중복 이름 제거
+                const uniqueNames = Array.from(new Set(currentBlock.map(h=>h.localName))).join(', ');
+
                 blocks.push({
                     start: currentBlock[0].date,
                     end: currentBlock[currentBlock.length-1].date,
                     count: currentBlock.length,
-                    name: currentBlock.map(h=> h.localName).join(', ')
+                    displayNames: uniqueNames 
                 });
             }
             currentBlock = [];
