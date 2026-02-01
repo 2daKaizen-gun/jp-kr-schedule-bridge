@@ -68,3 +68,43 @@ export function analyzeBusinessDay(
         color: 'green'
     };
 }
+
+// 연속된 휴일(주말 + 공휴일)을 찾아내 연휴 블록 반환 함수
+export function getVacationBlocks(holidays: Holiday[]) {
+    if(!holidays || holidays.length === 0) return [];
+
+    // 날짜순 정렬
+    const sortedHolidays = [...holidays].sort((a,b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    const blocks: {start: string; end: string; count: number; name: string }[] = [];
+
+    // 간단한 구현(3일 이상 연속되는 공휴일 덩어리부터)
+    // 실제 주말 결합 로직 -> 복잡 -> 일단 기초 설계
+    let currentBlock: Holiday[] = [];
+
+    for (let i=0; i<sortedHolidays.length; i++) {
+        const current = new Date(sortedHolidays[i].date);
+        const next= sortedHolidays[i+1] ? new Date(sortedHolidays[i+1].date) : null;
+
+        currentBlock.push(sortedHolidays[i]);
+
+        // 다음 휴일과의 차이가 1이상 -> 계속 수집
+        if (next&& (next.getTime() - current.getTime()) <= 86400000) {
+            continue;
+        } else {
+            // 2일 이상 연속된 휴일 -> 블록으로 인정
+            if (currentBlock.length >= 2) {
+                blocks.push({
+                    start: currentBlock[0].date,
+                    end: currentBlock[currentBlock.length-1].date,
+                    count: currentBlock.length,
+                    name: currentBlock.map(h=> h.localName).join(', ')
+                });
+            }
+            currentBlock = [];
+        }
+    }
+    return blocks;
+}
