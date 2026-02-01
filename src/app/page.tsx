@@ -65,8 +65,30 @@ export default async function Home() {
         </div>
 
         {/* long-term vacation alerts*/}
-        <div className="">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {jpVacations.length > 0 && (
+            <div className="bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-1">
+              <span className="text-orange-800 font-bold flex items-center gap-2">
+                일본 장기 연휴 주의
+              </span>
+              <p className="text-orange-700 text-sm">
+                <span className="font-semibold">{jpVacations[0].name}</span>
+              </p>
+              <p className="text-xs text-orange-600 mt-1">이 기간 동안은 일본 파트너사의 대응이 늦어질 수 있습니다.</p>
+            </div>
+          )}
 
+          {KrVacations.length > 0 && (
+            <div className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col gap-1">
+              <span className="text-red-800 font-bold flex item-center gap-2">
+                한국 장기 연휴 주의
+              </span>
+              <p className="text-red-700 text-sm">
+                <span className="font-semibold">{KrVacations[0].name}</span>
+              </p>
+              <p className="text-xs text-red-600 mt-1">한국 내 업무 지연 발생이 예상됩니다. 미리 조치하세요.</p>
+            </div>
+          )}
         </div>
 
         {/* Notice section (Phase 3 Business logic) */}
