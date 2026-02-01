@@ -64,7 +64,10 @@ export default async function Home() {
           </div>
         </div>
 
-        
+        {/* long-term vacation alerts*/}
+        <div className="">
+
+        </div>
 
         {/* Notice section (Phase 3 Business logic) */}
         <section className={`mt-10 p-6 rounded-2xl border ${advice.color === 'blue' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50'}`}>
