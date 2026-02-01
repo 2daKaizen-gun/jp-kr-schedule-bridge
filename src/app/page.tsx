@@ -1,4 +1,4 @@
-import { getCachedHolidays, analyzeBusinessDay } from "@/lib/holidays";
+import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks } from "@/lib/holidays";
 
 export default async function Home() {
   // 데이터 가져오기 (병렬)
@@ -9,6 +9,10 @@ export default async function Home() {
 
   const nextJp = jpHolidays[0];
   const nextKr = krHolidays[0];
+
+  // 연휴 블록 추출
+  const jpVacations = getVacationBlocks(jpHolidays);
+  const KrVacations = getVacationBlocks(krHolidays);
 
   // 2026년 2월 11일 (일본 건국기념일) test
   const testDate = "2026-02-11";
@@ -59,6 +63,8 @@ export default async function Home() {
             </div>
           </div>
         </div>
+
+        
 
         {/* Notice section (Phase 3 Business logic) */}
         <section className={`mt-10 p-6 rounded-2xl border ${advice.color === 'blue' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50'}`}>
