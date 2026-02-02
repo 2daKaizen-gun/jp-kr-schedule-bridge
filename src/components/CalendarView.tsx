@@ -35,7 +35,7 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
                     key={formattedDate}
                     className={`relative h-24 border-t p-2 transition-all ${
                         !isCurrentMonth ? "bg-gray-50 text-gray-300" : "bg-white"
-                    } ${holiday ? (countryCode === "KR" ? "bg-red-50" : "bg-blue-50") : ""}`}
+                    } ${isPublicHoliday ? (countryCode === "KR" ? "bg-red-50" : "bg-blue-50") : ""}`}
                 >  
                     {/* 일요일 또는 공휴일만 숫자 빨간색으로 */}
                     <span className={`text-sm font-semibold ${
