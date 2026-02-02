@@ -158,14 +158,14 @@ export function getRecommendedMeetingDays(krHolidays: Holiday[], jpHolidays: Hol
         const target = new Date(today);
         target.setDate(today.getDate() + i);
 
-        // 주말 제외 (SAT: 6, SUN: 0)
-        if (target.getDay() === 0 || target.getDay() === 6) continue;
+        // 금요일, 주말 제외 (FRI: 5, SAT: 6, SUN: 0)
+        if (target.getDay() === 0 || target.getDay() === 6 || target.getDay() === 5) continue;
 
         const dateStr = target.toISOString().split('T')[0];
-        const isjpHoliday = jpHolidays.some(h => h.date === dateStr);
-        const iskrHoliday = krHolidays.some(h => h.date === dateStr);
+        const isjpHoliday = jpHolidays.some(h => h.date.trim() === dateStr);
+        const iskrHoliday = krHolidays.some(h => h.date.trim() === dateStr);
         
-        if (!iskrHoliday && isjpHoliday) {
+        if (!iskrHoliday && !isjpHoliday) {
             //basic: 100
             let score = 100;
             let reason = "양국 모두 정상 근무입니다.";
