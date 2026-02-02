@@ -28,7 +28,7 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
                 (!holiday.localName.includes("Day") || //기념일 제외 로직
                 holiday.localName.includes("Replacement") || //대체공휴일 포함
                 holiday.localName.includes("Memorial")) && //주요 휴일 포함
-                !["어버이날", "스승의날", "제헌절"].includes(holiday.localName)
+                !["노동절", "어버이날", "스승의날", "제헌절", "국군의날"].includes(holiday.localName)
             );
 
             days.push(
