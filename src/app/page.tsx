@@ -1,4 +1,4 @@
-import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks } from "@/lib/holidays";
+import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks, getRecommendedMeetingDays } from "@/lib/holidays";
 
 export default async function Home() {
   // 데이터 가져오기 (병렬)
@@ -13,6 +13,9 @@ export default async function Home() {
   // 연휴 블록 추출
   const jpVacations = getVacationBlocks(jpHolidays);
   const krVacations = getVacationBlocks(krHolidays);
+
+  // 추천 일정 알고리즘
+  const recommendedDays = getRecommendedMeetingDays(krHolidays, jpHolidays);
 
   // 2026년 2월 11일 (일본 건국기념일) test
   const testDate = "2026-02-11";
@@ -107,6 +110,34 @@ export default async function Home() {
             ))}
           </div>
         </div>
+
+        {/* Best Collaboration Days section */}
+        <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
+          <h3 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
+            Best Collaboration Days (Next 2 Weeks)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {recommendedDays.length > 0 ? (
+              recommendedDays.map((item, idx) => (
+                <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-green-700 font-bold">{item.date}</span>
+                    <span className="text-[10px] bg-green-200 text-green-800 px-2 py-1 rounded-lg font-black uppercase">
+                      Score: {item.score}
+                    </span>
+                  </div>
+                  <p className="text-xs text-green-600 font-medium leading-relaxed">
+                    {item.reason}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-3 text-center text-gray-400 text-sm py-4">
+                추천할 수 있는 날이 없습니다.
+              </p>
+            )}
+          </div>
+        </section>
 
         {/* Notice section (Phase 3 Business logic) */}
         <section className={`mt-10 p-6 rounded-2xl border-2 transition-all
