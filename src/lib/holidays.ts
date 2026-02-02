@@ -2,12 +2,12 @@ import { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
 
 // Google Calendar API
-const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_API_KEY;
+const GOOGLE_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
 
 // 국가별 캘린더 ID
 const CALENDAR_IDS: {[key: string]: string } = {
     KR: 'ko.south_korea#holiday@group.v.calendar.google.com',
-    JR: 'ja.japanese#holiday@group.v.calendar.google.com'
+    JP: 'japanese__ja@holiday.calendar.google.com'
 };
 
 export async function getHolidays(countryCode:string, year: number = 2026): Promise<Holiday[]> {
@@ -21,15 +21,33 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
         const response = await fetch(url)
         const data = await response.json();
         
+        // [체크 1] API가 에러를 반환했는지 확인
+        if (data.error) {
+            console.error(`Google API Error (${countryCode}):`, data.error.message);
+        return [];
+        }
+
+        // [체크 2] items 데이터가 있는지 확인
+        if (!data.items) {
+            console.warn(`No items found for ${countryCode}`);
+        return [];
+        }
+
         // 우리 Holiday 인터페이스에 맞게 가공함
         return data.items.map((item: any) => ({
             date: item.start.date || item.start.dateTime.split('T')[0],
             localName: item.summary,
             name: item.summary,
-            countryCode: countryCode
+            countryCode: countryCode,
+            // 기존 인터페이스 호환
+            fixed: true,
+            global: true,
+            counties: null,
+            launchYear: null,
+            types: ['Public']
         }));
     } catch (error) {
-        console.error("Google Calender API Error:", error);
+        console.error("Critical Fetch Error:", error);
         //error 발생 시 빈 배열 반환해 protect
         return [];
     }
