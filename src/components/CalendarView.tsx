@@ -39,7 +39,7 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
                 >  
                     {/* 일요일 또는 공휴일만 숫자 빨간색으로 */}
                     <span className={`text-sm font-semibold ${
-                        (format(day, "i") === "7" || holiday) ? "text-red-500" : "text-gray-700"
+                        (format(day, "i") === "7" || isPublicHoliday) ? "text-red-500" : "text-gray-700"
                     }`}>
                         {format(day, "d")}
                     </span>
@@ -47,7 +47,9 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
                     {/* 휴일/기념일 이름 표시 */}
                     {holiday && (
                         <div className={`mt-1 text-[10px] leading-tight font-bold break-keep p-1 rounded ${
-                           countryCode === "KR" ? "text-red-700 bg-red-100" : "text-blue-700 bg-blue-100" 
+                           isPublicHoliday
+                            ? (countryCode === "KR" ? "text-red-700 bg-red-100" : "text-blue-700 bg-blue-100")
+                            : "text-gray-400 bg-gray-100" // 쉬지 않는 기념일 회색 처리
                         }`}>
                             {holiday.localName}
                         </div>
