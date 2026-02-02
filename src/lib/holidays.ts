@@ -147,3 +147,45 @@ export function getVacationBlocks(holidays: Holiday[]) {
     }
     return blocks;
 }
+
+// 다가오는 2주 내의 날짜 중 협업하기 좋은 날 TOP3 추천
+export function getRecommendedMeetingDays(krHolidays: Holiday[], jpHolidays: Holiday[]) {
+    const recommedations: {date: string; score: number; reason: string }[] = [];
+    const today = new Date();
+
+    // 오늘부터 14일간 날짜
+    for (let i=1; i<=14; i++) {
+        const target = new Date(today);
+        target.setDate(today.getDate() + i);
+
+        // 주말 제외 (SAT: 6, SUN: 0)
+        if (target.getDay() === 0 || target.getDay() === 6) continue;
+
+        const dateStr = target.toISOString().split('T')[0];
+        const isjpHoliday = jpHolidays.some(h => h.date === dateStr);
+        const iskrHoliday = krHolidays.some(h => h.date === dateStr);
+        
+        if (!iskrHoliday && isjpHoliday) {
+            //basic: 100
+            let score = 100;
+            let reason = "양국 모두 정상 근무입니다.";
+
+            // 앞뒤 2일 내 장기 연휴 체크(집중도 하락 방지)
+            const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
+                const hDate = new Date(h.date);
+                const diff = Math.abs(hDate.getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
+                return diff <= 2;
+            });
+
+            if (hasNearbyHoliday) {
+                score = 70;
+                reason = "인접 공휴일이 있어 업무 집중도가 낮을 수 있습니다.";
+            }
+
+            recommedations.push({ date: dateStr, score, reason});
+        }
+    }
+
+    // 점수 높은 순 TOP3 반환
+    return recommedations.sort((a,b) => b.score - a.score).slice(0,3);
+}
