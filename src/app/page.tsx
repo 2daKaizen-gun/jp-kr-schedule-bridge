@@ -1,4 +1,5 @@
 import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks, getRecommendedMeetingDays } from "@/lib/holidays";
+import CalendarView from "@/components/CalendarView";
 
 export default async function Home() {
   // 데이터 가져오기 (병렬)
@@ -21,6 +22,9 @@ export default async function Home() {
   const testDate = "2026-02-11";
   const advice = analyzeBusinessDay(testDate, krHolidays, jpHolidays);
 
+  // 달력 보여줄 기준 월 설정
+  const currentMonth = new Date(2026,4,1);
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Navigation bar */}
@@ -42,34 +46,36 @@ export default async function Home() {
           <p className="mt-2 text-gray-600">한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.</p>
         </header>
 
-        {/* 2 column layout (Calendar) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Interactive Dual-Calendar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-12">
           {/* Japan section */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
-              <span className="text-2xl">🇯🇵</span> Japan
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                🇯🇵 Japan Calendar
+              </h3>
+              <span className="text-sm text-gray-500 font-medium">May 2026</span>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-blue-600 font-bold">{nextJp?.localName || "No data"}</p>
-              <p className="text-sm text-gray-500">{nextJp?.date}</p>
-            </div>
-          </div>
+            {/* 일본 달력 */}
+            <CalendarView month={currentMonth} holidays={jpHolidays} countryCode="JP" />
+          </section>
 
           {/* Korea section */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4 text-lg font-semibold border-b pb-2">
-              <span className="text-2xl">🇰🇷</span> South Korea
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                🇰🇷 Korea Calendar
+              </h3>
+              <span className="text-sm text-gray-500 font-medium">May 2026</span>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-red-600 font-bold">{nextKr?.localName || "No data"}</p>
-              <p className="text-sm text-gray-500">{nextKr?.date}</p>
-            </div>
-          </div>
+            {/* 한국 달력 */}
+            <CalendarView month={currentMonth} holidays={krHolidays} countryCode="KR" />
+          </section>
         </div>
 
         {/* long-term vacation alerts*/}
         {/* long-term vacation alerts 섹션 수정 */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 일본 전체 연휴 리스트 */}
           <div className="flex flex-col gap-4">
             {jpVacations.map((block, index) => (
