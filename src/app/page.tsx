@@ -65,48 +65,47 @@ export default async function Home() {
         </div>
 
         {/* long-term vacation alerts*/}
+        {/* long-term vacation alerts 섹션 수정 */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {jpVacations.length > 0 && (
-            <div className="bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-1">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-orange-800 font-bold flex items-center gap-2 text-lg">
-                  🇯🇵일본 연휴 주의
-                </span>
-                <span className="bg-orange-200 text-orange-800 text-xs font-black px-2 py-1 rounded-md">
-                  {jpVacations[0].count} DAYS
-                </span>
+          {/* 일본 전체 연휴 리스트 */}
+          <div className="flex flex-col gap-4">
+            {jpVacations.map((block, index) => (
+              <div key={index} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-1">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-orange-800 font-bold flex items-center gap-2 text-lg">
+                    🇯🇵 일본 연휴 주의
+                  </span>
+                  <span className="bg-orange-200 text-orange-800 text-xs font-black px-2 py-1 rounded-md">
+                    {block.count} DAYS
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-orange-900 font-extrabold text-base">{block.displayNames}</p>
+                  <p className="text-orange-700 text-sm font-medium">📅 {block.start} ~ {block.end}</p>
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-orange-900 font-extrabold text-base">
-                  {jpVacations[0].displayNames}
-                </p>
-                <p className="text-orange-700 text-sm font-medium">
-                  📅 {jpVacations[0].start} ~ {jpVacations[0].end}
-                </p>
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {krVacations.length > 0 && (
-            <div className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col gap-1">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-red-800 font-bold flex items-center gap-2 text-lg">
-                  🇰🇷한국 연휴 주의
-                </span>
-                <span className="bg-red-200 text-red-800 text-xs font-black px-2 py-1 rounded-md">
-                  {krVacations[0].count} DAYS
-                </span>
+          {/* 한국 전체 연휴 리스트 */}
+          <div className="flex flex-col gap-4">
+            {krVacations.map((block, index) => (
+              <div key={index} className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col gap-1">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-red-800 font-bold flex items-center gap-2 text-lg">
+                    🇰🇷 한국 연휴 주의
+                  </span>
+                  <span className="bg-red-200 text-red-800 text-xs font-black px-2 py-1 rounded-md">
+                    {block.count} DAYS
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-red-900 font-extrabold text-base">{block.displayNames}</p>
+                  <p className="text-red-700 text-sm font-medium">📅 {block.start} ~ {block.end}</p>
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-red-900 font-extrabold text-base">
-                  {krVacations[0].displayNames}
-                </p>
-                <p className="text-red-700 text-sm font-medium">
-                  📅 {krVacations[0].start} ~ {krVacations[0].end}
-                </p>
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Notice section (Phase 3 Business logic) */}

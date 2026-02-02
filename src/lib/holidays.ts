@@ -1,29 +1,34 @@
 import { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
 
-/**
- * 특정 국가와 연도의 공휴일 데이터를 가져오는 함수
- * @param countryCode 'KR' 또는 'JP'
- * @param year 연도 (기본값 2026)
- */
+const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_API_KEY;
+
+// 국가별 캘린더 ID
+const CALENDAR_IDS: {[key: string]: string } = {
+    KR: 'ko.south_korea#holiday@group.v.calendar.google.com',
+    JR: 'ja.japanese#holiday@group.v.calendar.google.com'
+};
 
 export async function getHolidays(countryCode:string, year: number = 2026): Promise<Holiday[]> {
-    const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`;
+    const calendarId = CALENDAR_IDS[countryCode];
+    const timeMin = `${year}-01-01T00:00:00Z`;
+    const timeMax = `${year}-12-31T23:59:59Z`;
+  
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
 
     try {
-        const response = await fetch(url, {
-            //data 변동 거의 없으므로 24hour cash
-            next: {revalidate: 86400} // 나중에 강제로 캐시 비울 때 사용하는 태그
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch holidays for ${countryCode}`);
-        }
-
-        const data: Holiday[] = await response.json();
-        return data;
+        const response = await fetch(url)
+        const data = await response.json();
+        
+        // 우리 Holiday 인터페이스에 맞게 가공함
+        return data.items.map((item: any) => ({
+            date: item.start.date || item.start.dateTime.split('T')[0],
+            localName: item.summary,
+            name: item.summary,
+            countryCode: countryCode
+        }));
     } catch (error) {
-        console.error("Holiday Fetch Error:", error);
+        console.error("Google Calender API Error:", error);
         //error 발생 시 빈 배열 반환해 protect
         return [];
     }
@@ -100,24 +105,24 @@ export function getVacationBlocks(holidays: Holiday[]) {
             }
         }
 
-        // 블록 확정 로직 (3일 이상 쉴 때만 표시)
-        if (currentBlock.length >= 2) {
+        // 블록 확정 로직
+        if (currentBlock.length >= 1) {
             const startDate = new Date(currentBlock[0].date);
             const endDate = new Date(currentBlock[currentBlock.length-1].date);
 
             // 실제 날짜 차이 계산 (끝날-시작날+1)
             const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000*60*60*24)) + 1;
 
-            if (totalDays >= 3) {
-                // 중복 이름 제거
-                const uniqueNames = Array.from(new Set(currentBlock.map(h=>h.localName))).join(', ');
-                blocks.push({
-                    start: currentBlock[0].date,
-                    end: currentBlock[currentBlock.length-1].date,
-                    count: totalDays,
-                    displayNames: uniqueNames 
-                });
-            }
+            // 만약 단독 공휴일인데 주말(토,일)과 붙어있는지 체크하고 싶다면 
+            // 여기서 추가 로직이 필요하지만, 일단 모든 공휴일이 나오게 1 이상으로 설정합니다.
+            const uniqueNames = Array.from(new Set(currentBlock.map(h => h.localName))).join(', ');
+            
+            blocks.push({
+                start: currentBlock[0].date,
+                end: currentBlock[currentBlock.length-1].date,
+                count: totalDays,
+                displayNames: uniqueNames 
+            });
         }
         currentBlock = [];
     }
