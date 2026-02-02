@@ -25,9 +25,10 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
             const holiday = holidays.find((h) => h.date === formattedDate);
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isPublicHoliday = holiday && (
-                !holiday.localName.includes("Day") || //기념일 제외 로직
+                (!holiday.localName.includes("Day") || //기념일 제외 로직
                 holiday.localName.includes("Replacement") || //대체공휴일 포함
-                holiday.localName.includes("Memorial") //주요 휴일 포함
+                holiday.localName.includes("Memorial")) && //주요 휴일 포함
+                !["어버이날", "스승의 날", "제헌절"].includes(holiday.localName)
             );
 
             days.push(
