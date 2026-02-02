@@ -12,7 +12,7 @@ export default async function Home() {
 
   // 연휴 블록 추출
   const jpVacations = getVacationBlocks(jpHolidays);
-  const KrVacations = getVacationBlocks(krHolidays);
+  const krVacations = getVacationBlocks(krHolidays);
 
   // 2026년 2월 11일 (일본 건국기념일) test
   const testDate = "2026-02-11";
@@ -87,22 +87,22 @@ export default async function Home() {
             </div>
           )}
 
-          {KrVacations.length > 0 && (
+          {krVacations.length > 0 && (
             <div className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col gap-1">
               <div className="flex justify-between items-start mb-2">
                 <span className="text-red-800 font-bold flex items-center gap-2 text-lg">
                   🇰🇷한국 연휴 주의
                 </span>
                 <span className="bg-red-200 text-red-800 text-xs font-black px-2 py-1 rounded-md">
-                  {KrVacations[0].count} DAYS
+                  {krVacations[0].count} DAYS
                 </span>
               </div>
               <div className="flex flex-col gap-1">
                 <p className="text-red-900 font-extrabold text-base">
-                  {KrVacations[0].displayNames}
+                  {krVacations[0].displayNames}
                 </p>
                 <p className="text-red-700 text-sm font-medium">
-                  📅 {KrVacations[0].start} ~ {KrVacations[0].end}
+                  📅 {krVacations[0].start} ~ {krVacations[0].end}
                 </p>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default async function Home() {
               advice.status === 'match' ? 'text-gra-800' : 'text-green-800'}`}>
             Business Coordination Advice ({testDate})
           </h3>
-          
+
           <p className={`text-sm font-medium
             ${advice.status === 'jp-only' ? 'text-blue-700' :
               advice.status === 'kr-only' ? 'text-red-700' :
