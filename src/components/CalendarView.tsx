@@ -34,7 +34,7 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
             days.push(
                 <div
                     key={formattedDate}
-                    className={`relative h-24 border-t p-2 transition-all ${
+                    className={`group relative h-24 border-t p-2 transition-all ${
                         !isCurrentMonth ? "bg-gray-50 text-gray-300" : "bg-white"
                     } ${isPublicHoliday ? (countryCode === "KR" ? "bg-red-50" : "bg-blue-50") : ""}`}
                 >  
@@ -57,7 +57,7 @@ export default function CalendarView({ month, holidays, countryCode }: CalendarP
                     )}
 
                     {/* 협업 불가 아이콘 */}
-                    {holiday && (
+                    {isPublicHoliday && (
                         <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <span className="text-xs">⚠️</span>
                         </div>
