@@ -1,6 +1,7 @@
 import { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
 
+// Google Calendar API
 const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_API_KEY;
 
 // 국가별 캘린더 ID
