@@ -110,11 +110,22 @@ export default async function Home() {
         </div>
 
         {/* Notice section (Phase 3 Business logic) */}
-        <section className={`mt-10 p-6 rounded-2xl border ${advice.color === 'blue' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50'}`}>
-          <h3 className={`font-bold mb-2 flex items-center gap-2 ${advice.color === 'blue' ? 'text-blue-800' : 'text-gray-800'}`}>
+        <section className={`mt-10 p-6 rounded-2xl border-2 transition-all
+          ${advice.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 
+            advice.status === 'kr-only' ? 'bg-red-50 border-red-200' :
+            advice.status === 'match' ? 'bg-gray-100 border-gray-300' : 'bg-green-50 border-green-200'}`}>
+          
+          <h3 className={`font-bold mb-2 flex items-center gap-2
+            ${advice.status === 'jp-only' ? 'text-blue-800' :
+              advice.status === 'kr-only' ? 'text-red-800' :
+              advice.status === 'match' ? 'text-gra-800' : 'text-green-800'}`}>
             Business Coordination Advice ({testDate})
           </h3>
-          <p className={`${advice.status === 'jp-only' ? 'text-blue-700' : 'text-gray-700'} text-sm`}>
+          
+          <p className={`text-sm font-medium
+            ${advice.status === 'jp-only' ? 'text-blue-700' :
+              advice.status === 'kr-only' ? 'text-red-700' :
+              advice.status === 'match' ? 'text-gray-700' : 'text-green-700'}`}>
             {advice.message}
           </p>
         </section>
