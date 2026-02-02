@@ -75,7 +75,7 @@ export function getVacationBlocks(holidays: Holiday[]) {
 
     // 날짜순 정렬
     const sortedHolidays = [...holidays].sort((a,b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+        new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
     const blocks: {start: string; end: string; count: number; displayNames: string }[] = [];
@@ -90,24 +90,36 @@ export function getVacationBlocks(holidays: Holiday[]) {
 
         currentBlock.push(sortedHolidays[i]);
 
-        // 다음 휴일과의 차이가 1이상 -> 계속 수집
-        if (next&& (next.getTime() - current.getTime()) <= 86400000) {
-            continue;
-        } else {
-            // 2일 이상 연속된 휴일 -> 블록으로 인정
-            if (currentBlock.length >= 2) {
+        if (next) {
+            const diffTime = next.getTime() - current.getTime();
+            const diffDays = diffTime / (1000*60*60*24);
+        
+            // 날짜 차이가 3일 이내면 (즉, 사이에 주말이 끼어있어도) 하나의 블록
+            if (diffDays <= 3) {
+                continue;
+            }
+        }
+
+        // 블록 확정 로직 (3일 이상 쉴 때만 표시)
+        if (currentBlock.length >= 2) {
+            const startDate = new Date(currentBlock[0].date);
+            const endDate = new Date(currentBlock[currentBlock.length-1].date);
+
+            // 실제 날짜 차이 계산 (끝날-시작날+1)
+            const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000*60*60*24)) + 1;
+
+            if (totalDays >= 3) {
                 // 중복 이름 제거
                 const uniqueNames = Array.from(new Set(currentBlock.map(h=>h.localName))).join(', ');
-
                 blocks.push({
                     start: currentBlock[0].date,
                     end: currentBlock[currentBlock.length-1].date,
-                    count: currentBlock.length,
+                    count: totalDays,
                     displayNames: uniqueNames 
                 });
             }
-            currentBlock = [];
         }
+        currentBlock = [];
     }
     return blocks;
 }
