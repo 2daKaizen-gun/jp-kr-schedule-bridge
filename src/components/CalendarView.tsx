@@ -94,15 +94,38 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
     }
 
     return (
-        <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
-            <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-xs font-bold py-2">
-                {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => (
-                    <div key={d} className={d === "SUN" ? "text-red-500" : d === "SAT" ? "text-blue-500" : ""}>
-                        {d}
-                    </div>
-                ))}
+        <div className="flex flex-col gap-3">
+            {/* 달력 본체 */}
+            <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-xs font-bold py-2">
+                    {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => (
+                        <div key={d} className={d === "SUN" ? "text-red-500" : d === "SAT" ? "text-blue-500" : ""}>
+                            {d}
+                        </div>
+                    ))}
+                </div>
+                {rows}
             </div>
-            {rows}
+
+            {/* 범례 추가(Legend) */}
+            <div className="flex flex-wrap gap-4 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Legend:</span>
+
+                <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="text-xs text-gray-600 font-medium">상대국만 휴무 (협업 주의)</span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                    <span className="text-xs text-gray-600 font-medium">양국 공휴일 (비즈니스 중단)</span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                    <span className="text-xs">⚠️</span>
+                    <span className="text-xs text-gray-600 font-medium">휴무일 (마우스 오버)</span>
+                </div>
+            </div>
         </div>
-    );
+    );     
 }
