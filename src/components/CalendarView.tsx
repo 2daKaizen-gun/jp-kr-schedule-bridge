@@ -21,12 +21,13 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
     let day = startDate;
 
     while (day <= endDate) {
-        const formattedDate = format(day, "yyyy-MM-dd");
+        // row 위해 일요일 따로 저장
+        const weekKey = format(day, "yyyy-MM-dd");
         for (let i = 0; i < 7; i++) {
+            const formattedDate = format(day, "yyyy-MM-dd");
             // marker data 가져오기
             const marker = conflictMarkers?.[formattedDate];
             const otherCountry = countryCode === "KR"?"jp":"kr";
-
             const holiday = holidays.find((h) => h.date === formattedDate);
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isPublicHoliday = holiday && (
@@ -85,7 +86,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             day = addDays(day, 1);
         }
         rows.push(
-            <div className="grid grid-cols-7" key={`row-${formattedDate}`}>
+            <div className="grid grid-cols-7" key={`row-${weekKey}`}>
                 {days}
             </div>
         );
