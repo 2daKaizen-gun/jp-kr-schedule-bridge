@@ -1,5 +1,6 @@
 import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks, getRecommendedMeetingDays } from "@/lib/holidays";
 import CalendarView from "@/components/CalendarView";
+import ScheduleDashboard from "@/components/ScheduleDashboard";
 
 export default async function Home() {
   // 데이터 가져오기 (병렬)
@@ -80,6 +81,14 @@ export default async function Home() {
           <h2 className="text-3xl font-extrabold tracking-tight">Business Calendar Dashboard</h2>
           <p className="mt-2 text-gray-600">한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.</p>
         </header>
+
+        {/* 조립된 대시보드 호출 */}
+        <ScheduleDashboard
+          jpHolidays={jpHolidays}
+          krHolidays={krHolidays}
+          conflictMarkers={conflictMarkers}
+          currentMonth={currentMonth}
+        />
 
         {/* Interactive Dual-Calendar */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-12">
