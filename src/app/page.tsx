@@ -8,6 +8,23 @@ export default async function Home() {
     getCachedHolidays("KR"),
   ]);
 
+  const conflictMarkers: Record <string, {type: 'kr' | 'jp' | 'both'}> = {};
+
+  // 공휴일 날짜만 모아서 비교
+  const allHolidayDates = new Set([
+    ...jpHolidays.map(h=>h.date),
+    ...krHolidays.map(h=>h.date)
+  ]);
+
+  allHolidayDates.forEach(date=>{
+    const isKr = krHolidays.some(h=>h.date === date);
+    const isJp = jpHolidays.some(h=>h.date === date);
+
+    if (isKr&&isJp) conflictMarkers[date] = {type: 'both'};
+    else if (isKr) conflictMarkers[date] = {type: 'kr'};
+    else if (isJp) conflictMarkers[date] = {type: 'jp'};
+  });
+
   const nextJp = jpHolidays[0];
   const nextKr = krHolidays[0];
 
@@ -57,7 +74,12 @@ export default async function Home() {
               <span className="text-sm text-gray-500 font-medium">May 2026</span>
             </div>
             {/* 일본 달력 */}
-            <CalendarView month={currentMonth} holidays={jpHolidays} countryCode="JP" />
+            <CalendarView 
+              month={currentMonth}
+              holidays={jpHolidays}
+              countryCode="JP"
+              conflictMarkers={conflictMarkers}
+            />
           </section>
 
           {/* Korea section */}
@@ -69,7 +91,12 @@ export default async function Home() {
               <span className="text-sm text-gray-500 font-medium">May 2026</span>
             </div>
             {/* 한국 달력 */}
-            <CalendarView month={currentMonth} holidays={krHolidays} countryCode="KR" />
+            <CalendarView 
+              month={currentMonth}
+              holidays={krHolidays}
+              countryCode="KR"
+              conflictMarkers={conflictMarkers}
+            />
           </section>
         </div>
 

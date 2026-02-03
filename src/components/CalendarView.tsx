@@ -7,6 +7,7 @@ interface CalendarProps {
     month: Date;
     holidays: Holiday[];
     countryCode: "KR" | "JP";
+    conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
 }
 
 export default function CalendarView({ month, holidays, countryCode }: CalendarProps) {
