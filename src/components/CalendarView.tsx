@@ -8,9 +8,10 @@ interface CalendarProps {
     holidays: Holiday[];
     countryCode: "KR" | "JP";
     conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
+    onDateClick?: (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => void;
 }
 
-export default function CalendarView({ month, holidays, countryCode, conflictMarkers }: CalendarProps) {
+export default function CalendarView({ month, holidays, countryCode, conflictMarkers, onDateClick }: CalendarProps) {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -40,10 +41,14 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             days.push(
                 <div
                     key={formattedDate}
-                    className={`group relative h-24 border-t p-2 transition-all ${
-                        !isCurrentMonth ? "bg-gray-50 text-gray-300" : "bg-white"
-                    } ${isPublicHoliday ? (countryCode === "KR" ? "bg-red-50" : "bg-blue-50") : ""}`}
-                >  
+                    onClick={() => {
+                        // 공휴일이거나 마커가 있을 때만 클릭 작동
+                        if (holiday || marker) {
+                        onDateClick?.(formattedDate, holiday?.localName || "공휴일", marker?.type || (countryCode === 'KR' ? 'kr' : 'jp'));
+                        }
+                    }}
+                    className={`group cursor-pointer relative h-24 border-t p-2 transition-all ...`}
+                >
                     {/* 날짜 숫자 상단에 점 찍기 */}
                     <div className="flex justify-between items-start">
                     {/* 일요일 또는 공휴일만 숫자 빨간색으로 */}
