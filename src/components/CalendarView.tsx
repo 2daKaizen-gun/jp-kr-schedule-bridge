@@ -21,8 +21,8 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
     let day = startDate;
 
     while (day <= endDate) {
+        const formattedDate = format(day, "yyyy-MM-dd");
         for (let i = 0; i < 7; i++) {
-            const formattedDate = format(day, "yyyy-MM-dd");
             // marker data 가져오기
             const marker = conflictMarkers?.[formattedDate];
             const otherCountry = countryCode === "KR"?"jp":"kr";
@@ -85,7 +85,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             day = addDays(day, 1);
         }
         rows.push(
-            <div className="grid grid-cols-7" key={day.toString()}>
+            <div className="grid grid-cols-7" key={`row-${formattedDate}`}>
                 {days}
             </div>
         );
