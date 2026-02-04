@@ -6,12 +6,20 @@ import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
 
+interface DashboardProps {
+  jpHolidays: any[];
+  krHolidays: any[];
+  conflictMarkers: any;
+  currentMonth: Date; // 초기 기준 월
+}
+
 export default function ScheduleDashboard({ 
   jpHolidays,
   krHolidays,
   conflictMarkers,
   currentMonth
-}: any) {
+}: DashboardProps) {
+  
   // 현재 화면에 보여줄 달(Month)을 상태로 관리
   const [viewMonth, setViewMonth] = useState<Date>(currentMonth);
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
