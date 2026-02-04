@@ -90,43 +90,6 @@ export default async function Home() {
           currentMonth={currentMonth}
         />
 
-        {/* Interactive Dual-Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-12">
-          {/* Japan section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                🇯🇵 Japan Calendar
-              </h3>
-              <span className="text-sm text-gray-500 font-medium">May 2026</span>
-            </div>
-            {/* 일본 달력 */}
-            <CalendarView 
-              month={currentMonth}
-              holidays={jpHolidays}
-              countryCode="JP"
-              conflictMarkers={conflictMarkers}
-            />
-          </section>
-
-          {/* Korea section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                🇰🇷 Korea Calendar
-              </h3>
-              <span className="text-sm text-gray-500 font-medium">May 2026</span>
-            </div>
-            {/* 한국 달력 */}
-            <CalendarView 
-              month={currentMonth}
-              holidays={krHolidays}
-              countryCode="KR"
-              conflictMarkers={conflictMarkers}
-            />
-          </section>
-        </div>
-
         {/* long-term vacation alerts*/}
         {/* long-term vacation alerts 섹션 수정 */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
