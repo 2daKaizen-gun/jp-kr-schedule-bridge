@@ -39,7 +39,9 @@
   - [x] Phase 4-1: Build Interactive Dual-Calendar Dashboard UI
   - [x] Phase 4-2: Implement Real-time Schedule Conflict Visualization
   - [x] Phase 4-3: Develop Business Email Template Generator (KR/JP Bilingual)
-  - [] Phase 4-4: Ensure Responsive Web Design (RWD) for Cross-Device Support
+  - [] Phase 4-4: Implement Dynamic Calendar Navigation
+  - [] Phase 4-5: Integrate Gemini AI for Smart Email Generation
+  - [] Phase 4-6: Ensure Responsive Web Design (RWD) for Cross-Device Support
 
 - **Phase 5**: Deployment, Documentation & Portfolio Finalization
   - [] Phase 5-1: Cloud Deployment & CI/CD Pipeline Setup (Vercel)
