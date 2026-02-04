@@ -19,7 +19,7 @@ export default function ScheduleDashboard({
   conflictMarkers,
   currentMonth
 }: DashboardProps) {
-  
+
   // 현재 화면에 보여줄 달(Month)을 상태로 관리
   const [viewMonth, setViewMonth] = useState<Date>(currentMonth);
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
@@ -56,6 +56,21 @@ export default function ScheduleDashboard({
             >
               TODAY
             </button>
+        </div>
+
+        <div className='flex gap-2'>
+          <button
+            onClick={goPrev}
+            className="p-3 hover:bg-gray-100 rounded-2xl transition-all text-gray-600 active:scale-95"
+          >
+            <span className="text-xl">◀</span>
+          </button>
+          <button
+            onClick={goNext}
+            className="p-3 hover:bg-gray-100 rounded-2xl transition-all text-gray-600 active:scale-95"
+          >
+            <span className="text-xl">▶</span>
+          </button>
         </div>
       </div>
 
