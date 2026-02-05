@@ -59,7 +59,11 @@ export default function ScheduleDashboard({
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
   const goNext = () => setViewMonth(addMonths(viewMonth,1));
-  const goToday = () => setViewMonth(new Date(2026,4,1));
+  
+  const goToday = () => {
+    const today = new Date();
+    setViewMonth(today);
+  };
 
   const handleDateClick = (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => {
   let templateKey: TemplateType = 'BOTH_HOLIDAY';
@@ -162,7 +166,7 @@ export default function ScheduleDashboard({
 
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
-        <h3 className="text-xl font-bold text-green-800 mb-6">Best Collaboration Days</h3>
+        <h3 className="text-xl font-bold text-green-800 mb-6">Best Collaboration Days(Next 2 Weeks)</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendedDays.map((item, idx) => (
             <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200">
