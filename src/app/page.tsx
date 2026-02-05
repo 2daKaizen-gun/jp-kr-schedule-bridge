@@ -1,5 +1,4 @@
 import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks, getRecommendedMeetingDays } from "@/lib/holidays";
-import CalendarView from "@/components/CalendarView";
 import ScheduleDashboard from "@/components/ScheduleDashboard";
 
 export default async function Home() {
@@ -8,7 +7,7 @@ export default async function Home() {
     getCachedHolidays("JP"),
     getCachedHolidays("KR"),
   ]);
-
+/*
   // 제외할 기념일 목록 정의
   const EXCLUDED_HOLIDAYS = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
 
@@ -43,23 +42,23 @@ export default async function Home() {
     else if (isKr) conflictMarkers[date] = {type: 'kr'};
     else if (isJp) conflictMarkers[date] = {type: 'jp'};
   });
-
-  const nextJp = jpHolidays[0];
-  const nextKr = krHolidays[0];
+*/
+  //const nextJp = jpHolidays[0];
+  //const nextKr = krHolidays[0];
 
   // 연휴 블록 추출
-  const jpVacations = getVacationBlocks(jpHolidays);
-  const krVacations = getVacationBlocks(krHolidays);
+  //const jpVacations = getVacationBlocks(jpHolidays);
+  //const krVacations = getVacationBlocks(krHolidays);
 
   // 추천 일정 알고리즘
-  const recommendedDays = getRecommendedMeetingDays(krHolidays, jpHolidays);
+  //const recommendedDays = getRecommendedMeetingDays(krHolidays, jpHolidays);
 
   // 2026년 2월 11일 (일본 건국기념일) test
-  const testDate = "2026-02-11";
-  const advice = analyzeBusinessDay(testDate, krHolidays, jpHolidays);
+  //const testDate = "2026-02-11";
+  //const advice = analyzeBusinessDay(testDate, krHolidays, jpHolidays);
 
   // 달력 보여줄 기준 월 설정
-  const currentMonth = new Date(2026,4,1);
+  const currentMonthTimestamp = new Date(2026,4,1).getTime();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -82,106 +81,12 @@ export default async function Home() {
           <p className="mt-2 text-gray-600">한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.</p>
         </header>
 
-        {/* 조립된 대시보드 호출 */}
+        {/* 구조를 Dashboard로 넘겨 일관성 유지 */}
         <ScheduleDashboard
           jpHolidays={jpHolidays}
           krHolidays={krHolidays}
-          conflictMarkers={conflictMarkers}
-          currentMonth={currentMonth}
+          initialTimestamp={currentMonthTimestamp}
         />
-
-        {/* long-term vacation alerts*/}
-        {/* long-term vacation alerts 섹션 수정 */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* 일본 전체 연휴 리스트 */}
-          <div className="flex flex-col gap-4">
-            {jpVacations.map((block, index) => (
-              <div key={index} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-1">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-orange-800 font-bold flex items-center gap-2 text-lg">
-                    🇯🇵 일본 연휴 주의
-                  </span>
-                  <span className="bg-orange-200 text-orange-800 text-xs font-black px-2 py-1 rounded-md">
-                    {block.count} DAYS
-                  </span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-orange-900 font-extrabold text-base">{block.displayNames}</p>
-                  <p className="text-orange-700 text-sm font-medium">📅 {block.start} ~ {block.end}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 한국 전체 연휴 리스트 */}
-          <div className="flex flex-col gap-4">
-            {krVacations.map((block, index) => (
-              <div key={index} className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col gap-1">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-red-800 font-bold flex items-center gap-2 text-lg">
-                    🇰🇷 한국 연휴 주의
-                  </span>
-                  <span className="bg-red-200 text-red-800 text-xs font-black px-2 py-1 rounded-md">
-                    {block.count} DAYS
-                  </span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-red-900 font-extrabold text-base">{block.displayNames}</p>
-                  <p className="text-red-700 text-sm font-medium">📅 {block.start} ~ {block.end}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Best Collaboration Days section */}
-        <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
-          <h3 className="text-xl font-bold text-green-800 mb-6 flex items-center gap-2">
-            Best Collaboration Days (Next 2 Weeks)
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recommendedDays.length > 0 ? (
-              recommendedDays.map((item, idx) => (
-                <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-green-700 font-bold">{item.date}</span>
-                    <span className="text-[10px] bg-green-200 text-green-800 px-2 py-1 rounded-lg font-black uppercase">
-                      Score: {item.score}
-                    </span>
-                  </div>
-                  <p className="text-xs text-green-600 font-medium leading-relaxed">
-                    {item.reason}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="col-span-3 text-center text-gray-400 text-sm py-4">
-                추천할 수 있는 날이 없습니다.
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* Notice section (Phase 3 Business logic) */}
-        <section className={`mt-10 p-6 rounded-2xl border-2 transition-all
-          ${advice.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 
-            advice.status === 'kr-only' ? 'bg-red-50 border-red-200' :
-            advice.status === 'match' ? 'bg-gray-100 border-gray-300' : 'bg-green-50 border-green-200'}`}>
-          
-          <h3 className={`font-bold mb-2 flex items-center gap-2
-            ${advice.status === 'jp-only' ? 'text-blue-800' :
-              advice.status === 'kr-only' ? 'text-red-800' :
-              advice.status === 'match' ? 'text-gra-800' : 'text-green-800'}`}>
-            Business Coordination Advice ({testDate})
-          </h3>
-
-          <p className={`text-sm font-medium
-            ${advice.status === 'jp-only' ? 'text-blue-700' :
-              advice.status === 'kr-only' ? 'text-red-700' :
-              advice.status === 'match' ? 'text-gray-700' : 'text-green-700'}`}>
-            {advice.message}
-          </p>
-        </section>
       </main>
     </div>
   );
