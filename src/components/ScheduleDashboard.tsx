@@ -110,7 +110,7 @@ export default function ScheduleDashboard({
         <section>
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇯🇵 Japan Calendar</h3>
           <CalendarView
-            key={`jp-${viewMonth.toISOString()}`}
+            key="cv-jp" // 고유 키 추가
             month={viewMonth}
             holidays={jpHolidays}
             countryCode="JP"
@@ -122,7 +122,7 @@ export default function ScheduleDashboard({
         <section>
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇰🇷 Korea Calendar</h3>
           <CalendarView
-            key={`kr-${viewMonth.toISOString()}`}
+            key="cv-kr" // 고유 키 추가
             month={viewMonth}
             holidays={krHolidays}
             countryCode="KR"

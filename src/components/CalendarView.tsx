@@ -40,7 +40,8 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
 
             days.push(
                 <div
-                    key={formattedDate}
+                    // 날짜 겹치지 않게 함
+                    key={`${countryCode}-${formattedDate}`}
                     onClick={() => {
                         // 공휴일이거나 마커가 있을 때만 클릭 작동
                         if (holiday || marker) {
