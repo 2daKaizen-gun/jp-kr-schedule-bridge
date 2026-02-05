@@ -7,55 +7,6 @@ export default async function Home() {
     getCachedHolidays("JP"),
     getCachedHolidays("KR"),
   ]);
-/*
-  // 제외할 기념일 목록 정의
-  const EXCLUDED_HOLIDAYS = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
-
-  // 비즈니스 셧다운(진짜 공휴일인지) 판별 헬퍼 함수
-  const isTrueBusinessHoliday = (h: any) => {
-    return (
-      (!h.localName.includes("Day") ||
-      h.localName.includes("Replacement") ||
-      h.localName.includes("Memorial")) &&
-      !EXCLUDED_HOLIDAYS.includes(h.localName)
-    );
-  };
-
-  // 충돌 마커 생성 시 필터링 적용
-  const conflictMarkers: Record <string, {type: 'kr' | 'jp' | 'both'}> = {};
-
-  // 진짜 공휴일들만 따로 추출
-  const trueKrHolidays = krHolidays.filter(isTrueBusinessHoliday);
-  const trueJpHolidays = jpHolidays.filter(isTrueBusinessHoliday);
-
-  // 공휴일 날짜만 모아서 비교
-  const allHolidayDates = new Set([
-    ...trueKrHolidays.map(h=>h.date),
-    ...trueJpHolidays.map(h=>h.date)
-  ]);
-
-  allHolidayDates.forEach(date=>{
-    const isKr = trueKrHolidays.some(h=>h.date === date);
-    const isJp = trueJpHolidays.some(h=>h.date === date);
-
-    if (isKr&&isJp) conflictMarkers[date] = {type: 'both'};
-    else if (isKr) conflictMarkers[date] = {type: 'kr'};
-    else if (isJp) conflictMarkers[date] = {type: 'jp'};
-  });
-*/
-  //const nextJp = jpHolidays[0];
-  //const nextKr = krHolidays[0];
-
-  // 연휴 블록 추출
-  //const jpVacations = getVacationBlocks(jpHolidays);
-  //const krVacations = getVacationBlocks(krHolidays);
-
-  // 추천 일정 알고리즘
-  //const recommendedDays = getRecommendedMeetingDays(krHolidays, jpHolidays);
-
-  // 2026년 2월 11일 (일본 건국기념일) test
-  //const testDate = "2026-02-11";
-  //const advice = analyzeBusinessDay(testDate, krHolidays, jpHolidays);
 
   // 달력 보여줄 기준 월 설정
   const currentMonthTimestamp = new Date(2026,4,1).getTime();
