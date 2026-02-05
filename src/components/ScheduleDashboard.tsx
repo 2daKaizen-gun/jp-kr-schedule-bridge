@@ -22,12 +22,15 @@ export default function ScheduleDashboard({
     const markers: any = {};
     const EXCLUDED_HOLIDAYS = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
     
+    // 공휴일 필터링 함수
     const isTrue = (h: any) => ((!h.localName.includes("Day") || h.localName.includes("Replacement") || h.localName.includes("Memorial")) && !EXCLUDED_HOLIDAYS.includes(h.localName));
     
     const trueKr = krHolidays.filter(isTrue);
     const trueJp = jpHolidays.filter(isTrue);
     
+    // 양국 날짜 합치기
     const allDates = new Set([...trueKr.map((h: any) => h.date), ...trueJp.map((h: any) => h.date)]);
+    
     allDates.forEach(date => {
       const isKr = trueKr.some((h: any) => h.date === date);
       const isJp = trueJp.some((h: any) => h.date === date);
