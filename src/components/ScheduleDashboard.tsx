@@ -54,7 +54,10 @@ export default function ScheduleDashboard({
 
   // 현재 달 기준 추천 일정 및 조언
   const recommendedDays = useMemo(() => getRecommendedMeetingDays(krHolidays, jpHolidays).filter(d => isSameMonth(new Date(d.date), viewMonth)), [krHolidays, jpHolidays, viewMonth]);
-  const advice = useMemo(() => analyzeBusinessDay(format(viewMonth, "yyyy-MM-dd"), krHolidays, jpHolidays), [viewMonth, krHolidays, jpHolidays]);
+  const advice = useMemo(() => 
+    analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays), 
+    [krHolidays, jpHolidays]
+  );
 
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
@@ -166,7 +169,7 @@ export default function ScheduleDashboard({
 
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
-        <h3 className="text-xl font-bold text-green-800 mb-6">Best Collaboration Days(Next 2 Weeks)</h3>
+        <h3 className="text-xl font-bold text-green-800 mb-6">Best Collaboration Days (Next 2 Weeks)</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendedDays.map((item, idx) => (
             <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200">
@@ -178,7 +181,9 @@ export default function ScheduleDashboard({
       </section>
 
       <section className={`p-6 rounded-2xl border-2 bg-opacity-50 ${advice.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
-        <h3 className="font-bold mb-2">Business Advice ({format(viewMonth, "yyyy. MM")})</h3>
+        <h3 className="font-bold mb-2">
+          Today&apos;s Business Status ({format(new Date(), "yyyy. MM. dd")})
+        </h3>
         <p className="text-sm font-medium">{advice.message}</p>
       </section>
     </div>
