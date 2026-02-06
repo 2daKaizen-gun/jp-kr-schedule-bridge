@@ -165,28 +165,37 @@ export function getRecommendedMeetingDays(krHolidays: Holiday[], jpHolidays: Hol
         // 한국, 일본 시간 기준
         const dateStr = format(target, 'yyyy-MM-dd');
 
-        const isjpHoliday = jpHolidays.some(h => h.date.trim() === dateStr);
-        const iskrHoliday = krHolidays.some(h => h.date.trim() === dateStr);
-        
-        if (!iskrHoliday && !isjpHoliday) {
-            //basic: 100
-            let score = 100;
-            let reason = "양국 모두 정상 근무입니다.";
+        // 오늘이 휴일인지 체크
+        const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr);
+        if (isTodayHoliday) continue;
 
-            // 앞뒤 2일 내 장기 연휴 체크(집중도 하락 방지)
-            const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
-                return Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000*60*60*24) <= 2;
-            });
+        // 내일(Tomorrow)이 휴무일(공휴일 or 토요일)인지 체크
+        const tomorrow = addDays(target, 1);
+        const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+        const tomorrowDay = getDay(tomorrow);
 
-            if (hasNearbyHoliday) {
-                score = 70;
-                reason = "인접 공휴일이 있어 업무 집중도가 낮을 수 있습니다.";
-            }
+        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === tomorrowStr);
+        const isTomorrowWeekend = (tomorrowDay === 6); // 내일이 토요일인가?
 
-            recommedations.push({ date: dateStr, score, reason});
+        // 공휴일 전날 혹은 주말(토요일) 전날이면 추천에서 제외
+        if (isTomorrowHoliday || isTomorrowWeekend) continue;
+        //basic: 100
+        let score = 100;
+        let reason = "양국 모두 정상 근무입니다.";
+
+        // 앞뒤 2일 내 장기 연휴 체크(집중도 하락 방지)
+        const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
+            const diff = Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
+            return diff === 2; // 모레가 휴일인 경우 등
+        });
+
+        if (hasNearbyHoliday) {
+            score = 70;
+            reason = "인접 공휴일이 있어 업무 집중도가 낮을 수 있습니다.";
         }
-    }
 
+        recommedations.push({ date: dateStr, score, reason});
+    }
     // 점수 높은 순 TOP3 반환
     return recommedations.sort((a,b) => b.score - a.score).slice(0,3);
 }
