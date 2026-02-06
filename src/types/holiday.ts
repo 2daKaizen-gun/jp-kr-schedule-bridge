@@ -22,6 +22,6 @@ export interface UserEvent {
     id: string;
     date: string;
     title: string;
-    type: 'meeting' | 'personal' | 'deadline'; // 일정 성격
+    type: 'meeting' | 'holiday' | 'personal' | 'deadline'; // 일정 성격
     countryCode?: 'KR' | 'JP' | 'Both'; // 관련 국가
 }

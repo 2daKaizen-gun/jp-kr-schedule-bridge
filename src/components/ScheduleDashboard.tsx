@@ -7,6 +7,7 @@ import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
 import { UserEvent } from '@/types/holiday';
+import EventModal from './EventModal';
 
 export default function ScheduleDashboard({ 
   jpHolidays,
@@ -37,16 +38,27 @@ export default function ScheduleDashboard({
     }
   }, [userEvents, isLoaded]);
 
+  // 비즈니스 어드바이스
+  const advice = useMemo(() => {
+    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays);
+  }, [krHolidays, jpHolidays]);
+
+  // 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
+
   // 일정 추가 함수
-  const addUserEvent = (date: string, title: string) => {
+  const addUserEvent = (title: string, type: 'meeting' | 'holiday', country: 'KR' | 'JP' | 'Both') => {
     const newEvent: UserEvent = {
-      // ✅ 더 안전하고 확실한 ID 생성 방식
-      id: `${date}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-      date,
+      // Date.now() 괄호 추가 및 랜덤 문자열 조합
+      id: `${activeDate}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      date: activeDate!,
       title,
-      type: 'meeting', // 기본 값
+      type,
+      countryCode: country
     };
     setUserEvents(prev => [...prev, newEvent]);
+    setIsModalOpen(false); // 저장 후 모달 닫기
   };
 
   // 일정 삭제 함수
@@ -98,11 +110,21 @@ export default function ScheduleDashboard({
   );
 
   // 현재 달 기준 추천 일정 및 조언
-  const recommendedDays = useMemo(() => getRecommendedMeetingDays(krHolidays, jpHolidays).filter(d => isSameMonth(new Date(d.date), viewMonth)), [krHolidays, jpHolidays, viewMonth]);
-  const advice = useMemo(() => 
-    analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays), 
-    [krHolidays, jpHolidays]
-  );
+  const recommendedDays = useMemo(() => {
+  // 사용자가 입력한 'holiday' 타입만 추출하여 가짜 공휴일 객체로 변환
+  const userHolidays = userEvents.filter(e => e.type === 'holiday').map(e => ({
+    date: e.date,
+    localName: e.title,
+    countryCode: e.countryCode
+  }));
+
+  // 기존 공휴일 데이터에 사용자 휴무일을 병합하여 계산
+  const combinedKr = [...krHolidays, ...userHolidays.filter(h => h.countryCode !== 'JP')];
+  const combinedJp = [...jpHolidays, ...userHolidays.filter(h => h.countryCode !== 'KR')];
+
+  return getRecommendedMeetingDays(combinedKr, combinedJp)
+    .filter(d => isSameMonth(new Date(d.date), viewMonth));
+  }, [krHolidays, jpHolidays, userEvents, viewMonth]);
 
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
@@ -113,7 +135,7 @@ export default function ScheduleDashboard({
     setViewMonth(today);
   };
 
-  const handleDateClick = (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => {
+  const handleDateClick = (date: string, holidayName: string, type: any) => {
   let templateKey: TemplateType = 'BOTH_HOLIDAY';
   if (type === 'kr') templateKey = 'KR_HOLIDAY';
   if (type === 'jp') templateKey = 'JP_HOLIDAY';
@@ -127,12 +149,9 @@ export default function ScheduleDashboard({
     body: template.body(date, holidayName),
   });
 
-  // 일정 등록 여부 물어보기 (간이 모달 대용)
-  const addConfirm = window.confirm(`${date}에 개인 일정을 추가하시겠습니까?`);
-  if (addConfirm) {
-    const title = window.prompt("일정 제목을 입력하세요:");
-    if (title) addUserEvent(date, title);
-  }
+  // 모달 띄우기 위해 날짜만 세팅
+  setActiveDate(date);
+  setIsModalOpen(true);
 };
 
   return (
@@ -242,6 +261,14 @@ export default function ScheduleDashboard({
         </h3>
         <p className="text-sm font-medium">{advice.message}</p>
       </section>
+
+      {isModalOpen && activeDate && (
+        <EventModal 
+          date={activeDate} 
+          onClose={() => setIsModalOpen(false)} 
+          onSave={addUserEvent} 
+        />
+      )}
     </div>
   );
 }
