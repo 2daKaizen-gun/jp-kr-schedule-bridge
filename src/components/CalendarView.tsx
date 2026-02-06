@@ -113,30 +113,40 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 )}
 
                                 {/* 사용자 일정 목록 표시 */}
-                                {isCurrentMonth && dayUserEvents.map(event => (
-                                    <div
-                                        key={event.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // 부모 클릭 이벤트
-                                            e.preventDefault(); // 브라우저 기본 동작 차단
-                                            onDeleteEvent?.(event.id);
-                                        }}
-                                        className="mt-1 text-[9px] bg-green-100 text-green-800 p-1 rounded truncate font-medium flex justify-between group/event"
-                                    >
-                                        <span className="truncate flex-1">{event.title}</span>
-                                        {/* 버튼 클릭 시 부모 div로 이벤트가 퍼지지 않게 함 */}
-                                        <span 
-                                            className="ml-2 text-red-500 hover:text-red-700 text-xs px-1"
+                                {isCurrentMonth && dayUserEvents.map(event => {
+                                    // 일정의 countryCode가 현재 달력의 countryCode와 일치하거나 'Both'일 때만 삭제 버튼 허용
+                                    const canDelete = event.countryCode === countryCode || event.countryCode === 'Both';
+                                    return (
+                                        <div
+                                            key={event.id}
                                             onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDeleteEvent?.(event.id);
+                                                e.stopPropagation(); // 부모 클릭 이벤트
+                                                e.preventDefault(); // 브라우저 기본 동작 차단
+                                                if (canDelete) onDeleteEvent?.(event.id);
                                             }}
+                                            className={`mt-1 text-[9px] p-1 rounded truncate font-medium flex justify-between items-center group/event transition-colors ${
+                                                canDelete 
+                                                ? "bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer" 
+                                                : "bg-gray-100 text-gray-500 cursor-default" // 권한 없으면 회색 처리
+                                            }`}
                                         >
-                                            ✕
-                                        </span>
-                                    </div>
-                                ))}
-
+                                            <span className="truncate flex-1">{event.title}</span>
+                                            {/* 삭제 권한이 있을 때만 X 버튼을 렌더링 */}
+                                            {canDelete && (
+                                                <span 
+                                                    className="ml-1 text-red-500 font-bold hover:scale-125 transition-transform px-1"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onDeleteEvent?.(event.id);
+                                                    }}
+                                                >
+                                                    ✕
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                
                                 {isPublicHoliday && isCurrentMonth && (
                                     <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="text-xs">⚠️</span>

@@ -266,7 +266,7 @@ export default function ScheduleDashboard({
         <EventModal 
           date={activeDate} 
           onClose={() => setIsModalOpen(false)} 
-          onSave={addUserEvent} 
+          onSave={addUserEvent}
         />
       )}
     </div>
