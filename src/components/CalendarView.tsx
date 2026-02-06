@@ -4,17 +4,19 @@ import {
   format, startOfMonth, endOfMonth, startOfWeek, 
   isSameMonth, addDays, eachDayOfInterval 
 } from "date-fns";
-import { Holiday } from "@/types/holiday";
+import { Holiday, UserEvent } from "@/types/holiday";
 
 interface CalendarProps {
     month: Date;
     holidays: Holiday[];
     countryCode: "KR" | "JP";
     conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
+    userEvents: UserEvent[]; // 사용자 일정 데이터
     onDateClick?: (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => void;
+    onDeleteEvent?: (id: string) => void; // 일정 삭제 함수
 }
 
-export default function CalendarView({ month, holidays, countryCode, conflictMarkers, onDateClick }: CalendarProps) {
+export default function CalendarView({ month, holidays, countryCode, conflictMarkers, userEvents = [], onDateClick, onDeleteEvent }: CalendarProps) {
     const monthStart = startOfMonth(month);
     
     const monthEnd = endOfMonth(monthStart);
@@ -44,11 +46,16 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                 <div className="grid grid-cols-7">
                     {calendarDays.map((day) => {
                         const formattedDate = format(day, "yyyy-MM-dd");
-                        const marker = conflictMarkers?.[formattedDate];
                         const otherCountry = countryCode === "KR" ? "jp" : "kr";
-                        const holiday = holidays.find((h) => h.date === formattedDate);
                         const isCurrentMonth = isSameMonth(day, monthStart);
                         
+                        // 공휴일/ 마커 데이터 
+                        const marker = conflictMarkers?.[formattedDate];
+                        const holiday = holidays.find((h) => h.date === formattedDate);
+                        
+                        // 사용자 일정 필터링
+                        const dayUserEvents = userEvents.filter(e => e.date === formattedDate);
+
                         // 공휴일 판별 로직
                         const isPublicHoliday = holiday && (
                             (!holiday.localName.includes("Day") || 
@@ -62,9 +69,12 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 // Key를 국가 코드와 조합하여 유일하게 설정
                                 key={`${countryCode}-${formattedDate}`}
                                 onClick={() => {
-                                    if (holiday || marker) {
-                                        onDateClick?.(formattedDate, holiday?.localName || "공휴일", marker?.type || (countryCode === 'KR' ? 'kr' : 'jp'));
-                                    }
+                                    // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
+                                    onDateClick?.(
+                                        formattedDate, 
+                                        holiday?.localName || "비즈니스 일정", 
+                                        marker?.type || (countryCode === 'KR' ? 'kr' : 'jp')
+                                    );
                                 }}
                                 className={`group cursor-pointer relative h-24 border-t border-r last:border-r-0 p-2 transition-all hover:bg-gray-50
                                     ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
@@ -77,15 +87,21 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     </span>
 
                                     <div className="flex gap-0.5">
+                                        {/* 공휴일 마커 */}
                                         {marker?.type === otherCountry && (
                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="상대국만 휴무" />
                                         )}
                                         {marker?.type === 'both' && (
                                             <span className="w-1.5 h-1.5 rounded-full bg-purple-500" title="양국 공휴일" />
                                         )}
+                                        {/* 사용자 일정 마커 (초록색 점) */}
+                                        {dayUserEvents.length > 0 && (
+                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" title="사용자 일정 있음" />
+                                        )}
                                     </div>
                                 </div>
                                 
+                                {/* 공휴일 표시 */}
                                 {holiday && isCurrentMonth && (
                                     <div className={`mt-1 text-[10px] leading-tight font-bold break-keep p-1 rounded ${
                                         isPublicHoliday
@@ -95,6 +111,31 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                         {holiday.localName}
                                     </div>
                                 )}
+
+                                {/* 사용자 일정 목록 표시 */}
+                                {isCurrentMonth && dayUserEvents.map(event => (
+                                    <div
+                                        key={event.id}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // 부모 클릭 이벤트
+                                            e.preventDefault(); // 브라우저 기본 동작 차단
+                                            onDeleteEvent?.(event.id);
+                                        }}
+                                        className="mt-1 text-[9px] bg-green-100 text-green-800 p-1 rounded truncate font-medium flex justify-between group/event"
+                                    >
+                                        <span className="truncate flex-1">{event.title}</span>
+                                        {/* 버튼 클릭 시 부모 div로 이벤트가 퍼지지 않게 함 */}
+                                        <span 
+                                            className="ml-2 text-red-500 hover:text-red-700 text-xs px-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteEvent?.(event.id);
+                                            }}
+                                        >
+                                            ✕
+                                        </span>
+                                    </div>
+                                ))}
 
                                 {isPublicHoliday && isCurrentMonth && (
                                     <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -121,6 +162,10 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                 <div className="flex items-center gap-1.5">
                     <span className="text-xs">⚠️</span>
                     <span className="text-xs text-gray-600 font-medium">휴무일 (마우스 오버)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-xs text-gray-600 font-medium">내 일정</span>
                 </div>
             </div>
         </div>

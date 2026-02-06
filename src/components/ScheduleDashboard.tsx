@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
-import { addMonths, subMonths, format, isSameMonth } from 'date-fns';
+import React, { useState, useMemo, useEffect } from 'react';
+import { addMonths, subMonths, format, isSameMonth, add } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
+import { UserEvent } from '@/types/holiday';
 
 export default function ScheduleDashboard({ 
   jpHolidays,
@@ -16,6 +17,50 @@ export default function ScheduleDashboard({
   // 현재 화면에 보여줄 달(Month)을 상태로 관리
   const [viewMonth, setViewMonth] = useState<Date>(new Date(initialTimestamp));
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
+
+  const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false); // 하이드레이션 오류 방지용
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    const saved = localStorage.getItem('user_events');
+    if (saved) {
+      setUserEvents(JSON.parse(saved));
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // 데이터 바뀔 때마다 로컬 스토리지 저장
+  useEffect (() =>  {
+    if (isLoaded) {
+      localStorage.setItem('user_events', JSON.stringify(userEvents));
+    }
+  }, [userEvents, isLoaded]);
+
+  // 일정 추가 함수
+  const addUserEvent = (date: string, title: string) => {
+    const newEvent: UserEvent = {
+      // ✅ 더 안전하고 확실한 ID 생성 방식
+      id: `${date}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+      date,
+      title,
+      type: 'meeting', // 기본 값
+    };
+    setUserEvents(prev => [...prev, newEvent]);
+  };
+
+  // 일정 삭제 함수
+  const deleteUserEvent = (id: string) => {
+    // 로그로 확인
+    console.log("삭제 시도 ID:", id);
+    if (window.confirm("Delete?")) {
+      setUserEvents((prev) => {
+        const nextEvents = prev.filter((event) => String(event.id) !== String(id));
+        console.log("삭제 후 결과:", nextEvents);
+        return nextEvents;
+      });
+    }
+  };
 
   // --- 비즈니스 로직 계산 섹션 (viewMonth에 반응함) ---
   const conflictMarkers = useMemo(() => {
@@ -81,6 +126,13 @@ export default function ScheduleDashboard({
     subject: template.subject(date, holidayName),
     body: template.body(date, holidayName),
   });
+
+  // 일정 등록 여부 물어보기 (간이 모달 대용)
+  const addConfirm = window.confirm(`${date}에 개인 일정을 추가하시겠습니까?`);
+  if (addConfirm) {
+    const title = window.prompt("일정 제목을 입력하세요:");
+    if (title) addUserEvent(date, title);
+  }
 };
 
   return (
@@ -125,7 +177,9 @@ export default function ScheduleDashboard({
             holidays={jpHolidays}
             countryCode="JP"
             conflictMarkers={conflictMarkers}
+            userEvents={userEvents} // 추가
             onDateClick={handleDateClick}
+            onDeleteEvent={deleteUserEvent} // 추가
           />
         </section>
 
@@ -137,7 +191,9 @@ export default function ScheduleDashboard({
             holidays={krHolidays}
             countryCode="KR"
             conflictMarkers={conflictMarkers}
+            userEvents={userEvents} // 추가
             onDateClick={handleDateClick}
+            onDeleteEvent={deleteUserEvent} // 추가
           />
         </section>
       </div>
