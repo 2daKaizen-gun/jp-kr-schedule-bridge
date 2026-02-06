@@ -111,20 +111,37 @@ export default function ScheduleDashboard({
 
   // 현재 달 기준 추천 일정 및 조언
   const recommendedDays = useMemo(() => {
-  // 사용자가 입력한 'holiday' 타입만 추출하여 가짜 공휴일 객체로 변환
-  const userHolidays = userEvents.filter(e => e.type === 'holiday').map(e => ({
+  // 사용자가 추가한 모든 일정을 '차단된 날짜'로 변환
+  // 'holiday'뿐만 아니라 'meeting'도 추천에서 제외되도록 type 체크를 제거하거나 조정
+  const userHolidays = userEvents.map(e => ({
     date: e.date,
     localName: e.title,
-    countryCode: e.countryCode
+    countryCode: e.countryCode,
+    isUserDefined: true // 사용자 정의 데이터 표시(debugging)
   }));
 
   // 기존 공휴일 데이터에 사용자 휴무일을 병합하여 계산
-  const combinedKr = [...krHolidays, ...userHolidays.filter(h => h.countryCode !== 'JP')];
-  const combinedJp = [...jpHolidays, ...userHolidays.filter(h => h.countryCode !== 'KR')];
+  // 한국 달력에 영향을 주는 것: KR 전용 + Both(공통)
+  const combinedKr = [
+    ...krHolidays,
+    ...userHolidays.filter(h => h.countryCode === 'KR' || h.countryCode === 'Both')
+  ];
+  // 일본 달력에 영향을 주는 것: JP 전용 + Both(공통)
+  const combinedJp = [
+    ...jpHolidays,
+    ...userHolidays.filter(h => h.countryCode === 'JP' || h.countryCode === 'Both')
+  ];
+  
+  // 디버깅 로그 (개발자 도구에서 확인)
+  console.log("추천 로직에 투입된 총 일정 수:", {
+    kr: combinedKr.length,
+    jp: combinedJp.length
+  });
 
   return getRecommendedMeetingDays(combinedKr, combinedJp)
     .filter(d => isSameMonth(new Date(d.date), viewMonth));
   }, [krHolidays, jpHolidays, userEvents, viewMonth]);
+  //userEvents 바뀔 때마다 이 전체 로직 다시 실행
 
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
