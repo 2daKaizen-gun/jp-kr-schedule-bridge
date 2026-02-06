@@ -34,15 +34,32 @@ export default function EmailGenerator({
     }
   };
 
-  if (!data && aiDraft) {
-    return (
-      <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50">
-        <span className="text-4xl mb-4">📅</span>
-        <p className="text-gray-500 font-medium">달력에서 휴일을 클릭하거나 AI 기능을 활용해</p>
-        <p className="text-gray-400 text-sm">비즈니스 이메일 초안을 생성하세요.</p>
+  if (!data && !aiDraft) {
+  return (
+    <div className="bg-white rounded-3xl p-10 border-2 border-dashed border-blue-100 flex flex-col items-center justify-center text-center animate-in fade-in duration-700">
+      <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+        <span className="text-4xl">📅</span>
       </div>
-    );
-  }
+      
+      <h4 className="text-xl font-black text-gray-800 mb-2">스마트 메일 작성을 시작해 보세요!</h4>
+      <p className="text-gray-400 text-sm mb-8">한·일 협업을 위한 메일 초안을 만듭니다.</p>
+
+      {/* 가이드 스텝 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-lg">
+        {[
+          { step: "01", text: "달력에서 일정을 클릭하세요." },
+          { step: "02", text: "원하는 메일 톤을 선택하세요." },
+          { step: "03", text: "생성된 문구를 복사해 사용하세요." }
+        ].map((item, idx) => (
+          <div key={idx} className="flex flex-col items-center">
+            <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">STEP {item.step}</div>
+            <p className="text-xs font-bold text-gray-600">{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
   // AI 답변이 오면 전체를 '제목 + 본문'으로 나눌 수 없으므로, 
   // 편의상 AI 답변 전체를 Body에 몰아넣거나 혹은 AI 답변 형식을 따름
