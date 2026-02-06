@@ -1,6 +1,6 @@
 import { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
-import { format, addDays, getDay } from 'date-fns';
+import { format, addDays, getDay, parseISO } from 'date-fns';
 
 // Google Calendar API
 const GOOGLE_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
@@ -65,6 +65,21 @@ export function analyzeBusinessDay(
     krHolidays: Holiday[],
     jpHolidays: Holiday[]
 ) {
+
+    // 날짜 문자열을 객체로 변환해서 요일 파악 (0: 일요일, 6: 토요일)
+    const date = parseISO(targetDate);
+    const day = getDay(date);
+
+    // 주말 체크(최우선)
+    if (day === 0 || day === 6) {
+        return {
+            status: 'holiday',
+            message: '오늘은 주말입니다. 양국 모두 업무일이 아니므로 충분한 휴식을 취하세요',
+            color: 'gray'
+        };
+    }
+
+    // 공휴일 체크 로직 (평일인 경우만 실행)
     const iskrHoliday = krHolidays.some(h => h.date === targetDate);
     const isjpHoliday = jpHolidays.some(h => h.date === targetDate);
 
