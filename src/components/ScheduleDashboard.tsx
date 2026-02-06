@@ -143,6 +143,51 @@ export default function ScheduleDashboard({
   }, [krHolidays, jpHolidays, userEvents, viewMonth]);
   //userEvents 바뀔 때마다 이 전체 로직 다시 실행
 
+  // AI 관련 상태 추가
+const [aiBriefing, setAiBriefing] = useState<string>("");
+const [emailDraft, setEmailDraft] = useState<string>("");
+const [isAiLoading, setIsAiLoading] = useState(false);
+const [isEmailLoading, setIsEmailLoading] = useState(false);
+const [activeMode, setActiveMode] = useState("");
+
+// AI 통합 호출 함수
+const callAiApi = async (mode: string, tone?: string) => {
+  const loadingTarget = tone || mode;
+  setActiveMode(loadingTarget);
+  
+  if (mode === "analyze") setIsAiLoading(true);
+  else setIsEmailLoading(true);
+
+  try {
+    const res = await fetch('/analyze', { // app/analyze/route.ts 호출
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode,
+        tone,
+        currentMonth: format(viewMonth, "yyyy년 MM월"),
+        holidays: { kr: krHolidays, jp: jpHolidays },
+        userEvents: userEvents // 사용자가 입력한 일정까지 포함
+      }),
+    });
+    const data = await res.json();
+    
+    if (mode === "analyze") {
+      setAiBriefing(data.text);
+      setEmailDraft(""); // 분석 새로하면 기존 메일은 초기화
+    } else {
+      setEmailDraft(data.text);
+    }
+  } catch (err) {
+    console.error("AI API Error:", err);
+    alert("AI 통신 중 오류가 발생했습니다.");
+  } finally {
+    setIsAiLoading(false);
+    setIsEmailLoading(false);
+    setActiveMode("");
+  }
+};
+
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
   const goNext = () => setViewMonth(addMonths(viewMonth,1));
@@ -257,7 +302,13 @@ export default function ScheduleDashboard({
       </div>
 
       {/* 이메일 생성기 */}
-      <EmailGenerator data={selectedEmail} />
+      <EmailGenerator 
+        data={selectedEmail} 
+        onAiGenerate={callAiApi}
+        aiDraft={emailDraft}
+        isAiLoading={isEmailLoading}
+        activeMode={activeMode}
+      />
 
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
