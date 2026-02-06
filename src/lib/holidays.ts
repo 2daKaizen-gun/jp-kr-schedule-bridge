@@ -1,5 +1,6 @@
 import { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
+import { format, addDays, getDay } from 'date-fns';
 
 // Google Calendar API
 const GOOGLE_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
@@ -155,13 +156,15 @@ export function getRecommendedMeetingDays(krHolidays: Holiday[], jpHolidays: Hol
 
     // 오늘부터 14일간 날짜
     for (let i=1; i<=14; i++) {
-        const target = new Date(today);
-        target.setDate(today.getDate() + i);
+        const target = addDays(today, i);
+        
+        // 주말 및 금요일 제외 로직
+        const day = getDay(target);
+        if (day === 0 || day === 6 || day === 5) continue;
 
-        // 금요일, 주말 제외 (FRI: 5, SAT: 6, SUN: 0)
-        if (target.getDay() === 0 || target.getDay() === 6 || target.getDay() === 5) continue;
+        // 한국, 일본 시간 기준
+        const dateStr = format(target, 'yyyy-MM-dd');
 
-        const dateStr = target.toISOString().split('T')[0];
         const isjpHoliday = jpHolidays.some(h => h.date.trim() === dateStr);
         const iskrHoliday = krHolidays.some(h => h.date.trim() === dateStr);
         
@@ -172,9 +175,7 @@ export function getRecommendedMeetingDays(krHolidays: Holiday[], jpHolidays: Hol
 
             // 앞뒤 2일 내 장기 연휴 체크(집중도 하락 방지)
             const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
-                const hDate = new Date(h.date);
-                const diff = Math.abs(hDate.getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
-                return diff <= 2;
+                return Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000*60*60*24) <= 2;
             });
 
             if (hasNearbyHoliday) {
