@@ -9,6 +9,7 @@ interface EmailGeneratorProps {
     body: string;
   } | null;
   onAiGenerate?: (mode: string, tone: string) => void;
+  onReset?:() => void;
   aiDraft?: string;
   isAiLoading?: boolean;
   activeMode?: string;
@@ -16,7 +17,8 @@ interface EmailGeneratorProps {
 
 export default function EmailGenerator({ 
   data, 
-  onAiGenerate, 
+  onAiGenerate,
+  onReset, 
   aiDraft, 
   isAiLoading, 
   activeMode 
@@ -78,11 +80,21 @@ export default function EmailGenerator({
         </div>
         
         {/* AI 상황별 생성 버튼들 */}
-        <div className="flex gap-2">
+        <div className="flex flex gap-2">
+          <button
+            onClick={onReset}
+            className={`px-3 py-2 rounded-xl text-xs font-black transition-all border-2 ${
+              aiDraft
+                ? 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50 active:scale-95'
+                : 'bg-gray-100 border-gray-200 text-gray-400 cursor-default opacity-50'
+            }`}
+          >
+            기본
+          </button>
           {[
-            { id: 'formal', label: '정중', emoji: '🤝', color: 'bg-indigo-600' },
-            { id: 'urgent', label: '긴급', emoji: '⚡', color: 'bg-amber-600' },
-            { id: 'apology', label: '사과', emoji: '🙇‍♂️', color: 'bg-rose-600' },
+            { id: 'formal', label: '정중', color: 'bg-indigo-600' },
+            { id: 'urgent', label: '긴급', color: 'bg-amber-600' },
+            { id: 'apology', label: '사과', color: 'bg-rose-600' },
           ].map((btn) => (
             <button
               key={btn.id}
@@ -90,7 +102,7 @@ export default function EmailGenerator({
               disabled={isAiLoading}
               className={`${btn.color} px-3 py-2 rounded-xl text-white text-xs font-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center gap-1.5`}
             >
-              {isAiLoading && activeMode === btn.id ? "..." : `${btn.emoji} ${btn.label}`}
+              {isAiLoading && activeMode === btn.id ? "..." : btn.label}
             </button>
           ))}
         </div>

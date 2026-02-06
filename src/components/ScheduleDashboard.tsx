@@ -188,6 +188,11 @@ const callAiApi = async (mode: string, tone?: string) => {
   }
 };
 
+  // 기본으로 되돌림
+  const handleReset = () => {
+    setEmailDraft("");
+  };
+
   // 월 이동 핸들러
   const goPrev = () => setViewMonth(subMonths(viewMonth,1));
   const goNext = () => setViewMonth(addMonths(viewMonth,1));
@@ -305,6 +310,7 @@ const callAiApi = async (mode: string, tone?: string) => {
       <EmailGenerator 
         data={selectedEmail} 
         onAiGenerate={callAiApi}
+        onReset={handleReset}
         aiDraft={emailDraft}
         isAiLoading={isEmailLoading}
         activeMode={activeMode}
