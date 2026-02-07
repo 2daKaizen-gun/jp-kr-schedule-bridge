@@ -332,7 +332,11 @@ const callAiApi = async (mode: string, tone?: string) => {
         <h3 className="font-bold mb-2">
           Today&apos;s Business Status ({format(new Date(), "yyyy. MM. dd")})
         </h3>
-        <p className="text-sm font-medium">{advice.message}</p>
+        {isLoaded ? (
+          <p className="text-sm font-medium">{advice.message}</p>
+        ) : (
+          <p className="text-sm font-medium text-gray-400">분석 중...</p>
+        )}
       </section>
 
       {isModalOpen && activeDate && (
