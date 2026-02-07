@@ -13,6 +13,7 @@ interface EmailGeneratorProps {
   aiDraft?: string;
   isAiLoading?: boolean;
   activeMode?: string;
+  currentTone?: string;
 }
 
 export default function EmailGenerator({ 
@@ -21,7 +22,8 @@ export default function EmailGenerator({
   onReset, 
   aiDraft, 
   isAiLoading, 
-  activeMode 
+  activeMode,
+  currentTone
 }: EmailGeneratorProps) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body'>('idle');
 
@@ -73,7 +75,7 @@ export default function EmailGenerator({
   
   // aiDraft가 있을 때 activeMode에 따라 제목을 매핑하고, 없으면 기본 템플릿 제목 사용
   const displaySubject = aiDraft 
-    ? (subjectMap[activeMode || ""] || "AI 생성 메일 초안")
+    ? (subjectMap[currentTone || ""] || "AI 생성 메일 초안")
     : data?. subject;
   
     const displayBody = aiDraft || data?.body;

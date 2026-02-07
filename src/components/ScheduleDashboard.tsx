@@ -149,6 +149,8 @@ const [emailDraft, setEmailDraft] = useState<string>("");
 const [isAiLoading, setIsAiLoading] = useState(false);
 const [isEmailLoading, setIsEmailLoading] = useState(false);
 const [activeMode, setActiveMode] = useState("");
+// 상태 추가
+const [currentTone, setCurrentTone] = useState<string>("");
 
 // AI 통합 호출 함수
 const callAiApi = async (mode: string, tone?: string) => {
@@ -177,6 +179,8 @@ const callAiApi = async (mode: string, tone?: string) => {
       setEmailDraft(""); // 분석 새로하면 기존 메일은 초기화
     } else {
       setEmailDraft(data.text);
+      // 메일 성공 시 현재 톤 저장
+      if (tone) setCurrentTone(tone);
     }
   } catch (err) {
     console.error("AI API Error:", err);
@@ -191,6 +195,8 @@ const callAiApi = async (mode: string, tone?: string) => {
   // 기본으로 되돌림
   const handleReset = () => {
     setEmailDraft("");
+    // 초기화 시 톤 기억 삭제
+    setCurrentTone("");
   };
 
   // 월 이동 핸들러
@@ -314,6 +320,7 @@ const callAiApi = async (mode: string, tone?: string) => {
         aiDraft={emailDraft}
         isAiLoading={isEmailLoading}
         activeMode={activeMode}
+        currentTone={currentTone}
       />
 
       {/* 추천 일정 및 비즈니스 조언 */}
