@@ -65,8 +65,18 @@ export default function EmailGenerator({
 
   // AI 답변이 오면 전체를 '제목 + 본문'으로 나눌 수 없으므로, 
   // 편의상 AI 답변 전체를 Body에 몰아넣거나 혹은 AI 답변 형식을 따름
-  const displaySubject = aiDraft ? "AI가 생성한 비즈니스 메일 초안입니다." : data?.subject;
-  const displayBody = aiDraft || data?.body;
+  const subjectMap: Record<string, string> = {
+    formal: "[정중 AI] 비즈니스 커뮤니케이션 초안",
+    urgent: "[긴급 AI] 업무 협조 및 일정 확인 요청",
+    apology: "[사과 AI] 일정 변경 및 조율 안내",
+  };
+  
+  // aiDraft가 있을 때 activeMode에 따라 제목을 매핑하고, 없으면 기본 템플릿 제목 사용
+  const displaySubject = aiDraft 
+    ? (subjectMap[activeMode || ""] || "AI 생성 메일 초안")
+    : data?. subject;
+  
+    const displayBody = aiDraft || data?.body;
 
   return (
     <div className="bg-white rounded-3xl p-8 border border-blue-100 shadow-2xl shadow-blue-500/10 animate-in fade-in slide-in-from-bottom-5 duration-500">
