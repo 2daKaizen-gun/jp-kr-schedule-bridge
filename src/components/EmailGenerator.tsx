@@ -46,7 +46,7 @@ export default function EmailGenerator({
       </div>
       
       <h4 className="text-xl font-black text-gray-800 mb-2">스마트 메일 작성을 시작해 보세요!</h4>
-      <p className="text-gray-400 text-sm mb-8">한·일 협업을 위한 메일 초안을 만듭니다.</p>
+      <p className="text-gray-500 text-sm mb-8">한·일 협업을 위한 메일 초안을 만듭니다.</p>
 
       {/* 가이드 스텝 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-lg">
@@ -57,7 +57,7 @@ export default function EmailGenerator({
         ].map((item, idx) => (
           <div key={idx} className="flex flex-col items-center">
             <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">STEP {item.step}</div>
-            <p className="text-xs font-bold text-gray-600">{item.text}</p>
+            <p className="text-xs font-bold text-gray-700">{item.text}</p>
           </div>
         ))}
       </div>
@@ -123,7 +123,7 @@ export default function EmailGenerator({
       <div className="space-y-6">
         {/* Subject Line */}
         <div className="group relative">
-          <label className="text-[10px] font-black text-gray-400 mb-1.5 block uppercase tracking-tighter">Email Subject</label>
+          <label className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Email Subject</label>
           <div className="relative flex items-center">
             <input 
               readOnly 
@@ -143,7 +143,7 @@ export default function EmailGenerator({
 
         {/* Message Body */}
         <div className="relative">
-          <label className="text-[10px] font-black text-gray-400 mb-1.5 block uppercase tracking-tighter">Message Body</label>
+          <label className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Message Body</label>
           <textarea 
             readOnly 
             rows={10} 

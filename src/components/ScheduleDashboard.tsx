@@ -63,8 +63,6 @@ export default function ScheduleDashboard({
 
   // 일정 삭제 함수
   const deleteUserEvent = (id: string) => {
-    // 로그로 확인
-    console.log("삭제 시도 ID:", id);
     if (window.confirm("Delete?")) {
       setUserEvents((prev) => {
         const nextEvents = prev.filter((event) => String(event.id) !== String(id));
@@ -131,12 +129,6 @@ export default function ScheduleDashboard({
     ...jpHolidays,
     ...userHolidays.filter(h => h.countryCode === 'JP' || h.countryCode === 'Both')
   ];
-  
-  // 디버깅 로그 (개발자 도구에서 확인)
-  console.log("추천 로직에 투입된 총 일정 수:", {
-    kr: combinedKr.length,
-    jp: combinedJp.length
-  });
 
   return getRecommendedMeetingDays(combinedKr, combinedJp)
     .filter(d => isSameMonth(new Date(d.date), viewMonth));

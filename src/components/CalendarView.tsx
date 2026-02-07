@@ -89,7 +89,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     <div className="flex gap-0.5">
                                         {/* 공휴일 마커 */}
                                         {marker?.type === otherCountry && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="상대국만 휴무" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="상대국만 휴무" />
                                         )}
                                         {marker?.type === 'both' && (
                                             <span className="w-1.5 h-1.5 rounded-full bg-purple-500" title="양국 공휴일" />
@@ -106,7 +106,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     <div className={`mt-1 text-[10px] leading-tight font-bold break-keep p-1 rounded ${
                                         isPublicHoliday
                                             ? (countryCode === "KR" ? "text-red-700 bg-red-100" : "text-blue-700 bg-blue-100")
-                                            : "text-gray-400 bg-gray-100"
+                                            : "text-gray-500 bg-gray-100"
                                     }`}>
                                         {holiday.localName}
                                     </div>
