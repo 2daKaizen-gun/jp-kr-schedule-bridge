@@ -34,7 +34,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
   5. Empty State Onboarding: Minimalist UI guide for first-time users
 
 - **JP-KR-Schedule-Bridge Architecture (Mermaid)**
-
+```mermaid
 graph TD
     User(["User"])
     NextJS["Next.js App (Client/Server)"]
@@ -56,6 +56,7 @@ graph TD
     NextJS --- ISR
     NextJS --- Hydration
     Vercel --- NextJS
+```
 
 ## 🛠 Tech Stack
 - **Framework**: <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"> (App Router)
