@@ -16,9 +16,9 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 - **The Solution**
   1. Dual-Sync Visualization: A side-by-side calendar view that instantly highlights holiday conflicts and recommends the best collaboration days
 
-  2. AI Business Agent: Integrated Gemini 1.5 Flash to generate context-aware business drafts (Formal/Urgent/Apology) based on specific calendar events
+  2. AI Business Agent: Integrated Gemini to generate context-aware business drafts (Formal/Urgent/Apology) based on specific calendar events
 
-  3. Extreme Optimization: Achieved a Perfect 100/100/100/100 Lighthouse score by resolving hydration mismatches and implementing server-side optimization
+  3. Extreme Optimization: Lighthouse score by resolving hydration mismatches and implementing server-side optimization
 
 - **Data Source**: Google Calendar API (JP), User Input (LocalStorage), Gemini AI Analysis
 
@@ -64,7 +64,7 @@ graph TD
 - **Styling**: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: | CI/CD Pipeline
-- **Libraries**: date-fns, lucide-react
+- **Libraries**: <img src="https://img.shields.io/badge/date-770C56?style=for-the-badge&logo=datefns&logoColor=white"> date-fns, lucide-react
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
