@@ -1,15 +1,123 @@
-# 🇯🇵🇰🇷 JP-KR Schedule Bridge
+🗓️ JP-KR-Schedule-Bridge
+An AI-powered collaboration assistant that synchronizes Korean and Japanese business schedules, identifies potential communication gaps due to different holidays, and automates professional bilingual mail drafting using Gemini AI.
 
-**韓国・日本間の日程調整自動化ツール** 한국과 일본의 공휴일 및 비즈니스 문화를 고려한 일정 조율 자동 체크 도구입니다.
+🎯 Background & Motivation
+The Context
 
-## 🚀 Vision
-국제 협업에서 발생하는 일정 조율의 실수를 줄이고, 문화적 차이를 이해하는 스마트한 워크플로우를 제공합니다.
+Working in a Korea-Japan cross-border environment requires constant checking of two different holiday systems to avoid scheduling conflicts and communication delays.
 
-## 🛠 Tech Stack
-- **Framework:** Next.js 14/15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **API:** Google Calendar API / Public Holiday API
+The Problem
+
+Scheduling Blind Spots: Missing a Japanese "Golden Week" or Korean "Chuseok" often leads to urgent requests being ignored or project timelines being pushed back unexpectedly.
+
+Communication Barriers: Drafting formal, urgent, or apologetic business emails in Japanese (Keigo) is mentally taxing and time-consuming for non-native engineers.
+
+Performance & UX: Many existing calendar tools are heavy and slow, failing to provide the instant "at-a-glance" status needed in fast-paced IT environments.
+
+The Solution
+
+Dual-Sync Visualization: A side-by-side calendar view that instantly highlights holiday conflicts and recommends the best collaboration days.
+
+AI Business Agent: Integrated Gemini 1.5 Flash to generate context-aware business drafts (Formal/Urgent/Apology) based on specific calendar events.
+
+Extreme Optimization: Achieved a Perfect 100/100/100/100 Lighthouse score by resolving hydration mismatches and implementing server-side optimization.
+
+Data Source: Public Holiday API (KR/JP), User Input (LocalStorage), Gemini AI Analysis
+
+Key Features
+
+Dual Calendar View: Synchronized display of KR/JP holidays.
+
+Smart Business Advice: Real-time status analysis (e.g., "Today is a holiday in JP, expect delays").
+
+One-Click AI Mailer: Contextual email drafting with 3 distinct tones.
+
+User Event Management: Add/Delete personal meetings with persistent storage.
+
+Empty State Onboarding: Minimalist UI guide for first-time users.
+
+JP-KR-Schedule-Bridge Architecture (Mermaid)
+
+코드 스니펫
+
+graph TD
+    User(["User"])
+    NextJS["Next.js App (Client/Server)"]
+    HolidayAPI["Public Holiday API<br/>(KR/JP Data)"]
+    Gemini{{"Gemini 1.5 Flash<br/>(Contextual Drafting)"}}
+    Storage[("LocalStorage<br/>(User Events)")]
+    Vercel["Vercel Edge Network"]
+
+    User -->|Interaction| NextJS
+    NextJS -->|Fetch Holidays| HolidayAPI
+    NextJS <-->|Persist Events| Storage
+    NextJS -->|Request Analysis| Gemini
+    
+    subgraph "Performance Core"
+        ISR["ISR (Incremental Static Regeneration)"]
+        Hydration["Hydration Shield<br/>(Error #418 Fix)"]
+    end
+    
+    NextJS --- ISR
+    NextJS --- Hydration
+    Vercel --- NextJS
+🛠 Tech Stack
+Framework: <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"> (App Router)
+
+Language: <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+
+Styling: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
+
+AI/LLM: | API
+
+Deployment: | CI/CD Pipeline
+
+Libraries: date-fns, lucide-react (Minimalist Icons)
+
+🔥 Troubleshooting & Lessons Learned
+1. Hydration Mismatch (React Error #418)
+
+Challenge: Server-side rendering of dynamic dates caused a mismatch with client-side local time, dropping the "Best Practices" score.
+
+Resolution: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability and a perfect Lighthouse score.
+
+2. AI Rate Limiting (429 Too Many Requests)
+
+Challenge: Frequent testing during development hit Gemini's free tier quotas.
+
+Resolution: Switched to gemini-1.5-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
+
+3. Accessibility & Contrast
+
+Challenge: Minimalist design with light grays (text-gray-400) failed WCAG accessibility standards.
+
+Resolution: Conducted a contrast audit and refined colors to text-gray-500/600, achieving 100 in Accessibility without compromising the aesthetic.
+
+📈 Results (Lighthouse)
+Performance: 100 (FCP: 0.3s, LCP: 0.5s)
+
+Accessibility: 100
+
+Best Practices: 100
+
+SEO: 100
+
+🧐 Final Project Retrospective
+💡 Engineering for Professionalism
+This project focuses on "Reliability". By achieving a perfect Lighthouse score and implementing robust error handling, I demonstrated that AI-powered tools can be both innovative and technically stable for enterprise-level collaboration.
+
+🚀 Technical Evolution: Beyond CRUD
+Moving from Project 2 (Python/Streamlit) to Project 3 (Next.js/TypeScript), I mastered the nuances of Modern Web Architecture. Dealing with Hydration errors and SSR/ISR taught me how to manage the lifecycle of data in a high-performance production environment.
+
+🌏 Bridging Markets
+As an aspiring IT solution engineer for the Japanese market, this tool represents my ability to identify cultural friction points and solve them using cutting-edge technology. It is not just a calendar; it is a communication bridge.
+
+✨ Contact
+Live Demo: https://kr-jp-schedule-bridge.vercel.app
+
+GitHub Repository: https://github.com/2daKaizen-gun/kr-jp-schedule-bridge
+
+Email: hkys1223@gmail.com
 
 ## 💡 Key Features
 - **Dual Holiday Sync:** 한국과 일본의 공휴일 자동 비교
