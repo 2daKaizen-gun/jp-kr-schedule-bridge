@@ -65,7 +65,6 @@ graph TD
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: | CI/CD Pipeline
 - **Libraries**: date-fns, lucide-react
-- **Lighthouse Score**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_95%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -127,10 +126,20 @@ graph TD
 
 - **SEO**: 100
 
+## 🧐 Self-Reflection
+Technical Growth
+System Design: 환경 변수(Environment Variables) 기반의 설정 관리와 정교한 에러 마스킹(Error Masking)을 적용하여, 보안성이 높고 실제 운영 환경에 바로 투입 가능한 "Production-ready" 애플리케이션 구축 프로세스를 익혔습니다.
+
+Global Mindset: 프로젝트 초기 단계부터 다국어 지원과 지역화(Localization)를 고려한 코드 구조를 설계하며, 글로벌 시장을 타겟으로 하는 소프트웨어 아키텍처의 중요성을 깊이 이해하게 되었습니다.
+
+Problem-Solving Mindset
+Bridge Builder: 개인적인 불편함(한·일 일정 조율)을 자동화하여 더 넓은 커뮤니티에 가치를 제공할 수 있는 솔루션을 만드는 과정에서, 진정한 소프트웨어의 가치는 현장의 페인 포인트(Pain Point)를 해결하는 '가교' 역할에 있음을 확인했습니다.
+
 ## 🧐 Final Project Retrospective
 
-### 💡 Engineering for Professionalism
-This project focuses on "Reliability". By achieving a perfect Lighthouse score and implementing robust error handling, I demonstrated that AI-powered tools can be both innovative and technically stable for enterprise-level collaboration.
+### 💡기술적 신뢰성을 향한 집념
+이 프로젝트는 **'신뢰성'**에 초점을 맞췄습니다. 성능, 보안, SEO 항목에서 Lighthouse 100점을 달성하고, 접근성(Accessibility) 항목에서 95점이라는 높은 점수를 기록했습니다. 단순한 기능 구현을 넘어, 실제 서비스 수준의 최적화와 견고한 에러 핸들링을 통해 AI 기술이 비즈니스 환경에서도 충분히 안정적으로 작동할 수 있음을 증명했습니다.
+- **Lighthouse Score**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_95%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
 
 ### 🚀 Technical Evolution: Beyond CRUD
 Moving from Project 2 (Python/Streamlit) to Project 3 (Next.js/TypeScript), I mastered the nuances of Modern Web Architecture. Dealing with Hydration errors and SSR/ISR taught me how to manage the lifecycle of data in a high-performance production environment.
