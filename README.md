@@ -39,7 +39,7 @@ graph TD
     User(["User"])
     NextJS["Next.js App (Client/Server)"]
     HolidayAPI["Public Holiday API<br/>(KR/JP Data)"]
-    Gemini{{"Gemini 1.5 Flash<br/>(Contextual Drafting)"}}
+    Gemini{{"Gemini API <br/>(Contextual Drafting)"}}
     Storage[("LocalStorage<br/>(User Events)")]
     Vercel["Vercel Edge Network"]
 
