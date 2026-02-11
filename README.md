@@ -137,7 +137,7 @@ graph TD
 
 ## 🧐 Final Project Retrospective
 
-### 💡기술적 신뢰성을 향한 집념
+### 💡Engineering for Reliability
 This project was built with a core focus on 'Reliability'. I achieved perfect 100/100/100 scores in Lighthouse Performance, Best Practices, and SEO, while securing a high score of 95 in Accessibility. Beyond mere feature implementation, I proved that AI technology can be stable enough for professional business environments through production-level optimization and robust error handling. The Accessibility score of 95 is a strategic result of finding the optimal balance between maintaining a minimalist design identity and ensuring high legibility for users.
 
 - **Lighthouse Score**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_95%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
