@@ -64,7 +64,7 @@ graph TD
 - **Styling**: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: | CI/CD Pipeline
-- **Libraries**: <img src="https://img.shields.io/badge/date-770C56?style=for-the-badge&logo=datefns&logoColor=white"> date-fns, lucide-react
+- **Libraries**: <img src="https://img.shields.io/badge/date-fns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> date-fns, lucide-react
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
