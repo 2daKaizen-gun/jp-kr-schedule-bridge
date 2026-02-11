@@ -20,7 +20,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 
   3. Extreme Optimization: Achieved a Perfect 100/100/100/100 Lighthouse score by resolving hydration mismatches and implementing server-side optimization
 
-- **Data Source**: Public Holiday API (KR/JP), User Input (LocalStorage), Gemini AI Analysis
+- **Data Source**: Google Calendar API (JP), User Input (LocalStorage), Gemini AI Analysis
 
 - **Key Features**
   1. Dual Calendar View: Synchronized display of KR/JP holidays
@@ -62,9 +62,10 @@ graph TD
 - **Framework**: <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"> (App Router)
 - **Language**: <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
 - **Styling**: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
-- **AI/LLM**: | API
+- **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: | CI/CD Pipeline
-- **Libraries**: date-fns, lucide-react (Minimalist Icons)
+- **Libraries**: date-fns, lucide-react
+- **Lighthouse Score**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_95%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -102,7 +103,7 @@ graph TD
   - [] Phase 5-6: Final Project Retrospective
 
 ## 🔥 Troubleshooting & Lessons Learned
-**1. Hydration Mismatch (React Error #418)**
+**1. Hydration Mismatch (React Error#418)**
   - **Challenge**: Server-side rendering of dynamic dates caused a mismatch with client-side local time.
 
   - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability.
