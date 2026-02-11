@@ -103,14 +103,14 @@ graph TD
 
 ## 🔥 Troubleshooting & Lessons Learned
 **1. Hydration Mismatch (React Error #418)**
-  - **Challenge**: Server-side rendering of dynamic dates caused a mismatch with client-side local time, dropping the "Best Practices" score.
+  - **Challenge**: Server-side rendering of dynamic dates caused a mismatch with client-side local time.
 
-  - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability and a perfect Lighthouse score.
+  - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability.
 
 **2. AI Rate Limiting (429 Too Many Requests)**
   - **Challenge**: Frequent testing during development hit Gemini's free tier quotas.
 
-  - **Resolution**: Switched to gemini-1.5-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
+  - **Resolution**: Switched to gemini-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
 
 **3. Accessibility & Contrast**
   - **Challenge**: Minimalist design with light grays (text-gray-400) failed WCAG accessibility standards.
