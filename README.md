@@ -138,8 +138,8 @@ Moving from Project 2 (Python/Streamlit) to Project 3 (Next.js/TypeScript), I ma
 As an aspiring IT solution engineer for the Japanese market, this tool represents my ability to identify cultural friction points and solve them using cutting-edge technology. It is not just a calendar, it is a communication bridge.
 
 ## ✨ Contact
-- **Live Demo**: https://kr-jp-schedule-bridge.vercel.app
+- **Live Demo**: https://jp-kr-schedule-bridge.vercel.app
 
-- **GitHub Repository**: https://github.com/2daKaizen-gun/kr-jp-schedule-bridge
+- **GitHub Repository**: https://github.com/2daKaizen-gun/jp-kr-schedule-bridge
 
 - **Email**: hkys1223@gmail.com
