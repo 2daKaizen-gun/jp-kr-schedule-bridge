@@ -24,6 +24,8 @@ export default function ScheduleDashboard({
   const [isLoaded, setIsLoaded] = useState(false); // 하이드레이션 오류 방지용
   // 언어 상태
   const [lang, setLang] = useState<'ko' | 'ja'>('ko');
+  //현재 언어셋 설정
+  const currentT = translations[lang];
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -66,12 +68,9 @@ export default function ScheduleDashboard({
 
   // 일정 삭제 함수
   const deleteUserEvent = (id: string) => {
-    if (window.confirm("Delete?")) {
-      setUserEvents((prev) => {
-        const nextEvents = prev.filter((event) => String(event.id) !== String(id));
-        console.log("삭제 후 결과:", nextEvents);
-        return nextEvents;
-      });
+    const confirmMsg = lang === 'ko' ? "일정을 삭제하시겠습니까?" : "予定を削除しますか？";
+    if (window.confirm(confirmMsg)) {
+      setUserEvents((prev) => prev.filter((event) => String(event.id) !== String(id)));
     }
   };
 
@@ -138,53 +137,36 @@ export default function ScheduleDashboard({
   }, [krHolidays, jpHolidays, userEvents, viewMonth]);
   //userEvents 바뀔 때마다 이 전체 로직 다시 실행
 
-  // AI 관련 상태 추가
-const [aiBriefing, setAiBriefing] = useState<string>("");
-const [emailDraft, setEmailDraft] = useState<string>("");
-const [isAiLoading, setIsAiLoading] = useState(false);
-const [isEmailLoading, setIsEmailLoading] = useState(false);
-const [activeMode, setActiveMode] = useState("");
-// 상태 추가
-const [currentTone, setCurrentTone] = useState<string>("");
+  const [emailDraft, setEmailDraft] = useState<string>("");
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [activeMode, setActiveMode] = useState("");
+  const [currentTone, setCurrentTone] = useState<string>("");
 
-// AI 통합 호출 함수
-const callAiApi = async (mode: string, tone?: string) => {
-  const loadingTarget = tone || mode;
-  setActiveMode(loadingTarget);
-  
-  if (mode === "analyze") setIsAiLoading(true);
-  else setIsEmailLoading(true);
-
-  try {
-    const res = await fetch('/analyze', { // app/analyze/route.ts 호출
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode,
-        tone,
-        currentMonth: format(viewMonth, "yyyy年 MM月"),
-        holidays: { kr: krHolidays, jp: jpHolidays },
-        userEvents: userEvents // 사용자가 입력한 일정까지 포함
-      }),
-    });
+  const callAiApi = async (mode: string, tone?: string) => {
+    setActiveMode(tone || mode);
+    setIsEmailLoading(true);
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode,
+          tone,
+          currentMonth: format(viewMonth, "yyyy-MM"),
+          lang, // AI에게 현재 언어 설정 전달
+          userEvents
+        }),
+      });
     const data = await res.json();
-    
-    if (mode === "analyze") {
-      setAiBriefing(data.text);
-      setEmailDraft(""); // 분석 새로하면 기존 메일은 초기화
-    } else {
       setEmailDraft(data.text);
-      // 메일 성공 시 현재 톤 저장
       if (tone) setCurrentTone(tone);
+    } catch (err) {
+      alert("AI Error");
+    } finally {
+      setIsEmailLoading(false);
+      setActiveMode("");
     }
-  } catch (err) {
-    alert("AI Error");
-  } finally {
-    setIsAiLoading(false);
-    setIsEmailLoading(false);
-    setActiveMode("");
-  }
-};
+  };
 
   // 기본으로 되돌림
   const handleReset = () => {
@@ -260,7 +242,8 @@ const callAiApi = async (mode: string, tone?: string) => {
             holidays={jpHolidays}
             countryCode="JP"
             conflictMarkers={conflictMarkers}
-            userEvents={userEvents} // 추가
+            userEvents={userEvents}
+            lang={lang} // 언어 프롭 전달
             onDateClick={handleDateClick}
             onDeleteEvent={deleteUserEvent} // 추가
           />
@@ -274,7 +257,8 @@ const callAiApi = async (mode: string, tone?: string) => {
             holidays={krHolidays}
             countryCode="KR"
             conflictMarkers={conflictMarkers}
-            userEvents={userEvents} // 추가
+            userEvents={userEvents}
+            lang={lang} // 언어 프롭 전달
             onDateClick={handleDateClick}
             onDeleteEvent={deleteUserEvent} // 추가
           />
@@ -286,7 +270,7 @@ const callAiApi = async (mode: string, tone?: string) => {
         <div className="flex flex-col gap-4">
           {jpVacations.map((block, idx) => (
             <div key={`jp-vac-${idx}`} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl">
-              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 日本の祝日に伴う注意</span>
+              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 {lang === 'ko' ? "일본 연휴 주의" : "日本の祝日に伴う注意"}</span>
               <p className="text-orange-900 font-extrabold">{block.displayNames}</p>
               <p className="text-orange-700 text-sm">📅 {block.start} ~ {block.end}</p>
             </div>
@@ -295,7 +279,7 @@ const callAiApi = async (mode: string, tone?: string) => {
         <div className="flex flex-col gap-4">
           {krVacations.map((block, idx) => (
             <div key={`kr-vac-${idx}`} className="bg-red-50 border border-red-200 p-5 rounded-2xl">
-              <span className="text-red-800 font-bold block mb-2 text-lg">🇰🇷 한국 연휴 주의</span>
+              <span className="text-red-800 font-bold block mb-2 text-lg">🇰🇷 {lang === 'ko' ? "한국 연휴 주의" : "韓国の祝日に伴う注意"}</span>
               <p className="text-red-900 font-extrabold">{block.displayNames}</p>
               <p className="text-red-700 text-sm">📅 {block.start} ~ {block.end}</p>
             </div>
@@ -312,11 +296,12 @@ const callAiApi = async (mode: string, tone?: string) => {
         isAiLoading={isEmailLoading}
         activeMode={activeMode}
         currentTone={currentTone}
+        lang={lang} //언어 프롭 전달
       />
 
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
-        <h3 className="text-xl font-bold text-green-800 mb-6">Best Collaboration Days (Next 2 Weeks)</h3>
+        <h3 className="text-xl font-bold text-green-800 mb-6">{currentT.bestDays}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendedDays.map((item, idx) => (
             <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200">
@@ -329,7 +314,7 @@ const callAiApi = async (mode: string, tone?: string) => {
 
       <section className={`p-6 rounded-2xl border-2 bg-opacity-50 ${advice.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
         <h3 className="font-bold mb-2">
-          Today&apos;s Business Status ({format(new Date(), "yyyy. MM. dd")})
+          {currentT.todayStatus} ({isLoaded ? format(new Date(), lang === 'ko' ? "yyyy. MM. dd" : "yyyy/MM/dd") : "..."})
         </h3>
         <p className="text-sm font-medium">{advice.message}</p>
       </section>
@@ -339,6 +324,7 @@ const callAiApi = async (mode: string, tone?: string) => {
           date={activeDate} 
           onClose={() => setIsModalOpen(false)} 
           onSave={addUserEvent}
+          lang={lang} // 언어 프롭 전달
         />
       )}
     </div>
