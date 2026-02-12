@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { translations } from '@/lib/translations';
 
 interface EmailGeneratorProps {
   data: {
@@ -8,6 +9,7 @@ interface EmailGeneratorProps {
     subject: string;
     body: string;
   } | null;
+  lang: 'ko' | 'ja'; // 언어 프롭
   onAiGenerate?: (mode: string, tone: string) => void;
   onReset?:() => void;
   aiDraft?: string;
@@ -18,6 +20,7 @@ interface EmailGeneratorProps {
 
 export default function EmailGenerator({ 
   data, 
+  lang,
   onAiGenerate,
   onReset, 
   aiDraft, 
@@ -26,6 +29,9 @@ export default function EmailGenerator({
   currentTone
 }: EmailGeneratorProps) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body'>('idle');
+
+  // 현재 언어에 맞는 번역 데이터 가져오기
+  const t = translations[lang].email;
 
   // 클립보드 복사 함수
   const handleCopy = async (text: string, type: 'subject' | 'body') => {
@@ -39,50 +45,56 @@ export default function EmailGenerator({
   };
 
   if (!data && !aiDraft) {
-  return (
-    <div className="bg-white rounded-3xl p-10 border-2 border-dashed border-blue-100 flex flex-col items-center justify-center text-center animate-in fade-in duration-700">
-      <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-        <span className="text-4xl">📅</span>
-      </div>
-      
-      <h4 className="text-xl font-black text-gray-800 mb-2">스마트 메일 작성을 시작해 보세요!</h4>
-      <p className="text-gray-500 text-sm mb-8">한·일 협업을 위한 메일 초안을 만듭니다.</p>
+    return (
+      <div className="bg-white rounded-3xl p-10 border-2 border-dashed border-blue-100 flex flex-col items-center justify-center text-center animate-in fade-in duration-700">
+        <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+          <span className="text-4xl">📅</span>
+        </div>
+        
+        <h4 className="text-xl font-black text-gray-800 mb-2">{t.onboardingTitle}</h4>
+        <p className="text-gray-500 text-sm mb-8">{t.onboardingSub}</p>
 
-      {/* 가이드 스텝 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-lg">
-        {[
-          { step: "01", text: "달력에서 일정을 클릭하세요." },
-          { step: "02", text: "원하는 메일 톤을 선택하세요." },
-          { step: "03", text: "생성된 문구를 복사해 사용하세요." }
-        ].map((item, idx) => (
-          <div key={idx} className="flex flex-col items-center">
-            <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">STEP {item.step}</div>
-            <p className="text-xs font-bold text-gray-700">{item.text}</p>
-          </div>
-        ))}
+        {/* 가이드 스텝 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-lg">
+          {[
+            { step: "01", text: t.step01 },
+            { step: "02", text: t.step02 },
+            { step: "03", text: t.step03 }
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center">
+              <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">STEP {item.step}</div>
+              <p className="text-xs font-bold text-gray-700">{item.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-  // AI 답변이 오면 전체를 '제목 + 본문'으로 나눌 수 없으므로, 
-  // 편의상 AI 답변 전체를 Body에 몰아넣거나 혹은 AI 답변 형식을 따름
-  const subjectMap: Record<string, string> = {
-    formal: "[정중 AI] 비즈니스 커뮤니케이션 초안",
-    urgent: "[긴급 AI] 업무 협조 및 일정 확인 요청",
-    apology: "[사과 AI] 일정 변경 및 조율 안내",
+  // AI 답변용 제목 맵을 다국어로 확장
+  const subjectMap: Record<string, Record<string, string>> = {
+    ko: {
+      formal: "[정중] 비즈니스 커뮤니케이션 초안",
+      urgent: "[긴급] 업무 협조 및 일정 확인 요청",
+      apology: "[사과] 일정 변경 및 조율 안내",
+      default: "AI 생성 메일 초안"
+    },
+    ja: {
+      formal: "[丁寧] ビジネスコミュニケーション下書き",
+      urgent: "[至急] 業務協力および日程確認の依頼",
+      apology: "[お詫び] 日程変更および調整のご案内",
+      default: "AI生成メールの下書き"
+    }
   };
   
-  // aiDraft가 있을 때 activeMode에 따라 제목을 매핑하고, 없으면 기본 템플릿 제목 사용
   const displaySubject = aiDraft 
-    ? (subjectMap[currentTone || ""] || "AI 생성 메일 초안")
-    : data?. subject;
+    ? (subjectMap[lang][currentTone || ""] || subjectMap[lang].default)
+    : data?.subject;
   
-    const displayBody = aiDraft || data?.body;
+  const displayBody = aiDraft || data?.body;
 
   return (
     <div className="bg-white rounded-3xl p-8 border border-blue-100 shadow-2xl shadow-blue-500/10 animate-in fade-in slide-in-from-bottom-5 duration-500">
-      {/* Header: 기존 디자인 유지 + AI 버튼 추가 */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h4 className="text-2xl font-black text-gray-800 tracking-tight">Email Draft</h4>
@@ -92,7 +104,7 @@ export default function EmailGenerator({
         </div>
         
         {/* AI 상황별 생성 버튼들 */}
-        <div className="flex flex gap-2">
+        <div className="flex gap-2">
           <button
             onClick={onReset}
             className={`px-3 py-2 rounded-xl text-xs font-black transition-all border-2 ${
@@ -101,12 +113,12 @@ export default function EmailGenerator({
                 : 'bg-gray-100 border-gray-200 text-gray-400 cursor-default opacity-50'
             }`}
           >
-            기본
+            {t.basic}
           </button>
           {[
-            { id: 'formal', label: '정중', color: 'bg-indigo-600' },
-            { id: 'urgent', label: '긴급', color: 'bg-amber-600' },
-            { id: 'apology', label: '사과', color: 'bg-rose-600' },
+            { id: 'formal', label: t.formal, color: 'bg-indigo-600' },
+            { id: 'urgent', label: t.urgent, color: 'bg-amber-600' },
+            { id: 'apology', label: t.apology, color: 'bg-rose-600' },
           ].map((btn) => (
             <button
               key={btn.id}
@@ -136,7 +148,7 @@ export default function EmailGenerator({
                 copyStatus === 'subject' ? 'bg-green-500 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
-              {copyStatus === 'subject' ? 'Copied!' : 'Copy'}
+              {copyStatus === 'subject' ? t.copied : t.copy}
             </button>
           </div>
         </div>
@@ -156,7 +168,7 @@ export default function EmailGenerator({
               copyStatus === 'body' ? 'bg-green-500 text-white' : 'bg-gray-900 text-white hover:bg-black'
             }`}
           >
-            {copyStatus === 'body' ? 'Full Message Copied!' : 'Copy Full Message'}
+            {copyStatus === 'body' ? t.fullCopied : t.copyFull}
           </button>
         </div>
       </div>
