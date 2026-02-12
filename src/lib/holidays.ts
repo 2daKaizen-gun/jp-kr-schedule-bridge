@@ -80,8 +80,8 @@ export function analyzeBusinessDay(
         };
     }
 
-    const iskrHoliday = krHolidays.some(h => h.date === targetDate);
-    const isjpHoliday = jpHolidays.some(h => h.date === targetDate);
+    const iskrHoliday = krHolidays.some(h => h.date === targetDate && isActualPublicHoliday(h));
+    const isjpHoliday = jpHolidays.some(h => h.date === targetDate && isActualPublicHoliday(h));
 
     if (iskrHoliday && isjpHoliday) {
         return {
@@ -189,15 +189,15 @@ export function getRecommendedMeetingDays(
         if (day === 0 || day === 6 || day === 5) continue;
 
         const dateStr = format(target, 'yyyy-MM-dd');
-        const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr);
+        const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr && isActualPublicHoliday(h));
         if (isTodayHoliday) continue;
 
         const tomorrow = addDays(target, 1);
-        const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
-        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === tomorrowStr && isActualPublicHoliday(h));
+        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === format(tomorrow, 'yyyy-MM-dd') && isActualPublicHoliday(h));
         const isTomorrowWeekend = (getDay(tomorrow) === 6);
 
         if (isTomorrowHoliday || isTomorrowWeekend) continue;
+
         let score = 100;
         let reason = lang === 'ko' 
             ? "양국 모두 정상 근무일이며, 협업 효율이 극대화되는 날입니다." 
