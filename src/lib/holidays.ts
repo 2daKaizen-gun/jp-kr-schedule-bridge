@@ -11,6 +11,17 @@ const CALENDAR_IDS: {[key: string]: string } = {
     JP: 'japanese__ja@holiday.calendar.google.com'
 };
 
+// 실질적인 휴무일인지 판별 (한국의 어버이날 등 제외)
+export const isActualPublicHoliday = (holiday: Holiday) => {
+    const EXCLUDED = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
+    return (
+        (!holiday.localName.includes("Day") || 
+         holiday.localName.includes("Replacement") || 
+         holiday.localName.includes("Memorial")) && 
+        !EXCLUDED.includes(holiday.localName)
+    );
+};
+
 export async function getHolidays(countryCode:string, year: number = 2026): Promise<Holiday[]> {
     const calendarId = CALENDAR_IDS[countryCode];
     const timeMin = `${year}-01-01T00:00:00Z`;
@@ -21,13 +32,8 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
     try {
         const response = await fetch(url)
         const data = await response.json();
-        
         // [체크 1] API가 에러를 반환했는지 확인
-        if (data.error) {
-            console.error(`Google API Error (${countryCode}):`, data.error.message);
-        return [];
-        }
-
+        if (data.error) return [];
         // [체크 2] items 데이터가 있는지 확인
         if (!data.items) return [];
 
@@ -45,8 +51,6 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
             types: ['Public']
         }));
     } catch (error) {
-        console.error("Critical Fetch Error:", error);
-        //error 발생 시 빈 배열 반환해 protect
         return [];
     }
 }
@@ -63,12 +67,9 @@ export function analyzeBusinessDay(
     jpHolidays: Holiday[],
     lang: 'ko' | 'ja' = 'ko'
 ) {
-
-    // 날짜 문자열을 객체로 변환해서 요일 파악 (0: 일요일, 6: 토요일)
     const date = parseISO(targetDate);
     const day = getDay(date);
 
-    // 주말 체크(최우선)
     if (day === 0 || day === 6) {
         return {
             status: 'holiday',
@@ -79,7 +80,6 @@ export function analyzeBusinessDay(
         };
     }
 
-    // 공휴일 체크 로직 (평일인 경우만 실행)
     const iskrHoliday = krHolidays.some(h => h.date === targetDate);
     const isjpHoliday = jpHolidays.some(h => h.date === targetDate);
 
@@ -108,11 +108,13 @@ export function analyzeBusinessDay(
             color: 'blue'
         };
     }
+
+    // 정상 근무일
     return {
         status: 'work',
         message: lang === 'ko'
-            ? '양국 모두 근무일입니다. 협업 및 미팅 진행에 최적화된 날입니다.'
-            : '両国とも営業日です。連携やミー팅に最適な日です。',
+            ? '양국 모두 영업일입니다. 원활한 파트너십과 미팅 진행에 최적화된 날입니다.'
+            : '両国ともに営業日です。円滑な連携やミーティングの実施に最適な日です。',
         color: 'green'
     };
 }
@@ -178,53 +180,41 @@ export function getRecommendedMeetingDays(
     jpHolidays: Holiday[],
     lang: 'ko' | 'ja' = 'ko'
 ) {
-    const recommedations: {date: string; score: number; reason: string }[] = [];
+    const recommendations: {date: string; score: number; reason: string }[] = [];
     const today = new Date();
 
-    // 오늘부터 14일간 날짜
     for (let i=1; i<=14; i++) {
         const target = addDays(today, i);
-        
-        // 주말 및 금요일 제외 로직
         const day = getDay(target);
         if (day === 0 || day === 6 || day === 5) continue;
 
-        // 한국, 일본 시간 기준
         const dateStr = format(target, 'yyyy-MM-dd');
-
-        // 오늘이 휴일인지 체크
         const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr);
         if (isTodayHoliday) continue;
 
-        // 내일(Tomorrow)이 휴무일(공휴일 or 토요일)인지 체크
         const tomorrow = addDays(target, 1);
         const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
-        const tomorrowDay = getDay(tomorrow);
+        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === tomorrowStr && isActualPublicHoliday(h));
+        const isTomorrowWeekend = (getDay(tomorrow) === 6);
 
-        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === tomorrowStr);
-        const isTomorrowWeekend = (tomorrowDay === 6); // 내일이 토요일인가?
-
-        // 공휴일 전날 혹은 주말(토요일) 전날이면 추천에서 제외
         if (isTomorrowHoliday || isTomorrowWeekend) continue;
-        //basic: 100
         let score = 100;
-        let reason = lang === 'ko' ? "양국 모두 정상 근무입니다." : "両国とも通常勤務です。";
+        let reason = lang === 'ko' 
+            ? "양국 모두 정상 근무일이며, 협업 효율이 극대화되는 날입니다." 
+            : "両国ともに通常勤務日であり、協業効率が最大化される日です。";
 
-        // 앞뒤 2일 내 장기 연휴 체크(집중도 하락 방지)
         const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
             const diff = Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
-            return diff === 2; // 모레가 휴일인 경우 등
+            return diff === 2 && isActualPublicHoliday(h);
         });
 
         if (hasNearbyHoliday) {
             score = 70;
             reason = lang === 'ko' 
                 ? "인접 공휴일이 있어 업무 집중도가 낮을 수 있습니다." 
-                : "近隣に祝일があるため、業務集中度が低下する可能性があります。";
+                : "近隣に祝日があるため、業務集中度が低下する可能性があります。";
         }
-
-        recommedations.push({ date: dateStr, score, reason});
+        recommendations.push({ date: dateStr, score, reason});
     }
-    // 점수 높은 순 TOP3 반환
-    return recommedations.sort((a,b) => b.score - a.score).slice(0,3);
+    return recommendations.sort((a,b) => b.score - a.score).slice(0,3);
 }
