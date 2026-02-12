@@ -114,7 +114,7 @@ export function analyzeBusinessDay(
         status: 'work',
         message: lang === 'ko'
             ? '양국 모두 영업일입니다. 원활한 파트너십과 미팅 진행에 최적화된 날입니다.'
-            : '両国ともに営業日です。円滑な連携やミーティングの実施に最適な日です。',
+            : '両国ともに営業日です。円滑な連携やミーティングの実施に最適な日です',
         color: 'green'
     };
 }
@@ -201,7 +201,7 @@ export function getRecommendedMeetingDays(
         let score = 100;
         let reason = lang === 'ko' 
             ? "양국 모두 정상 근무일이며, 협업 효율이 극대화되는 날입니다." 
-            : "両国ともに通常勤務日であり、協業効率が最大化される日です";
+            : "両国ともに通常勤務日であり、協業効率が最大化される日です。";
 
         const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
             const diff = Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
@@ -212,7 +212,7 @@ export function getRecommendedMeetingDays(
             score = 70;
             reason = lang === 'ko' 
                 ? "인접 공휴일이 있어 업무 집중도가 낮을 수 있습니다." 
-                : "近隣に祝日があるため、業務集中度が低下する可能性があります";
+                : "近隣に祝日があるため、業務集中度が低下する可能性があります。";
         }
         recommendations.push({ date: dateStr, score, reason});
     }
