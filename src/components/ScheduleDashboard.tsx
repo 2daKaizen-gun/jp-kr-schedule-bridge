@@ -45,8 +45,8 @@ export default function ScheduleDashboard({
 
   // 비즈니스 어드바이스
   const advice = useMemo(() => {
-    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays);
-  }, [krHolidays, jpHolidays]);
+    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays, lang);
+  }, [krHolidays, jpHolidays, lang]);
 
   // 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,9 +132,9 @@ export default function ScheduleDashboard({
     ...userHolidays.filter(h => h.countryCode === 'JP' || h.countryCode === 'Both')
   ];
 
-  return getRecommendedMeetingDays(combinedKr, combinedJp)
+  return getRecommendedMeetingDays(combinedKr, combinedJp, lang)
     .filter(d => isSameMonth(new Date(d.date), viewMonth));
-  }, [krHolidays, jpHolidays, userEvents, viewMonth]);
+  }, [krHolidays, jpHolidays, userEvents, viewMonth, lang]);
   //userEvents 바뀔 때마다 이 전체 로직 다시 실행
 
   const [emailDraft, setEmailDraft] = useState<string>("");
