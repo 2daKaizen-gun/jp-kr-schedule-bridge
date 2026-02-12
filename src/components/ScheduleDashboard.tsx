@@ -8,6 +8,7 @@ import { emailTemplates, TemplateType } from '@/lib/templates';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
 import { UserEvent } from '@/types/holiday';
 import EventModal from './EventModal';
+import { translations } from '@/lib/translations';
 
 export default function ScheduleDashboard({ 
   jpHolidays,
@@ -21,6 +22,8 @@ export default function ScheduleDashboard({
 
   const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
   const [isLoaded, setIsLoaded] = useState(false); // 하이드레이션 오류 방지용
+  // 언어 상태
+  const [lang, setLang] = useState<'ko' | 'ja'>('ko');
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -40,7 +43,7 @@ export default function ScheduleDashboard({
 
   // 비즈니스 어드바이스
   const advice = useMemo(() => {
-    return analyzeBusinessDay(format(new Date(), "yyyy年MM月dd日"), krHolidays, jpHolidays);
+    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays);
   }, [krHolidays, jpHolidays]);
 
   // 상태 추가
@@ -54,7 +57,7 @@ export default function ScheduleDashboard({
       id: `${activeDate}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       date: activeDate!,
       title,
-      type,
+      type: type as any,
       countryCode: country
     };
     setUserEvents(prev => [...prev, newEvent]);
@@ -175,7 +178,6 @@ const callAiApi = async (mode: string, tone?: string) => {
       if (tone) setCurrentTone(tone);
     }
   } catch (err) {
-    console.error("AI API Error:", err);
     alert("AI Error");
   } finally {
     setIsAiLoading(false);
@@ -225,7 +227,7 @@ const callAiApi = async (mode: string, tone?: string) => {
       <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
           <h3 className="text-2xl font-black text-gray-800 ml-2">
-            {format(viewMonth, "yyyy年 MM月")}
+            {format(viewMonth, lang === 'ko' ? "yyyy년 MM월" : "yyyy年 MM月")}
           </h3>
           <button
             onClick={goToday}
@@ -235,19 +237,16 @@ const callAiApi = async (mode: string, tone?: string) => {
             </button>
         </div>
 
-        <div className='flex gap-2'>
-          <button
-            onClick={goPrev}
-            className="p-3 hover:bg-gray-100 rounded-2xl transition-all text-gray-600 active:scale-95"
-          >
-            <span className="text-xl">◀</span>
-          </button>
-          <button
-            onClick={goNext}
-            className="p-3 hover:bg-gray-100 rounded-2xl transition-all text-gray-600 active:scale-95"
-          >
-            <span className="text-xl">▶</span>
-          </button>
+        <div className='flex gap-4 items-center'>
+          {/* 언어 스위처 */}
+          <div className="flex bg-gray-100 p-1 rounded-xl">
+            <button onClick={() => setLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>KO</button>
+            <button onClick={() => setLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>JA</button>
+          </div>
+          <div className='flex gap-1'>
+            <button onClick={() => setViewMonth(subMonths(viewMonth,1))} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
+            <button onClick={() => setViewMonth(addMonths(viewMonth,1))} className="p-2 hover:bg-gray-100 rounded-xl">▶</button>
+          </div>
         </div>
       </div>
 
