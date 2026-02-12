@@ -40,7 +40,7 @@ export default function ScheduleDashboard({
 
   // 비즈니스 어드바이스
   const advice = useMemo(() => {
-    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays);
+    return analyzeBusinessDay(format(new Date(), "yyyy年MM月dd日"), krHolidays, jpHolidays);
   }, [krHolidays, jpHolidays]);
 
   // 상태 추가
@@ -159,7 +159,7 @@ const callAiApi = async (mode: string, tone?: string) => {
       body: JSON.stringify({
         mode,
         tone,
-        currentMonth: format(viewMonth, "yyyy년 MM월"),
+        currentMonth: format(viewMonth, "yyyy年 MM月"),
         holidays: { kr: krHolidays, jp: jpHolidays },
         userEvents: userEvents // 사용자가 입력한 일정까지 포함
       }),
@@ -176,7 +176,7 @@ const callAiApi = async (mode: string, tone?: string) => {
     }
   } catch (err) {
     console.error("AI API Error:", err);
-    alert("AI 통신 중 오류가 발생했습니다.");
+    alert("AI Error");
   } finally {
     setIsAiLoading(false);
     setIsEmailLoading(false);
@@ -225,7 +225,7 @@ const callAiApi = async (mode: string, tone?: string) => {
       <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
           <h3 className="text-2xl font-black text-gray-800 ml-2">
-            {format(viewMonth, "yyyy.MM")}
+            {format(viewMonth, "yyyy年 MM")}
           </h3>
           <button
             onClick={goToday}
@@ -287,7 +287,7 @@ const callAiApi = async (mode: string, tone?: string) => {
         <div className="flex flex-col gap-4">
           {jpVacations.map((block, idx) => (
             <div key={`jp-vac-${idx}`} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl">
-              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 일본 연휴 주의</span>
+              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 日本の祝日に伴う注意</span>
               <p className="text-orange-900 font-extrabold">{block.displayNames}</p>
               <p className="text-orange-700 text-sm">📅 {block.start} ~ {block.end}</p>
             </div>
