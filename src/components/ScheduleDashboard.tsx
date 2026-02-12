@@ -189,7 +189,7 @@ export default function ScheduleDashboard({
   if (type === 'kr') templateKey = 'KR_HOLIDAY';
   if (type === 'jp') templateKey = 'JP_HOLIDAY';
 
-  const template = emailTemplates[templateKey];
+  const template = emailTemplates[lang][templateKey];
 
   // setSelectedEmail을 사용하여 상태를 업데이트
   setSelectedEmail({
