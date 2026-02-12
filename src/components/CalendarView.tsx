@@ -5,6 +5,7 @@ import {
   isSameMonth, addDays, eachDayOfInterval 
 } from "date-fns";
 import { Holiday, UserEvent } from "@/types/holiday";
+import { translations } from "@/lib/translations";
 
 interface CalendarProps {
     month: Date;
@@ -12,14 +13,16 @@ interface CalendarProps {
     countryCode: "KR" | "JP";
     conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
     userEvents: UserEvent[]; // 사용자 일정 데이터
+    lang: 'ko' | 'ja';
     onDateClick?: (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => void;
     onDeleteEvent?: (id: string) => void; // 일정 삭제 함수
 }
 
-export default function CalendarView({ month, holidays, countryCode, conflictMarkers, userEvents = [], onDateClick, onDeleteEvent }: CalendarProps) {
+export default function CalendarView({ month, holidays, countryCode, conflictMarkers, userEvents = [], lang, onDateClick, onDeleteEvent }: CalendarProps) {
     const monthStart = startOfMonth(month);
-    
-    const monthEnd = endOfMonth(monthStart);
+
+    // 번역 객체 정의
+    const t = translations[lang].calendar;
     
     // 무조건 달력의 시작일(일요일)부터 42일(6주)간의 날짜 배열
     // 날짜가 누락되거나 중복될 일 없음
@@ -160,22 +163,18 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
 
             {/* 범례 추가(Legend) */}
             <div className="flex flex-wrap gap-4 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Legend:</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t.legend}:</span>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-xs text-gray-600 font-medium">상대국만 휴무 (협업 주의)</span>
+                    <span className="text-xs text-gray-600 font-medium">{t.jpOnly}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-purple-500" />
-                    <span className="text-xs text-gray-600 font-medium">양국 공휴일 (비즈니스 중단)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="text-xs">⚠️</span>
-                    <span className="text-xs text-gray-600 font-medium">휴무일 (마우스 오버)</span>
+                    <span className="text-xs text-gray-600 font-medium">{t.both}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-xs text-gray-600 font-medium">내 일정</span>
+                    <span className="text-xs text-gray-600 font-medium">{t.myEvent}</span>
                 </div>
             </div>
         </div>
