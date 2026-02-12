@@ -225,7 +225,7 @@ const callAiApi = async (mode: string, tone?: string) => {
       <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
           <h3 className="text-2xl font-black text-gray-800 ml-2">
-            {format(viewMonth, "yyyy年 MM")}
+            {format(viewMonth, "yyyy年 MM月")}
           </h3>
           <button
             onClick={goToday}
