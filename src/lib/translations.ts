@@ -1,5 +1,6 @@
 export const translations = {
     ko: {
+        subDescription: "한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.",
         dashboard: "대시보드",
         todayStatus: "오늘의 비즈니스 상태",
         bestDays: "최적의 협업일 (향후 2주)",
@@ -42,6 +43,7 @@ export const translations = {
         }
     },
     ja: {
+        subDescription: "韓国と日本の祝日を比較し, 最適なコラボレーション日程を提案します。",
         dashboard: "ダッシュボード",
         todayStatus: "本日のビジネス状況",
         bestDays: "ベストな協力日 (今後2週間)",

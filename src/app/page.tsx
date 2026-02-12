@@ -26,13 +26,8 @@ export default async function Home() {
       </nav>
 
       <main className="max-w-7xl mx-auto p-8">
-        {/* header section */}
-        <header className="mb-10">
-          <h2 className="text-3xl font-extrabold tracking-tight">Business Calendar Dashboard</h2>
-          <p className="mt-2 text-gray-600">한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.</p>
-        </header>
-
-        {/* 구조를 Dashboard로 넘겨 일관성 유지 */}
+        {/* 기존에 여기에 있던 <header>의 한국어 설명을
+        ScheduleDashboard 내부로 이동시켜 언어 토글에 반응*/}
         <ScheduleDashboard
           jpHolidays={jpHolidays}
           krHolidays={krHolidays}

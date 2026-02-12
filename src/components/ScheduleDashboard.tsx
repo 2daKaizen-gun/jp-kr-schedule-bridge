@@ -205,6 +205,16 @@ export default function ScheduleDashboard({
 
   return (
     <div className="space-y-12">
+      {/* Page Header: 언어 토글에 반응하는 설명 섹션 */}
+      <header className="mb-10">
+        <h2 className="text-4xl font-black tracking-tight text-gray-900 mb-2">
+          Business Calendar Dashboard
+        </h2>
+        <p className="text-lg text-gray-500 font-medium">
+          {currentT.subDescription} {/* [핵심] 언어 변경 시 이 문구도 바뀜! */}
+        </p>
+      </header>
+      
       {/* 월 이동 컨트롤러 */}
       <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
