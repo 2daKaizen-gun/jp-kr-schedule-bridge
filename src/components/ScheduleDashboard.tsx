@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { addMonths, subMonths, format } from 'date-fns';
+import { format } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
@@ -22,46 +22,28 @@ export default function ScheduleDashboard({
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [activeMode, setActiveMode] = useState("");
   const [currentTone, setCurrentTone] = useState("");
-  // 상태 추가
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeDate, setActiveDate] = useState<string | null>(null);
 
   const currentT = translations[lang];
 
   // 커스텀 훅에서 모든 로직 수혈
   const {
-    viewMonth, setViewMonth,
-    userEvents, setUserEvents,
+    viewMonth, 
+    goPrev, goNext, goToday, 
+    userEvents, 
+    addUserEvent, deleteUserEvent,
     isLoaded,
     conflictMarkers,
     recommendedDays,
     advice,
     jpVacations,
-    krVacations
+    krVacations,
+    isModalOpen,
+    activeDate,
+    openEventModal,
+    closeEventModal
   } = useScheduleLogic(jpHolidays, krHolidays, initialTimestamp, lang);
 
-  // 일정 추가 함수
-  const addUserEvent = (title: string, type: 'meeting' | 'holiday', country: 'KR' | 'JP' | 'Both') => {
-    const newEvent: UserEvent = {
-      // Date.now() 괄호 추가 및 랜덤 문자열 조합
-      id: `${activeDate}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      date: activeDate!,
-      title,
-      type: type as any,
-      countryCode: country
-    };
-    setUserEvents(prev => [...prev, newEvent]);
-    setIsModalOpen(false); // 저장 후 모달 닫기
-  };
-
-  // 일정 삭제 함수
-  const deleteUserEvent = (id: string) => {
-    const confirmMsg = lang === 'ko' ? "일정을 삭제하시겠습니까?" : "予定を削除しますか？";
-    if (window.confirm(confirmMsg)) {
-      setUserEvents((prev) => prev.filter((event) => String(event.id) !== String(id)));
-    }
-  };
-
+  // AI 관련 로직
   const callAiApi = async (mode: string, tone?: string) => {
     setActiveMode(tone || mode);
     setIsEmailLoading(true);
@@ -94,11 +76,6 @@ export default function ScheduleDashboard({
     // 초기화 시 톤 기억 삭제
     setCurrentTone("");
   };
-  
-  const goToday = () => {
-    const today = new Date();
-    setViewMonth(today);
-  };
 
   const handleDateClick = (date: string, holidayName: string, type: any) => {
     let templateKey: TemplateType = 'BOTH_HOLIDAY';
@@ -114,9 +91,8 @@ export default function ScheduleDashboard({
       body: template.body(date, holidayName),
     });
 
-    // 모달 띄우기 위해 날짜만 세팅
-    setActiveDate(date);
-    setIsModalOpen(true);
+    // 훅 모달 열기 기능 호출
+    openEventModal(date);
   };
 
   return (
@@ -152,8 +128,8 @@ export default function ScheduleDashboard({
             <button onClick={() => setLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>JA</button>
           </div>
           <div className='flex gap-1'>
-            <button onClick={() => setViewMonth(subMonths(viewMonth,1))} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
-            <button onClick={() => setViewMonth(addMonths(viewMonth,1))} className="p-2 hover:bg-gray-100 rounded-xl">▶</button>
+            <button onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
+            <button onClick={goNext} className="p-2 hover:bg-gray-100 rounded-xl">▶</button>
           </div>
         </div>
       </div>
@@ -248,7 +224,7 @@ export default function ScheduleDashboard({
       {isModalOpen && activeDate && (
         <EventModal 
           date={activeDate} 
-          onClose={() => setIsModalOpen(false)} 
+          onClose={closeEventModal} 
           onSave={addUserEvent}
           lang={lang} // 언어 프롭 전달
         />
