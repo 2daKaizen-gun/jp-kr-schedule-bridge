@@ -5,10 +5,10 @@ import { addMonths, subMonths, format, isSameMonth, add } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
 import { UserEvent } from '@/types/holiday';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
+import { useScheduleLogic } from '@/hook/useScheduleLogic';
 
 export default function ScheduleDashboard({ 
   jpHolidays,
@@ -16,38 +16,28 @@ export default function ScheduleDashboard({
   initialTimestamp
 }: any) {
 
-  // 현재 화면에 보여줄 달(Month)을 상태로 관리
-  const [viewMonth, setViewMonth] = useState<Date>(new Date(initialTimestamp));
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
-
-  const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false); // 하이드레이션 오류 방지용
   // 언어 상태
   const [lang, setLang] = useState<'ko' | 'ja'>('ko');
   //현재 언어셋 설정
   const currentT = translations[lang];
+  const [emailDraft, setEmailDraft] = useState<string>("");
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [activeMode, setActiveMode] = useState("");
+  const [currentTone, setCurrentTone] = useState<string>("");
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    const saved = localStorage.getItem('user_events');
-    if (saved) {
-      setUserEvents(JSON.parse(saved));
-    }
-    setIsLoaded(true);
-  }, []);
-
-  // 데이터 바뀔 때마다 로컬 스토리지 저장
-  useEffect (() =>  {
-    if (isLoaded) {
-      localStorage.setItem('user_events', JSON.stringify(userEvents));
-    }
-  }, [userEvents, isLoaded]);
-
-  // 비즈니스 어드바이스
-  const advice = useMemo(() => {
-    return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays, lang);
-  }, [krHolidays, jpHolidays, lang]);
-
+  // 커스텀 훅에서 모든 로직 수혈
+  const {
+    viewMonth, setViewMonth,
+    userEvents, setUserEvents,
+    isLoaded,
+    conflictMarkers,
+    recommendedDays,
+    advice,
+    jpVacations,
+    krVacations
+  } = useScheduleLogic(jpHolidays, krHolidays, initialTimestamp, lang);
+  
   // 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDate, setActiveDate] = useState<string | null>(null);
@@ -73,74 +63,6 @@ export default function ScheduleDashboard({
       setUserEvents((prev) => prev.filter((event) => String(event.id) !== String(id)));
     }
   };
-
-  // --- 비즈니스 로직 계산 섹션 (viewMonth에 반응함) ---
-  const conflictMarkers = useMemo(() => {
-    const markers: any = {};
-    const EXCLUDED_HOLIDAYS = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
-    
-    // 공휴일 필터링 함수
-    const isTrue = (h: any) => ((!h.localName.includes("Day") || h.localName.includes("Replacement") || h.localName.includes("Memorial")) && !EXCLUDED_HOLIDAYS.includes(h.localName));
-    
-    const trueKr = krHolidays.filter(isTrue);
-    const trueJp = jpHolidays.filter(isTrue);
-    
-    // 양국 날짜 합치기
-    const allDates = new Set([...trueKr.map((h: any) => h.date), ...trueJp.map((h: any) => h.date)]);
-    
-    allDates.forEach(date => {
-      const isKr = trueKr.some((h: any) => h.date === date);
-      const isJp = trueJp.some((h: any) => h.date === date);
-      if (isKr && isJp) markers[date] = { type: 'both' };
-      else if (isKr) markers[date] = { type: 'kr' };
-      else if (isJp) markers[date] = { type: 'jp' };
-    });
-    return markers;
-  }, [jpHolidays, krHolidays]);
-
-  // 현재 달의 연휴 블록 필터링
-  const jpVacations = useMemo(() => 
-    getVacationBlocks(jpHolidays).filter(v => isSameMonth(new Date(v.start), viewMonth)),
-    [jpHolidays, viewMonth]
-  );
-
-  const krVacations = useMemo(() => 
-    getVacationBlocks(krHolidays).filter(v => isSameMonth(new Date(v.start), viewMonth)),
-    [krHolidays, viewMonth]
-  );
-
-  // 현재 달 기준 추천 일정 및 조언
-  const recommendedDays = useMemo(() => {
-  // 사용자가 추가한 모든 일정을 '차단된 날짜'로 변환
-  // 'holiday'뿐만 아니라 'meeting'도 추천에서 제외되도록 type 체크를 제거하거나 조정
-  const userHolidays = userEvents.map(e => ({
-    date: e.date,
-    localName: e.title,
-    countryCode: e.countryCode,
-    isUserDefined: true // 사용자 정의 데이터 표시(debugging)
-  }));
-
-  // 기존 공휴일 데이터에 사용자 휴무일을 병합하여 계산
-  // 한국 달력에 영향을 주는 것: KR 전용 + Both(공통)
-  const combinedKr = [
-    ...krHolidays,
-    ...userHolidays.filter(h => h.countryCode === 'KR' || h.countryCode === 'Both')
-  ];
-  // 일본 달력에 영향을 주는 것: JP 전용 + Both(공통)
-  const combinedJp = [
-    ...jpHolidays,
-    ...userHolidays.filter(h => h.countryCode === 'JP' || h.countryCode === 'Both')
-  ];
-
-  return getRecommendedMeetingDays(combinedKr, combinedJp, lang)
-    .filter(d => isSameMonth(new Date(d.date), viewMonth));
-  }, [krHolidays, jpHolidays, userEvents, viewMonth, lang]);
-  //userEvents 바뀔 때마다 이 전체 로직 다시 실행
-
-  const [emailDraft, setEmailDraft] = useState<string>("");
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
-  const [activeMode, setActiveMode] = useState("");
-  const [currentTone, setCurrentTone] = useState<string>("");
 
   const callAiApi = async (mode: string, tone?: string) => {
     setActiveMode(tone || mode);
@@ -185,23 +107,23 @@ export default function ScheduleDashboard({
   };
 
   const handleDateClick = (date: string, holidayName: string, type: any) => {
-  let templateKey: TemplateType = 'BOTH_HOLIDAY';
-  if (type === 'kr') templateKey = 'KR_HOLIDAY';
-  if (type === 'jp') templateKey = 'JP_HOLIDAY';
+    let templateKey: TemplateType = 'BOTH_HOLIDAY';
+    if (type === 'kr') templateKey = 'KR_HOLIDAY';
+    if (type === 'jp') templateKey = 'JP_HOLIDAY';
 
-  const template = emailTemplates[lang][templateKey];
+    const template = emailTemplates[lang][templateKey];
 
-  // setSelectedEmail을 사용하여 상태를 업데이트
-  setSelectedEmail({
-    title: template.title,
-    subject: template.subject(date, holidayName),
-    body: template.body(date, holidayName),
-  });
+    // setSelectedEmail을 사용하여 상태를 업데이트
+    setSelectedEmail({
+      title: template.title,
+      subject: template.subject(date, holidayName),
+      body: template.body(date, holidayName),
+    });
 
-  // 모달 띄우기 위해 날짜만 세팅
-  setActiveDate(date);
-  setIsModalOpen(true);
-};
+    // 모달 띄우기 위해 날짜만 세팅
+    setActiveDate(date);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="space-y-12">
