@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { DashboardProps, UserEvent } from '@/types/holiday';
+import { DashboardProps } from '@/types/holiday';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
@@ -77,6 +77,7 @@ export default function ScheduleDashboard({
     setCurrentTone("");
   };
 
+  // 날짜 클릭 핸들러 (이메일 템플릿 설정, 훅 모달 열기 호출)
   const handleDateClick = (date: string, holidayName: string, type: any) => {
     let templateKey: TemplateType = 'BOTH_HOLIDAY';
     if (type === 'kr') templateKey = 'KR_HOLIDAY';
