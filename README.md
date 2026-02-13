@@ -115,7 +115,7 @@ graph TD
 **3. Accessibility & Contrast**
   - **Challenge**: Minimalist design with light grays (text-gray-400) failed WCAG accessibility standards.
 
-  - **Resolution**: Conducted a contrast audit and refined colors to text-gray-500/600, achieving 100 in Accessibility without compromising the aesthetic.
+  - **Resolution**: Conducted a comprehensive color audit, remapping text colors (text-gray-400 → 600) to achieve a near-perfect Accessibility score without sacrificing the professional design.
 
 ## 📈 Results
 - **Performance**: 100 (FCP: 0.3s, LCP: 0.5s)
