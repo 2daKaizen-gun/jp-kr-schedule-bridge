@@ -13,7 +13,7 @@ export function useScheduleLogic(
     const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // [추가] 훅 내부에서 관리해야 할 UI 상태들
+    // 훅 내부에서 관리해야 할 UI 상태들
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeDate, setActiveDate] = useState<string | null>(null);
 
