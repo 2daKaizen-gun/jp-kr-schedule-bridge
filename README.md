@@ -63,7 +63,7 @@ graph TD
 - **Language**: <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
 - **Styling**: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
-- **Deployment**: | CI/CD Pipeline
+- **Deployment**: <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"> | CI/CD Pipeline
 - **Libraries**: <img src="https://img.shields.io/badge/datefns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> | Date <img src="https://img.shields.io/badge/lucidereact-F56565?style=for-the-badge&logo=lucide&logoColor=white"> | Details
 
 ## ✅ Milestone
@@ -102,7 +102,7 @@ graph TD
   - [] Phase 5-6: Final Project Retrospective
 
 ## 🔥 Troubleshooting & Lessons Learned
-**1. Hydration Mismatch (React Error#418)**
+**1. Hydration Mismatch (React Error #418)**
   - **Challenge**: Server-side rendering of dynamic dates caused a mismatch with client-side local time.
 
   - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability.
