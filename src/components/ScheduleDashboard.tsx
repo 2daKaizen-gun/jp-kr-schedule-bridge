@@ -5,7 +5,7 @@ import { addMonths, subMonths, format } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { UserEvent } from '@/types/holiday';
+import { DashboardProps, UserEvent } from '@/types/holiday';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
@@ -14,7 +14,7 @@ export default function ScheduleDashboard({
   jpHolidays,
   krHolidays,
   initialTimestamp
-}: any) {
+}: DashboardProps) {
 
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
   // 언어 상태
