@@ -122,7 +122,7 @@ graph TD
 
 - **Accessibility**: 95 (WCAG Compliant)
 
-- **Best Practices**: 100
+- **Best Practices**: 100 (Modern Web Standards)
 
 - **SEO**: 100
 
