@@ -96,10 +96,6 @@ export default function ScheduleDashboard({
     // 초기화 시 톤 기억 삭제
     setCurrentTone("");
   };
-
-  // 월 이동 핸들러
-  const goPrev = () => setViewMonth(subMonths(viewMonth,1));
-  const goNext = () => setViewMonth(addMonths(viewMonth,1));
   
   const goToday = () => {
     const today = new Date();
