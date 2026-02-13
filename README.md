@@ -107,7 +107,7 @@ graph TD
 
   - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability.
 
-**2. AI Rate Limiting (429 Too Many Requests)**
+**2. API Resilience & AI Rate Limiting (429 Too Many Requests)**
   - **Challenge**: Frequent testing during development hit Gemini's free tier quotas.
 
   - **Resolution**: Switched to gemini-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
