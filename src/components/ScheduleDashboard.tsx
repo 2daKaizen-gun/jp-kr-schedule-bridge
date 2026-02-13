@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { addMonths, subMonths, format, isSameMonth, add } from 'date-fns';
+import React, { useState } from 'react';
+import { addMonths, subMonths, format } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
