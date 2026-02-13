@@ -16,15 +16,17 @@ export default function ScheduleDashboard({
   initialTimestamp
 }: DashboardProps) {
 
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
-  // 언어 상태
   const [lang, setLang] = useState<'ko' | 'ja'>('ko');
-  //현재 언어셋 설정
-  const currentT = translations[lang];
-  const [emailDraft, setEmailDraft] = useState<string>("");
+  const [selectedEmail, setSelectedEmail] = useState<any>(null);
+  const [emailDraft, setEmailDraft] = useState("");
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [activeMode, setActiveMode] = useState("");
-  const [currentTone, setCurrentTone] = useState<string>("");
+  const [currentTone, setCurrentTone] = useState("");
+  // 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
+
+  const currentT = translations[lang];
 
   // 커스텀 훅에서 모든 로직 수혈
   const {
@@ -37,10 +39,6 @@ export default function ScheduleDashboard({
     jpVacations,
     krVacations
   } = useScheduleLogic(jpHolidays, krHolidays, initialTimestamp, lang);
-  
-  // 상태 추가
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeDate, setActiveDate] = useState<string | null>(null);
 
   // 일정 추가 함수
   const addUserEvent = (title: string, type: 'meeting' | 'holiday', country: 'KR' | 'JP' | 'Both') => {
