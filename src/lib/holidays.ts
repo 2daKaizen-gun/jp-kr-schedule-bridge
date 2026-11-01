@@ -1,4 +1,4 @@
-import { Holiday } from "@/types/holiday";
+import type { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
 import { format, addDays, getDay, parseISO } from 'date-fns';
 
@@ -11,15 +11,13 @@ const CALENDAR_IDS: {[key: string]: string } = {
     JP: 'japanese__ja@holiday.calendar.google.com'
 };
 
-// 실질적인 휴무일인지 판별 (한국의 어버이날 등 제외)
-export const isActualPublicHoliday = (holiday: Holiday) => {
-    const EXCLUDED = ["노동절", "어버이날", "스승의날", "제헌절", "국군의날"];
-    return (
-        (!holiday.localName.includes("Day") || 
-         holiday.localName.includes("Replacement") || 
-         holiday.localName.includes("Memorial")) && 
-        !EXCLUDED.includes(holiday.localName)
-    );
+// Google 캘린더 일정의 description 첫 줄이 공휴일 분류를 나타냄
+// (KR: 공휴일/기념일, JP: 祝日/祭日)
+const PUBLIC_HOLIDAY_LABELS = ["공휴일", "祝日"];
+
+export const isPublicHolidayDescription = (description?: string) => {
+    const label = description?.split("\n")[0].trim() ?? "";
+    return PUBLIC_HOLIDAY_LABELS.includes(label);
 };
 
 export async function getHolidays(countryCode:string, year: number = 2026): Promise<Holiday[]> {
@@ -48,7 +46,8 @@ export async function getHolidays(countryCode:string, year: number = 2026): Prom
             global: true,
             counties: null,
             launchYear: null,
-            types: ['Public']
+            types: ['Public'],
+            isPublicHoliday: isPublicHolidayDescription(item.description)
         }));
     } catch (error) {
         return [];
@@ -80,8 +79,8 @@ export function analyzeBusinessDay(
         };
     }
 
-    const iskrHoliday = krHolidays.some(h => h.date === targetDate && isActualPublicHoliday(h));
-    const isjpHoliday = jpHolidays.some(h => h.date === targetDate && isActualPublicHoliday(h));
+    const iskrHoliday = krHolidays.some(h => h.date === targetDate && h.isPublicHoliday);
+    const isjpHoliday = jpHolidays.some(h => h.date === targetDate && h.isPublicHoliday);
 
     if (iskrHoliday && isjpHoliday) {
         return {
@@ -123,8 +122,8 @@ export function analyzeBusinessDay(
 export function getVacationBlocks(holidays: Holiday[]) {
     if(!holidays || holidays.length === 0) return [];
 
-    // 날짜순 정렬
-    const sortedHolidays = [...holidays].sort((a,b) => 
+    // 공휴일만 날짜순 정렬
+    const sortedHolidays = holidays.filter(h => h.isPublicHoliday).sort((a,b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
@@ -174,10 +173,13 @@ export function getVacationBlocks(holidays: Holiday[]) {
     return blocks;
 }
 
+// 추천 계산에서 제외할 날 (공휴일 또는 사용자 일정)
+export type BlockedDay = Pick<Holiday, 'date' | 'isPublicHoliday'>;
+
 // 다가오는 2주 내의 날짜 중 협업하기 좋은 날 TOP3 추천
 export function getRecommendedMeetingDays(
-    krHolidays: Holiday[],
-    jpHolidays: Holiday[],
+    krHolidays: BlockedDay[],
+    jpHolidays: BlockedDay[],
     lang: 'ko' | 'ja' = 'ko'
 ) {
     const recommendations: {date: string; score: number; reason: string }[] = [];
@@ -189,11 +191,11 @@ export function getRecommendedMeetingDays(
         if (day === 0 || day === 6 || day === 5) continue;
 
         const dateStr = format(target, 'yyyy-MM-dd');
-        const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr && isActualPublicHoliday(h));
+        const isTodayHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === dateStr && h.isPublicHoliday);
         if (isTodayHoliday) continue;
 
         const tomorrow = addDays(target, 1);
-        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === format(tomorrow, 'yyyy-MM-dd') && isActualPublicHoliday(h));
+        const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === format(tomorrow, 'yyyy-MM-dd') && h.isPublicHoliday);
         const isTomorrowWeekend = (getDay(tomorrow) === 6);
 
         if (isTomorrowHoliday || isTomorrowWeekend) continue;
@@ -205,7 +207,7 @@ export function getRecommendedMeetingDays(
 
         const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
             const diff = Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
-            return diff === 2 && isActualPublicHoliday(h);
+            return diff === 2 && h.isPublicHoliday;
         });
 
         if (hasNearbyHoliday) {

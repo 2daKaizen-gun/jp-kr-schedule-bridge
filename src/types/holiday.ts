@@ -8,6 +8,7 @@ export interface Holiday {
     counties: string[] | null;
     launchYear: number[] | null;
     types: string[];
+    isPublicHoliday: boolean; // 법정 공휴일 여부 (기념일·祭日은 false)
 }
 
 export interface UserEvent {

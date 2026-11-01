@@ -1,0 +1,57 @@
+import { describe, expect, it } from "vitest";
+import { analyzeBusinessDay, getVacationBlocks, isPublicHolidayDescription } from "./holidays";
+import type { Holiday } from "@/types/holiday";
+
+const holiday = (date: string, localName: string, isPublicHoliday: boolean): Holiday => ({
+    date,
+    localName,
+    name: localName,
+    countryCode: "KR",
+    fixed: true,
+    global: true,
+    counties: null,
+    launchYear: null,
+    types: ["Public"],
+    isPublicHoliday,
+});
+
+describe("isPublicHolidayDescription", () => {
+    it("treats Google's public holiday labels as public holidays", () => {
+        expect(isPublicHolidayDescription("공휴일")).toBe(true);
+        expect(isPublicHolidayDescription("祝日")).toBe(true);
+    });
+
+    it("rejects observances, including their multi-line descriptions", () => {
+        expect(isPublicHolidayDescription("기념일\n기념일을 숨기려면 Google Calendar 설정")).toBe(false);
+        expect(isPublicHolidayDescription("祭日\n祭日を非表示にするには")).toBe(false);
+    });
+
+    it("rejects a missing description", () => {
+        expect(isPublicHolidayDescription(undefined)).toBe(false);
+    });
+});
+
+describe("analyzeBusinessDay", () => {
+    it("treats a weekday observance as a working day", () => {
+        // 2026-05-08 (Fri) 어버이날
+        const result = analyzeBusinessDay("2026-05-08", [holiday("2026-05-08", "어버이날", false)], []);
+        expect(result.status).toBe("work");
+    });
+
+    it("flags a weekday public holiday in one country", () => {
+        // 2026-05-01 (Fri) 노동절
+        const result = analyzeBusinessDay("2026-05-01", [holiday("2026-05-01", "노동절", true)], []);
+        expect(result.status).toBe("kr-only");
+    });
+});
+
+describe("getVacationBlocks", () => {
+    it("ignores observances", () => {
+        const blocks = getVacationBlocks([
+            holiday("2026-05-05", "어린이날", true),
+            holiday("2026-05-15", "스승의날", false),
+        ]);
+        expect(blocks).toHaveLength(1);
+        expect(blocks[0].displayNames).toBe("어린이날");
+    });
+});

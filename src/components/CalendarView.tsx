@@ -54,18 +54,15 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                         
                         // 공휴일/ 마커 데이터 
                         const marker = conflictMarkers?.[formattedDate];
-                        const holiday = holidays.find((h) => h.date === formattedDate);
+                        // 같은 날 기념일과 공휴일이 겹치면 공휴일을 우선
+                        const dayHolidays = holidays.filter((h) => h.date === formattedDate);
+                        const holiday = dayHolidays.find((h) => h.isPublicHoliday) ?? dayHolidays[0];
                         
                         // 사용자 일정 필터링
                         const dayUserEvents = userEvents.filter(e => e.date === formattedDate);
 
                         // 공휴일 판별 로직
-                        const isPublicHoliday = holiday && (
-                            (!holiday.localName.includes("Day") || 
-                            holiday.localName.includes("Replacement") || 
-                            holiday.localName.includes("Memorial")) && 
-                            !["노동절", "어버이날", "스승의날", "제헌절", "국군의날"].includes(holiday.localName)
-                        );
+                        const isPublicHoliday = holiday?.isPublicHoliday;
 
                         return (
                             <div
