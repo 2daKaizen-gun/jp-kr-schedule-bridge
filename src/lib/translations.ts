@@ -19,6 +19,8 @@ export const translations = {
         formal: "정중",
         urgent: "긴급",
         apology: "사과",
+        aiRateLimited: "AI 사용량 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.",
+        aiFailed: "메일을 생성하지 못했습니다. 다시 시도해 주세요.",
         },
         modal: {
         title: "새 일정 추가",
@@ -62,6 +64,8 @@ export const translations = {
         formal: "丁寧",
         urgent: "至急",
         apology: "お詫び",
+        aiRateLimited: "AIの利用上限に達しました。しばらくしてからもう一度お試しください。",
+        aiFailed: "メールを生成できませんでした。もう一度お試しください。",
         },
         modal: {
         title: "予定を追加",

@@ -10,9 +10,11 @@ interface EmailGeneratorProps {
     body: string;
   } | null;
   lang: 'ko' | 'ja'; // 언어 프롭
-  onAiGenerate?: (mode: string, tone: string) => void;
+  onAiGenerate?: (tone: string) => void;
   onReset?:() => void;
   aiDraft?: string;
+  aiSubject?: string | null;
+  aiError?: 'rate_limited' | 'failed' | null;
   isAiLoading?: boolean;
   activeMode?: string;
   currentTone?: string;
@@ -23,8 +25,10 @@ export default function EmailGenerator({
   lang,
   onAiGenerate,
   onReset, 
-  aiDraft, 
-  isAiLoading, 
+  aiDraft,
+  aiSubject,
+  aiError,
+  isAiLoading,
   activeMode,
   currentTone
 }: EmailGeneratorProps) {
@@ -88,7 +92,7 @@ export default function EmailGenerator({
   };
   
   const displaySubject = aiDraft 
-    ? (subjectMap[lang][currentTone || ""] || subjectMap[lang].default)
+    ? (aiSubject || subjectMap[lang][currentTone || ""] || subjectMap[lang].default)
     : data?.subject;
   
   const displayBody = aiDraft || data?.body;
@@ -122,7 +126,7 @@ export default function EmailGenerator({
           ].map((btn) => (
             <button
               key={btn.id}
-              onClick={() => onAiGenerate?.("email", btn.id)}
+              onClick={() => onAiGenerate?.(btn.id)}
               disabled={isAiLoading}
               className={`${btn.color} px-3 py-2 rounded-xl text-white text-xs font-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center gap-1.5`}
             >
@@ -131,6 +135,12 @@ export default function EmailGenerator({
           ))}
         </div>
       </div>
+
+      {aiError && (
+        <p role="alert" className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-red-700">
+          {aiError === 'rate_limited' ? t.aiRateLimited : t.aiFailed}
+        </p>
+      )}
 
       <div className="space-y-6">
         {/* Subject Line */}

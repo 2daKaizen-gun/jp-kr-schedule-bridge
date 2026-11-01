@@ -5,7 +5,8 @@ import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { DashboardProps } from '@/types/holiday';
+import { DashboardProps, Holiday } from '@/types/holiday';
+import { MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
@@ -22,6 +23,8 @@ export default function ScheduleDashboard({
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [activeMode, setActiveMode] = useState("");
   const [currentTone, setCurrentTone] = useState("");
+  const [aiSubject, setAiSubject] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
 
   const currentT = translations[lang];
 
@@ -44,26 +47,42 @@ export default function ScheduleDashboard({
   } = useScheduleLogic(jpHolidays, krHolidays, initialMonth, lang);
 
   // AI 관련 로직
-  const callAiApi = async (mode: string, tone?: string) => {
-    setActiveMode(tone || mode);
+  const callAiApi = async (tone: string) => {
+    setActiveMode(tone);
     setIsEmailLoading(true);
+    setAiError(null);
+
+    // 보고 있는 달의 공휴일과 일정만 전달
+    const currentMonth = format(viewMonth, "yyyy-MM");
+    const toAiHolidays = (holidays: Holiday[], country: 'KR' | 'JP') => holidays
+      .filter(h => h.isPublicHoliday && h.date.startsWith(currentMonth))
+      .map(h => ({ country, date: h.date, name: h.localName }));
+
     try {
       const res = await fetch('/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mode,
           tone,
-          currentMonth: format(viewMonth, "yyyy-MM"),
+          currentMonth,
           lang, // AI에게 현재 언어 설정 전달
-          userEvents
+          holidays: [...toAiHolidays(jpHolidays, 'JP'), ...toAiHolidays(krHolidays, 'KR')],
+          userEvents: userEvents
+            .filter(e => e.date.startsWith(currentMonth))
+            .slice(0, MAX_AI_ITEMS)
+            .map(e => ({ date: e.date, title: e.title.slice(0, MAX_AI_TEXT_LENGTH), countryCode: e.countryCode })),
         }),
       });
-    const data = await res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        setAiError(data.error === 'rate_limited' ? 'rate_limited' : 'failed');
+        return;
+      }
       setEmailDraft(data.text);
-      if (tone) setCurrentTone(tone);
-    } catch (err) {
-      alert("AI Error");
+      setAiSubject(data.subject);
+      setCurrentTone(tone);
+    } catch {
+      setAiError('failed');
     } finally {
       setIsEmailLoading(false);
       setActiveMode("");
@@ -73,6 +92,8 @@ export default function ScheduleDashboard({
   // 기본으로 되돌림
   const handleReset = () => {
     setEmailDraft("");
+    setAiSubject(null);
+    setAiError(null);
     // 초기화 시 톤 기억 삭제
     setCurrentTone("");
   };
@@ -196,6 +217,8 @@ export default function ScheduleDashboard({
         onAiGenerate={callAiApi}
         onReset={handleReset}
         aiDraft={emailDraft}
+        aiSubject={aiSubject}
+        aiError={aiError}
         isAiLoading={isEmailLoading}
         activeMode={activeMode}
         currentTone={currentTone}
