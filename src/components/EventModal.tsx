@@ -44,11 +44,11 @@ export default function EventModal({ date, lang, onClose, onSave }: EventModalPr
             ref={dialogRef}
             aria-labelledby={headingId}
             onCancel={onClose}
-            className="m-auto bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+            className="m-auto bg-white w-[calc(100%-2rem)] max-w-md max-h-[calc(100dvh-2rem)] p-5 sm:p-8 rounded-3xl shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
         >
             <div className="flex justify-between items-center mb-6">
                 {/* 제목 현지화 */}
-                <h3 id={headingId} className="text-xl font-bold text-gray-800">{t.title} ({date})</h3>
+                <h3 id={headingId} className="text-lg sm:text-xl font-bold text-gray-800">{t.title} ({date})</h3>
                 <button type="button" aria-label={t.cancel} onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
             </div>
 

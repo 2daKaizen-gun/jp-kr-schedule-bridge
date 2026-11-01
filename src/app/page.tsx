@@ -18,18 +18,18 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Navigation bar */}
-      <nav className="border-b bg-white px-8 py-4 flex justify-between items-center shadow-sm">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-red-600 bg-clip-text text-transparent">
+      <nav className="border-b bg-white px-4 sm:px-8 py-4 flex justify-between items-center gap-3 shadow-sm">
+        <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-red-600 bg-clip-text text-transparent">
           JP-KR Schedule Bridge
         </h1>
-        <div className="flex gap-4 text-sm font-medium text-gray-500">
+        <div className="flex shrink-0 gap-1.5 sm:gap-4 text-xs sm:text-sm font-medium text-gray-500 whitespace-nowrap">
           <span>JP 🇯🇵</span>
           <span>↔️</span>
           <span>KR 🇰🇷</span>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto p-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-8">
         {/* 기존에 여기에 있던 <header>의 한국어 설명을
         ScheduleDashboard 내부로 이동시켜 언어 토글에 반응*/}
         <ScheduleDashboard

@@ -37,7 +37,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             {/* 달력 본체 */}
             <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
                 {/* 요일 헤더 */}
-                <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-xs font-bold py-2">
+                <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-[10px] sm:text-xs font-bold py-2">
                     {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => (
                         <div key={d} className={d === "SUN" ? "text-red-500" : d === "SAT" ? "text-blue-500" : "text-gray-500"}>
                             {d}
@@ -70,7 +70,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 key={`${countryCode}-${formattedDate}`}
                                 // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
                                 onClick={() => onDateClick?.(formattedDate)}
-                                className={`group cursor-pointer relative h-24 border-t border-r last:border-r-0 p-2 transition-all hover:bg-gray-50
+                                className={`group cursor-pointer relative min-w-0 min-h-20 sm:min-h-24 border-t border-r last:border-r-0 p-1 sm:p-2 transition-all hover:bg-gray-50
                                     ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
                             >
                                 <div className="flex justify-between items-start">
@@ -102,7 +102,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 
                                 {/* 공휴일 표시 */}
                                 {holiday && isCurrentMonth && (
-                                    <div className={`mt-1 text-[10px] leading-tight font-bold break-keep p-1 rounded ${
+                                    <div className={`mt-1 text-[10px] leading-tight font-bold break-keep [overflow-wrap:anywhere] p-0.5 sm:p-1 rounded ${
                                         isPublicHoliday
                                             ? (countryCode === "KR" ? "text-red-700 bg-red-100" : "text-blue-700 bg-blue-100")
                                             : "text-gray-500 bg-gray-100"
@@ -123,19 +123,20 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                                 e.preventDefault(); // 브라우저 기본 동작 차단
                                                 if (canDelete) onDeleteEvent?.(event.id);
                                             }}
-                                            className={`mt-1 text-[9px] p-1 rounded truncate font-medium flex justify-between items-center group/event transition-colors ${
+                                            className={`mt-1 text-[10px] p-0.5 sm:p-1 rounded font-medium flex justify-between items-center group/event transition-colors ${
                                                 canDelete 
                                                 ? "bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer" 
                                                 : "bg-gray-100 text-gray-500 cursor-default" // 권한 없으면 회색 처리
                                             }`}
                                         >
-                                            <span className="truncate flex-1">{event.title}</span>
-                                            {/* 삭제 권한이 있을 때만 X 버튼을 렌더링 */}
+                                            <span className="truncate flex-1 min-w-0">{event.title}</span>
+                                            {/* 삭제 권한이 있을 때만 X 버튼을 렌더링.
+                                                좁은 칸에서는 제목을 보이도록 숨기되(행을 눌러 삭제 가능) 키보드·스크린 리더로는 접근 가능 */}
                                             {canDelete && (
                                                 <button
                                                     type="button"
                                                     aria-label={`${t.deleteEvent}: ${event.title}`}
-                                                    className="ml-1 text-red-600 font-bold hover:scale-125 transition-transform px-1"
+                                                    className="sr-only focus:not-sr-only sm:not-sr-only ml-1 text-red-600 font-bold hover:scale-125 transition-transform px-1"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onDeleteEvent?.(event.id);
@@ -149,7 +150,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 })}
                                 
                                 {isPublicHoliday && isCurrentMonth && (
-                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="hidden sm:block absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="text-xs">⚠️</span>
                                     </div>
                                 )}
@@ -160,7 +161,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             </div>
 
             {/* 범례 추가(Legend) */}
-            <div className="flex flex-wrap gap-4 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
                 <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t.legend}:</span>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />

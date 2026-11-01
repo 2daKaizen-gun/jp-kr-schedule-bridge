@@ -137,21 +137,21 @@ export default function ScheduleDashboard({
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {/* Page Header: 언어 토글에 반응하는 설명 섹션 */}
-      <header className="mb-10">
-        <h2 className="text-4xl font-black tracking-tight text-gray-900 mb-2">
+      <header className="mb-6 sm:mb-10">
+        <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-gray-900 mb-2">
           Business Calendar Dashboard
         </h2>
-        <p className="text-lg text-gray-500 font-medium">
+        <p className="text-base sm:text-lg text-gray-500 font-medium">
           {currentT.subDescription} {/* [핵심] 언어 변경 시 이 문구도 바뀜! */}
         </p>
       </header>
       
       {/* 월 이동 컨트롤러 */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-4">
-          <h3 className="text-2xl font-black text-gray-800 ml-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-3xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <h3 className="text-xl sm:text-2xl font-black text-gray-800 ml-2 whitespace-nowrap">
             {format(viewMonth, lang === 'ko' ? "yyyy년 MM월" : "yyyy年 MM月")}
           </h3>
           <button
@@ -162,7 +162,7 @@ export default function ScheduleDashboard({
             </button>
         </div>
 
-        <div className='flex gap-4 items-center'>
+        <div className='flex gap-2 sm:gap-4 items-center'>
           {/* 언어 스위처 */}
           <div className="flex bg-gray-100 p-1 rounded-xl">
             <button aria-pressed={lang === 'ko'} onClick={() => setLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
@@ -176,8 +176,8 @@ export default function ScheduleDashboard({
       </div>
 
       {/* 달력 그리드 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <section>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+        <section className="min-w-0">
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇯🇵 Japan Calendar</h3>
           <CalendarView
             key="cv-jp" // 고유 키 추가
@@ -192,7 +192,7 @@ export default function ScheduleDashboard({
           />
         </section>
 
-        <section>
+        <section className="min-w-0">
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇰🇷 Korea Calendar</h3>
           <CalendarView
             key="cv-kr" // 고유 키 추가
@@ -245,7 +245,7 @@ export default function ScheduleDashboard({
       />
 
       {/* 추천 일정 및 비즈니스 조언 */}
-      <section className="mt-10 p-8 bg-white rounded-3xl shadow-sm border border-green-100">
+      <section className="mt-10 p-5 sm:p-8 bg-white rounded-3xl shadow-sm border border-green-100">
         <h3 className="text-xl font-bold text-green-800 mb-6">{currentT.bestDays}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendedDays.map((item, idx) => (
