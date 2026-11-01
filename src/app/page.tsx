@@ -1,15 +1,19 @@
-import { getCachedHolidays, analyzeBusinessDay, getVacationBlocks, getRecommendedMeetingDays } from "@/lib/holidays";
+import { format } from "date-fns";
+import { getHolidaysForYears } from "@/lib/holidays";
 import ScheduleDashboard from "@/components/ScheduleDashboard";
 
+// 공휴일과 기준 월이 빌드 시점에 고정되지 않도록 하루마다 재생성
+export const revalidate = 86400;
+
 export default async function Home() {
+  const now = new Date();
+  const years = [now.getFullYear(), now.getFullYear() + 1];
+
   // 데이터 가져오기 (병렬)
   const [jpHolidays, krHolidays] = await Promise.all([
-    getCachedHolidays("JP"),
-    getCachedHolidays("KR"),
+    getHolidaysForYears("JP", years),
+    getHolidaysForYears("KR", years),
   ]);
-
-  // 달력 보여줄 기준 월 설정
-  const currentMonthTimestamp = new Date(2026,4,1).getTime();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -31,7 +35,7 @@ export default async function Home() {
         <ScheduleDashboard
           jpHolidays={jpHolidays}
           krHolidays={krHolidays}
-          initialTimestamp={currentMonthTimestamp}
+          initialMonth={format(now, "yyyy-MM-01")}
         />
       </main>
     </div>

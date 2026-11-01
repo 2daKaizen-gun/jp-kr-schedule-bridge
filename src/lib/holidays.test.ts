@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeBusinessDay, getVacationBlocks, isPublicHolidayDescription } from "./holidays";
+import { analyzeBusinessDay, getRecommendedMeetingDays, getVacationBlocks, isPublicHolidayDescription } from "./holidays";
 import type { Holiday } from "@/types/holiday";
 
 const holiday = (date: string, localName: string, isPublicHoliday: boolean): Holiday => ({
@@ -42,6 +42,29 @@ describe("analyzeBusinessDay", () => {
         // 2026-05-01 (Fri) 노동절
         const result = analyzeBusinessDay("2026-05-01", [holiday("2026-05-01", "노동절", true)], []);
         expect(result.status).toBe("kr-only");
+    });
+});
+
+describe("getRecommendedMeetingDays", () => {
+    // 2026-11-02 is a Monday; a non-midnight time must not affect the result
+    const today = new Date(2026, 10, 2, 15, 30);
+    const blocked = (...dates: string[]) => dates.map(date => ({ date, isPublicHoliday: true }));
+
+    it("only recommends Monday to Thursday within the next two weeks", () => {
+        const dates = getRecommendedMeetingDays([], [], today).map(d => d.date);
+        expect(dates).toEqual(["2026-11-03", "2026-11-04", "2026-11-05"]);
+    });
+
+    it("skips holidays and the day before a holiday", () => {
+        const dates = getRecommendedMeetingDays(blocked("2026-11-04"), [], today).map(d => d.date);
+        expect(dates).not.toContain("2026-11-03");
+        expect(dates).not.toContain("2026-11-04");
+    });
+
+    it("lowers the score when a holiday is two days away", () => {
+        const kr = blocked("2026-11-03", "2026-11-04", "2026-11-05", "2026-11-09", "2026-11-12", "2026-11-16");
+        const result = getRecommendedMeetingDays(kr, [], today);
+        expect(result.map(d => [d.date, d.score])).toEqual([["2026-11-10", 70]]);
     });
 });
 

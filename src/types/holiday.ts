@@ -32,7 +32,7 @@ export interface ConflictMarkers {
 export interface DashboardProps {
     jpHolidays: Holiday[];
     krHolidays: Holiday[];
-    initialTimestamp: number;
+    initialMonth: string; // 서버 기준 월 (yyyy-MM-01), 타임존과 무관하게 동일하게 해석됨
 }
 
 export interface ScheduleAdvice {

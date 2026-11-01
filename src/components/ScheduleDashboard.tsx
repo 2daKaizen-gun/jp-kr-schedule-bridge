@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
@@ -13,7 +13,7 @@ import { useScheduleLogic } from '@/hook/useScheduleLogic';
 export default function ScheduleDashboard({ 
   jpHolidays,
   krHolidays,
-  initialTimestamp
+  initialMonth
 }: DashboardProps) {
 
   const [lang, setLang] = useState<'ko' | 'ja'>('ko');
@@ -27,11 +27,11 @@ export default function ScheduleDashboard({
 
   // 커스텀 훅에서 모든 로직 수혈
   const {
-    viewMonth, 
-    goPrev, goNext, goToday, 
-    userEvents, 
+    today,
+    viewMonth,
+    goPrev, goNext, goToday,
+    userEvents,
     addUserEvent, deleteUserEvent,
-    isLoaded,
     conflictMarkers,
     recommendedDays,
     advice,
@@ -41,7 +41,7 @@ export default function ScheduleDashboard({
     activeDate,
     openEventModal,
     closeEventModal
-  } = useScheduleLogic(jpHolidays, krHolidays, initialTimestamp, lang);
+  } = useScheduleLogic(jpHolidays, krHolidays, initialMonth, lang);
 
   // AI 관련 로직
   const callAiApi = async (mode: string, tone?: string) => {
@@ -215,11 +215,11 @@ export default function ScheduleDashboard({
         </div>
       </section>
 
-      <section className={`p-6 rounded-2xl border-2 bg-opacity-50 ${advice.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+      <section className={`p-6 rounded-2xl border-2 bg-opacity-50 ${advice?.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
         <h3 className="font-bold mb-2">
-          {currentT.todayStatus} ({isLoaded ? format(new Date(), lang === 'ko' ? "yyyy. MM. dd" : "yyyy/MM/dd") : "..."})
+          {currentT.todayStatus} ({today ? format(parseISO(today), lang === 'ko' ? "yyyy. MM. dd" : "yyyy/MM/dd") : "..."})
         </h3>
-        <p className="text-sm font-medium">{advice.message}</p>
+        <p className="text-sm font-medium">{advice?.message ?? "..."}</p>
       </section>
 
       {isModalOpen && activeDate && (

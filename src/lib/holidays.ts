@@ -1,6 +1,6 @@
 import type { Holiday } from "@/types/holiday";
 import { cache } from "react"; // react 캐시 기능 불러오기
-import { format, addDays, getDay, parseISO } from 'date-fns';
+import { format, addDays, differenceInCalendarDays, getDay, parseISO } from 'date-fns';
 
 // Google Calendar API
 const GOOGLE_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
@@ -20,44 +20,54 @@ export const isPublicHolidayDescription = (description?: string) => {
     return PUBLIC_HOLIDAY_LABELS.includes(label);
 };
 
-export async function getHolidays(countryCode:string, year: number = 2026): Promise<Holiday[]> {
+export async function getHolidays(countryCode: string, year: number): Promise<Holiday[]> {
+    if (!GOOGLE_API_KEY) {
+        console.warn("GOOGLE_CALENDAR_API_KEY is not set; holidays will be empty.");
+        return [];
+    }
+
     const calendarId = CALENDAR_IDS[countryCode];
     const timeMin = `${year}-01-01T00:00:00Z`;
     const timeMax = `${year}-12-31T23:59:59Z`;
   
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
 
-    try {
-        const response = await fetch(url)
-        const data = await response.json();
-        // [체크 1] API가 에러를 반환했는지 확인
-        if (data.error) return [];
-        // [체크 2] items 데이터가 있는지 확인
-        if (!data.items) return [];
+    const response = await fetch(url, { next: { revalidate: 86400 } });
 
-        // 우리 Holiday 인터페이스에 맞게 가공함
-        return data.items.map((item: any) => ({
-            date: item.start.date || item.start.dateTime.split('T')[0],
-            localName: item.summary,
-            name: item.summary,
-            countryCode: countryCode,
-            // 기존 인터페이스 호환
-            fixed: true,
-            global: true,
-            counties: null,
-            launchYear: null,
-            types: ['Public'],
-            isPublicHoliday: isPublicHolidayDescription(item.description)
-        }));
-    } catch (error) {
-        return [];
+    // 실패 시 빈 배열 대신 예외를 던져, 재생성 중이면 직전 정상 페이지가 유지되게 함
+    // (메시지에 API 키가 포함된 URL을 넣지 않음)
+    if (!response.ok) {
+        throw new Error(`Holiday API failed for ${countryCode} ${year}: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    // 우리 Holiday 인터페이스에 맞게 가공함
+    return (data.items ?? []).map((item: any) => ({
+        date: item.start.date || item.start.dateTime.split('T')[0],
+        localName: item.summary,
+        name: item.summary,
+        countryCode: countryCode,
+        // 기존 인터페이스 호환
+        fixed: true,
+        global: true,
+        counties: null,
+        launchYear: null,
+        types: ['Public'],
+        isPublicHoliday: isPublicHolidayDescription(item.description)
+    }));
 }
 
 // 같은 요청 여러 번 해도 한 번만 실행 (Memoization)
-export const getCachedHolidays = cache(async (countryCode: string, year: number = 2026) => {
+export const getCachedHolidays = cache(async (countryCode: string, year: number) => {
     return await getHolidays(countryCode, year);
 });
+
+// 연말에도 다음 해 달력과 추천일이 동작하도록 여러 연도를 합쳐서 반환
+export async function getHolidaysForYears(countryCode: string, years: number[]) {
+    const results = await Promise.all(years.map(year => getCachedHolidays(countryCode, year)));
+    return results.flat();
+}
 
 // 양국 공휴일 비교, 비즈니스 조언 생성
 export function analyzeBusinessDay(
@@ -180,14 +190,15 @@ export type BlockedDay = Pick<Holiday, 'date' | 'isPublicHoliday'>;
 export function getRecommendedMeetingDays(
     krHolidays: BlockedDay[],
     jpHolidays: BlockedDay[],
+    today: Date,
     lang: 'ko' | 'ja' = 'ko'
 ) {
     const recommendations: {date: string; score: number; reason: string }[] = [];
-    const today = new Date();
 
     for (let i=1; i<=14; i++) {
         const target = addDays(today, i);
         const day = getDay(target);
+        // 주말과 금요일(회신이 다음 주로 밀리기 쉬움)은 추천하지 않음
         if (day === 0 || day === 6 || day === 5) continue;
 
         const dateStr = format(target, 'yyyy-MM-dd');
@@ -196,9 +207,8 @@ export function getRecommendedMeetingDays(
 
         const tomorrow = addDays(target, 1);
         const isTomorrowHoliday = [...krHolidays, ...jpHolidays].some(h => h.date.trim() === format(tomorrow, 'yyyy-MM-dd') && h.isPublicHoliday);
-        const isTomorrowWeekend = (getDay(tomorrow) === 6);
 
-        if (isTomorrowHoliday || isTomorrowWeekend) continue;
+        if (isTomorrowHoliday) continue;
 
         let score = 100;
         let reason = lang === 'ko' 
@@ -206,7 +216,7 @@ export function getRecommendedMeetingDays(
             : "両国ともに通常勤務日であり、協業効率が最大化される日です。";
 
         const hasNearbyHoliday = [...krHolidays, ...jpHolidays].some(h => {
-            const diff = Math.abs(new Date(h.date).getTime() - target.getTime()) / (1000 * 60 * 60 * 24);
+            const diff = Math.abs(differenceInCalendarDays(parseISO(h.date), target));
             return diff === 2 && h.isPublicHoliday;
         });
 

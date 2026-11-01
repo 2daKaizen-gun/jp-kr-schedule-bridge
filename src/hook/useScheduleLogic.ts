@@ -1,15 +1,24 @@
-import { useState, useMemo, useEffect } from 'react';
-import { isSameMonth, format, addMonths, subMonths } from 'date-fns';
+import { useState, useMemo, useEffect, useSyncExternalStore } from 'react';
+import { isSameMonth, format, addMonths, subMonths, parseISO, startOfMonth } from 'date-fns';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
 import { Holiday, UserEvent, Lang, ConflictMarkers, RecommendedDay } from '@/types/holiday';
+
+// 서버 렌더링과 하이드레이션 중에는 null, 그 이후에는 브라우저 기준 오늘 날짜를 반환
+const subscribeToNothing = () => () => {};
+const getToday = () => format(new Date(), 'yyyy-MM-dd');
+const getServerToday = () => null;
 
 export function useScheduleLogic(
     jpHolidays: Holiday[],
     krHolidays: Holiday[],
-    initialTimestamp: number,
+    initialMonth: string,
     lang: Lang
 ) {
-    const [viewMonth, setViewMonth] = useState<Date>(new Date(initialTimestamp));
+    const today = useSyncExternalStore(subscribeToNothing, getToday, getServerToday);
+
+    // 사용자가 이동하기 전에는 오늘이 속한 달을 표시
+    const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
+    const viewMonth = selectedMonth ?? startOfMonth(parseISO(today ?? initialMonth));
     const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -34,9 +43,9 @@ export function useScheduleLogic(
     }, [userEvents, isLoaded]);
 
     // 내비게이션 함수들
-    const goPrev = () => setViewMonth(prev => subMonths(prev, 1));
-    const goNext = () => setViewMonth(prev => addMonths(prev, 1));
-    const goToday = () => setViewMonth(new Date());
+    const goPrev = () => setSelectedMonth(subMonths(viewMonth, 1));
+    const goNext = () => setSelectedMonth(addMonths(viewMonth, 1));
+    const goToday = () => setSelectedMonth(null);
 
     // 날짜 클릭 시 모달 오픈 로직
     const openEventModal = (date: string) => {
@@ -92,8 +101,10 @@ export function useScheduleLogic(
     };
 
     // 추천 일정 및 어드바이스 계산
-    // 현재 달 기준 추천 일정 및 조언
+    // 오늘 기준 향후 2주 (보고 있는 달과 무관)
     const recommendedDays = useMemo<RecommendedDay[]>(() => {
+      if (!today) return [];
+
       // 사용자가 추가한 모든 일정을 '차단된 날짜'로 변환
       // 'holiday'뿐만 아니라 'meeting'도 추천에서 제외되도록 type 체크를 제거하거나 조정
       const userHolidays = userEvents.map(e => ({
@@ -114,20 +125,19 @@ export function useScheduleLogic(
         ...userHolidays.filter(e => e.countryCode === 'JP' || e.countryCode === 'Both')
       ];
     
-      return getRecommendedMeetingDays(combinedKr, combinedJp, lang)
-        .filter(d => isSameMonth(new Date(d.date), viewMonth));
-    }, [krHolidays, jpHolidays, userEvents, viewMonth, lang]);
+      return getRecommendedMeetingDays(combinedKr, combinedJp, parseISO(today), lang);
+    }, [krHolidays, jpHolidays, userEvents, today, lang]);
 
     // 비즈니스 어드바이스
     const advice = useMemo(() => {
-        return analyzeBusinessDay(format(new Date(), "yyyy-MM-dd"), krHolidays, jpHolidays, lang);
-    }, [krHolidays, jpHolidays, lang]);
+        return today ? analyzeBusinessDay(today, krHolidays, jpHolidays, lang) : null;
+    }, [today, krHolidays, jpHolidays, lang]);
 
     return {
-        viewMonth, setViewMonth,
+        today,
+        viewMonth,
         goPrev, goNext, goToday,
         userEvents, setUserEvents,
-        isLoaded,
         activeDate,
         isModalOpen, setIsModalOpen,
         openEventModal, closeEventModal,
@@ -136,7 +146,7 @@ export function useScheduleLogic(
         recommendedDays,
         advice,
         // 연휴 블록 데이터도 훅에서 제공
-        jpVacations: getVacationBlocks(jpHolidays).filter(v => isSameMonth(new Date(v.start), viewMonth)),
-        krVacations: getVacationBlocks(krHolidays).filter(v => isSameMonth(new Date(v.start), viewMonth)),
+        jpVacations: getVacationBlocks(jpHolidays).filter(v => isSameMonth(parseISO(v.start), viewMonth)),
+        krVacations: getVacationBlocks(krHolidays).filter(v => isSameMonth(parseISO(v.start), viewMonth)),
     };
 }
