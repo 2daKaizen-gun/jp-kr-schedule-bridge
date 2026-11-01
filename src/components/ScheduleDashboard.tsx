@@ -18,7 +18,7 @@ export default function ScheduleDashboard({
 }: DashboardProps) {
 
   const [lang, setLang] = useState<'ko' | 'ja'>('ko');
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
+  const [selectedHolidayDate, setSelectedHolidayDate] = useState<string | null>(null);
   const [emailDraft, setEmailDraft] = useState("");
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [activeMode, setActiveMode] = useState("");
@@ -98,20 +98,34 @@ export default function ScheduleDashboard({
     setCurrentTone("");
   };
 
-  // 날짜 클릭 핸들러 (이메일 템플릿 설정, 훅 모달 열기 호출)
-  const handleDateClick = (date: string, holidayName: string, type: any) => {
-    let templateKey: TemplateType = 'BOTH_HOLIDAY';
-    if (type === 'kr') templateKey = 'KR_HOLIDAY';
-    if (type === 'jp') templateKey = 'JP_HOLIDAY';
+  // 선택한 공휴일의 메일 초안 (언어를 바꾸면 함께 바뀌도록 렌더링 시 계산)
+  const selectedEmail = (() => {
+    const marker = selectedHolidayDate ? conflictMarkers[selectedHolidayDate] : null;
+    if (!selectedHolidayDate || !marker) return null;
 
-    const template = emailTemplates[lang][templateKey];
+    const templateKeys: Record<typeof marker.type, TemplateType> = {
+      kr: 'KR_HOLIDAY',
+      jp: 'JP_HOLIDAY',
+      both: 'BOTH_HOLIDAY',
+    };
+    // 클릭한 달력과 무관하게 실제로 쉬는 나라의 공휴일 이름을 사용
+    const source = marker.type === 'jp' ? jpHolidays : krHolidays;
+    const holidayName = source.find(h => h.date === selectedHolidayDate && h.isPublicHoliday)?.localName ?? "";
+    const template = emailTemplates[lang][templateKeys[marker.type]];
 
-    // setSelectedEmail을 사용하여 상태를 업데이트
-    setSelectedEmail({
+    return {
       title: template.title,
-      subject: template.subject(date, holidayName),
-      body: template.body(date, holidayName),
-    });
+      subject: template.subject(selectedHolidayDate, holidayName),
+      body: template.body(selectedHolidayDate, holidayName),
+    };
+  })();
+
+  // 날짜 클릭 핸들러 (공휴일이면 메일 초안 설정, 훅 모달 열기 호출)
+  const handleDateClick = (date: string) => {
+    if (conflictMarkers[date]) {
+      setSelectedHolidayDate(date);
+      handleReset(); // 이전 공휴일 기준의 AI 초안이 남지 않도록 초기화
+    }
 
     // 훅 모달 열기 기능 호출
     openEventModal(date);

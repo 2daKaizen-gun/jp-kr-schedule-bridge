@@ -14,7 +14,7 @@ interface CalendarProps {
     conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
     userEvents: UserEvent[]; // 사용자 일정 데이터
     lang: 'ko' | 'ja';
-    onDateClick?: (date: string, holidayName: string, type: 'kr' | 'jp' | 'both') => void;
+    onDateClick?: (date: string) => void;
     onDeleteEvent?: (id: string) => void; // 일정 삭제 함수
 }
 
@@ -68,14 +68,8 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                             <div
                                 // Key를 국가 코드와 조합하여 유일하게 설정
                                 key={`${countryCode}-${formattedDate}`}
-                                onClick={() => {
-                                    // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
-                                    onDateClick?.(
-                                        formattedDate, 
-                                        holiday?.localName || "비즈니스 일정", 
-                                        marker?.type || (countryCode === 'KR' ? 'kr' : 'jp')
-                                    );
-                                }}
+                                // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
+                                onClick={() => onDateClick?.(formattedDate)}
                                 className={`group cursor-pointer relative h-24 border-t border-r last:border-r-0 p-2 transition-all hover:bg-gray-50
                                     ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
                             >
@@ -89,14 +83,14 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     <div className="flex gap-0.5">
                                         {/* 공휴일 마커 */}
                                         {marker?.type === otherCountry && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title="상대국만 휴무" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title={t.jpOnly} />
                                         )}
                                         {marker?.type === 'both' && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" title="양국 공휴일" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" title={t.both} />
                                         )}
                                         {/* 사용자 일정 마커 (초록색 점) */}
                                         {dayUserEvents.length > 0 && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" title="사용자 일정 있음" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" title={t.myEvent} />
                                         )}
                                     </div>
                                 </div>

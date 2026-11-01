@@ -123,7 +123,7 @@ export function analyzeBusinessDay(
         status: 'work',
         message: lang === 'ko'
             ? '양국 모두 영업일입니다. 원활한 파트너십과 미팅 진행에 최적화된 날입니다.'
-            : '両国ともに営業日です。円滑な連携やミーティングの実施に最適な日です',
+            : '両国ともに営業日です。円滑な連携やミーティングの実施に最適な日です。',
         color: 'green'
     };
 }

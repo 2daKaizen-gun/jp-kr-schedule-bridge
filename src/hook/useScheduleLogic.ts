@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect, useSyncExternalStore } from 'react';
+import { useState, useMemo, useSyncExternalStore } from 'react';
 import { isSameMonth, format, addMonths, subMonths, parseISO, startOfMonth } from 'date-fns';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
+import { parseUserEvents, readUserEvents, readUserEventsOnServer, subscribeToUserEvents, writeUserEvents } from '@/lib/userEvents';
 import { Holiday, UserEvent, Lang, ConflictMarkers, RecommendedDay } from '@/types/holiday';
 
 // 서버 렌더링과 하이드레이션 중에는 null, 그 이후에는 브라우저 기준 오늘 날짜를 반환
@@ -19,28 +20,13 @@ export function useScheduleLogic(
     // 사용자가 이동하기 전에는 오늘이 속한 달을 표시
     const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
     const viewMonth = selectedMonth ?? startOfMonth(parseISO(today ?? initialMonth));
-    const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+
+    const savedEvents = useSyncExternalStore(subscribeToUserEvents, readUserEvents, readUserEventsOnServer);
+    const userEvents = useMemo(() => parseUserEvents(savedEvents), [savedEvents]);
 
     // 훅 내부에서 관리해야 할 UI 상태들
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeDate, setActiveDate] = useState<string | null>(null);
-
-    // 초기 데이터 로드
-    useEffect(() => {
-    const saved = localStorage.getItem('user_events');
-        if (saved) {
-            setUserEvents(JSON.parse(saved));
-        }
-        setIsLoaded(true);
-    }, []);
-
-    // 데이터 바뀔 때마다 로컬 스토리지 저장
-    useEffect (() =>  {
-        if (isLoaded) {
-            localStorage.setItem('user_events', JSON.stringify(userEvents));
-        }
-    }, [userEvents, isLoaded]);
 
     // 내비게이션 함수들
     const goPrev = () => setSelectedMonth(subMonths(viewMonth, 1));
@@ -78,17 +64,17 @@ export function useScheduleLogic(
     }, [jpHolidays, krHolidays]);
 
     // 일정 추가 함수
-    const addUserEvent = (title: string, type: string, country: 'KR' | 'JP' | 'Both') => {
+    const addUserEvent = (title: string, type: UserEvent['type'], country: 'KR' | 'JP' | 'Both') => {
         if (!activeDate) return;
 
         const newEvent: UserEvent = {
             id: `${activeDate}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             date: activeDate,
             title,
-            type: type as any,
+            type,
             countryCode: country
         };
-        setUserEvents(prev => [...prev, newEvent]);
+        writeUserEvents([...userEvents, newEvent]);
         closeEventModal(); // 모달 닫기 함수 사용
     };
 
@@ -96,7 +82,7 @@ export function useScheduleLogic(
     const deleteUserEvent = (id: string) => {
         const confirmMsg = lang === 'ko' ? "일정을 삭제하시겠습니까?" : "予定を削除しますか？";
         if (window.confirm(confirmMsg)) {
-            setUserEvents((prev) => prev.filter((event) => String(event.id) !== String(id)));
+            writeUserEvents(userEvents.filter((event) => event.id !== id));
         }
     };
 
@@ -137,7 +123,7 @@ export function useScheduleLogic(
         today,
         viewMonth,
         goPrev, goNext, goToday,
-        userEvents, setUserEvents,
+        userEvents,
         activeDate,
         isModalOpen, setIsModalOpen,
         openEventModal, closeEventModal,

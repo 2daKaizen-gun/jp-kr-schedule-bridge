@@ -6,7 +6,7 @@ export const translations = {
         bestDays: "최적의 협업일 (향후 2주)",
         noEvents: "등록된 일정이 없습니다.",
         email: {
-        step01: "달력에서 일정을 클릭하세요.",
+        step01: "달력에서 공휴일을 클릭하세요.",
         step02: "원하는 메일 톤을 선택하세요.",
         step03: "생성된 문구를 복사해 사용하세요.",
         onboardingTitle: "스마트 메일 작성을 시작해 보세요!",
@@ -45,13 +45,13 @@ export const translations = {
         }
     },
     ja: {
-        subDescription: "韓国と日本の祝日を比較し, 最適なコラボレーション日程を提案します。",
+        subDescription: "韓国と日本の祝日を比較し、最適なコラボレーション日程を提案します。",
         dashboard: "ダッシュボード",
         todayStatus: "本日のビジネス状況",
         bestDays: "ベストな協力日 (今後2週間)",
         noEvents: "登録された予定がありません。",
         email: {
-        step01: "カレンダーから予定を選択してください。",
+        step01: "カレンダーから祝日を選択してください。",
         step02: "メールのトーンを選択してください。",
         step03: "テキストをコピーして使用してください。",
         onboardingTitle: "スマートメール作成を始めましょう！",
