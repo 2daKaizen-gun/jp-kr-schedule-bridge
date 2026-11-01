@@ -50,7 +50,7 @@ export default function EmailGenerator({
 
   if (!data && !aiDraft) {
     return (
-      <div className="bg-white rounded-3xl p-10 border-2 border-dashed border-blue-100 flex flex-col items-center justify-center text-center animate-in fade-in duration-700">
+      <div className="bg-white rounded-3xl p-10 border-2 border-dashed border-blue-100 flex flex-col items-center justify-center text-center">
         <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
           <span className="text-4xl">📅</span>
         </div>
@@ -98,7 +98,7 @@ export default function EmailGenerator({
   const displayBody = aiDraft || data?.body;
 
   return (
-    <div className="bg-white rounded-3xl p-8 border border-blue-100 shadow-2xl shadow-blue-500/10 animate-in fade-in slide-in-from-bottom-5 duration-500">
+    <div className="bg-white rounded-3xl p-8 border border-blue-100 shadow-2xl shadow-blue-500/10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h4 className="text-2xl font-black text-gray-800 tracking-tight">Email Draft</h4>
@@ -114,7 +114,7 @@ export default function EmailGenerator({
             className={`px-3 py-2 rounded-xl text-xs font-black transition-all border-2 ${
               aiDraft
                 ? 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50 active:scale-95'
-                : 'bg-gray-100 border-gray-200 text-gray-400 cursor-default opacity-50'
+                : 'bg-gray-100 border-gray-200 text-gray-600 cursor-default'
             }`}
           >
             {t.basic}
@@ -145,10 +145,11 @@ export default function EmailGenerator({
       <div className="space-y-6">
         {/* Subject Line */}
         <div className="group relative">
-          <label className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Email Subject</label>
+          <label htmlFor="email-subject" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Email Subject</label>
           <div className="relative flex items-center">
-            <input 
-              readOnly 
+            <input
+              id="email-subject"
+              readOnly
               value={displaySubject} 
               className="w-full bg-gray-50 border border-gray-100 p-4 pr-24 rounded-2xl text-sm font-bold text-gray-700 outline-none"
             />
@@ -165,9 +166,10 @@ export default function EmailGenerator({
 
         {/* Message Body */}
         <div className="relative">
-          <label className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Message Body</label>
-          <textarea 
-            readOnly 
+          <label htmlFor="email-body" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Message Body</label>
+          <textarea
+            id="email-body"
+            readOnly
             rows={10} 
             value={displayBody} 
             className="w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl text-sm leading-relaxed text-gray-600 font-medium resize-none outline-none" 

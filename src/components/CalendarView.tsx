@@ -1,7 +1,7 @@
 "use client" // 클라이언트 컴포넌트
 
 import { 
-  format, startOfMonth, endOfMonth, startOfWeek, 
+  format, startOfMonth, startOfWeek,
   isSameMonth, addDays, eachDayOfInterval 
 } from "date-fns";
 import { Holiday, UserEvent } from "@/types/holiday";
@@ -74,11 +74,16 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
                             >
                                 <div className="flex justify-between items-start">
-                                    <span className={`text-sm font-semibold ${
-                                        (format(day, "i") === "7" || isPublicHoliday) ? "text-red-500" : "text-gray-700"
-                                    }`}>
+                                    {/* 키보드 조작용 버튼. 클릭은 상위 칸의 onClick으로 전달됨 */}
+                                    <button
+                                        type="button"
+                                        aria-label={`${formattedDate}${holiday ? ` ${holiday.localName}` : ""}`}
+                                        className={`text-sm font-semibold rounded ${
+                                            (format(day, "i") === "7" || isPublicHoliday) ? "text-red-600" : "text-gray-700"
+                                        }`}
+                                    >
                                         {format(day, "d")}
-                                    </span>
+                                    </button>
 
                                     <div className="flex gap-0.5">
                                         {/* 공휴일 마커 */}
@@ -127,15 +132,17 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                             <span className="truncate flex-1">{event.title}</span>
                                             {/* 삭제 권한이 있을 때만 X 버튼을 렌더링 */}
                                             {canDelete && (
-                                                <span 
-                                                    className="ml-1 text-red-500 font-bold hover:scale-125 transition-transform px-1"
+                                                <button
+                                                    type="button"
+                                                    aria-label={`${t.deleteEvent}: ${event.title}`}
+                                                    className="ml-1 text-red-600 font-bold hover:scale-125 transition-transform px-1"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onDeleteEvent?.(event.id);
                                                     }}
                                                 >
                                                     ✕
-                                                </span>
+                                                </button>
                                             )}
                                         </div>
                                     );
@@ -154,7 +161,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
 
             {/* 범례 추가(Legend) */}
             <div className="flex flex-wrap gap-4 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t.legend}:</span>
+                <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t.legend}:</span>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     <span className="text-xs text-gray-600 font-medium">{t.jpOnly}</span>

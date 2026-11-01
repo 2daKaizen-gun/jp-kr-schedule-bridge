@@ -8,20 +8,5 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', sans-serif;
-}
-
-@layer components {
-  .bg-biz-blue { background-color: blue; }
-  .bg-biz-red { background-color: red; }
-  .text-biz-blue { color: blue; }
-  .text-biz-red { color: red; }
-  
-  .card-hover {
-    transition: all 0.2s;
-  }
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  }
+  font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Malgun Gothic", "Hiragino Sans", "Yu Gothic", sans-serif;
 }

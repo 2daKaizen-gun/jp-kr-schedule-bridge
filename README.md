@@ -20,7 +20,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 
   3. Extreme Optimization: Lighthouse score by resolving hydration mismatches and implementing server-side optimization
 
-- **Data Source**: Google Calendar API (JP), User Input (LocalStorage), Gemini AI Analysis
+- **Data Source**: Google Calendar API (KR/JP), User Input (LocalStorage), Gemini AI Analysis
 
 - **Key Features**
   1. Dual Calendar View: Synchronized display of KR/JP holidays
@@ -38,7 +38,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 graph TD
     User(["User"])
     NextJS["Next.js App (Client/Server)"]
-    HolidayAPI["Public Holiday API<br/>(KR/JP Data)"]
+    HolidayAPI["Google Calendar API<br/>(KR/JP Holidays)"]
     Gemini{{"Gemini API <br/>(Contextual Drafting)"}}
     Storage[("LocalStorage<br/>(User Events)")]
     Vercel["Vercel Edge Network"]
@@ -64,7 +64,17 @@ graph TD
 - **Styling**: <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"> | CI/CD Pipeline
-- **Libraries**: <img src="https://img.shields.io/badge/datefns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> | Date <img src="https://img.shields.io/badge/lucidereact-F56565?style=for-the-badge&logo=lucide&logoColor=white"> | Details
+- **Libraries**: <img src="https://img.shields.io/badge/datefns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> | Date
+- **Testing**: <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white"> | Date & Validation Logic
+
+## 🚀 Getting Started
+1. Create `.env.local` with `GOOGLE_CALENDAR_API_KEY` and `GEMINI_API_KEY`
+2. Run `npm install`, then `npm run dev`
+3. Run `npm test` for the unit tests and `npm run lint` for static checks
+
+## ⚠️ Known Limitations
+- `/analyze` validates its input but has no rate limiting, so public traffic can consume the Gemini quota
+- Calendars cover the current and next year only
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -96,7 +106,7 @@ graph TD
 - **Phase 5**: Deployment, Documentation & Portfolio Finalization
   - [x] Phase 5-1: Cloud Deployment & CI/CD Pipeline Setup (Vercel)
   - [x] Phase 5-2: Performance Optimization (Server-side Rendering & Static Generation)
-  - [x] Phase 5-3: Comprehensive Technical Documentation (README & API Docs)
+  - [x] Phase 5-3: Comprehensive Technical Documentation (README)
   - [x] Phase 5-4: Global Localization & UX Optimization 
   - [x] Phase 5-5: Code Refactoring & TypeScript Strict Mode Audit
   - [x] Phase 5-6: Final Project Retrospective
@@ -105,7 +115,7 @@ graph TD
 **1. Hydration Mismatch (React Error #418)**
   - **Challenge**: Server-side rendering of dynamic dates caused a mismatch with client-side local time.
 
-  - **Resolution**: Implemented a isLoaded state guard to isolate date-related rendering until the client-side mount, ensuring UI stability.
+  - **Resolution**: Read the current date and saved events through `useSyncExternalStore`, so they stay empty on the server and during hydration and are applied right after, ensuring UI stability.
 
 **2. API Resilience & AI Rate Limiting (429 Too Many Requests)**
   - **Challenge**: Frequent testing during development hit Gemini's free tier quotas.
@@ -118,6 +128,8 @@ graph TD
   - **Resolution**: Conducted a comprehensive color audit, remapping text colors (text-gray-400 → 600) to achieve a near-perfect Accessibility score without sacrificing the professional design.
 
 ## 📈 Results
+> Lighthouse scores below predate the November 2026 fixes and should be re-measured after the next deployment.
+
 - **Performance**: 100 (FCP: 0.3s, LCP: 0.5s)
 
 - **Accessibility**: 95 (WCAG Compliant)

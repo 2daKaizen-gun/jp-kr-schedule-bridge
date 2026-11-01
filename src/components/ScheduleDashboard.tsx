@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
@@ -27,6 +27,11 @@ export default function ScheduleDashboard({
   const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
 
   const currentT = translations[lang];
+
+  // 스크린 리더와 브라우저 번역이 현재 언어를 알 수 있도록 반영
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   // 커스텀 훅에서 모든 로직 수혈
   const {
@@ -160,12 +165,12 @@ export default function ScheduleDashboard({
         <div className='flex gap-4 items-center'>
           {/* 언어 스위처 */}
           <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button onClick={() => setLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>KO</button>
-            <button onClick={() => setLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}>JA</button>
+            <button aria-pressed={lang === 'ko'} onClick={() => setLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
+            <button aria-pressed={lang === 'ja'} onClick={() => setLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>JA</button>
           </div>
           <div className='flex gap-1'>
-            <button onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
-            <button onClick={goNext} className="p-2 hover:bg-gray-100 rounded-xl">▶</button>
+            <button aria-label={currentT.prevMonth} onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
+            <button aria-label={currentT.nextMonth} onClick={goNext} className="p-2 hover:bg-gray-100 rounded-xl">▶</button>
           </div>
         </div>
       </div>
@@ -252,7 +257,7 @@ export default function ScheduleDashboard({
         </div>
       </section>
 
-      <section className={`p-6 rounded-2xl border-2 bg-opacity-50 ${advice?.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+      <section className={`p-6 rounded-2xl border-2 ${advice?.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
         <h3 className="font-bold mb-2">
           {currentT.todayStatus} ({today ? format(parseISO(today), lang === 'ko' ? "yyyy. MM. dd" : "yyyy/MM/dd") : "..."})
         </h3>

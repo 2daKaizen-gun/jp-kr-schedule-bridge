@@ -1,10 +1,10 @@
 export const translations = {
     ko: {
         subDescription: "한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.",
-        dashboard: "대시보드",
         todayStatus: "오늘의 비즈니스 상태",
         bestDays: "최적의 협업일 (향후 2주)",
-        noEvents: "등록된 일정이 없습니다.",
+        prevMonth: "이전 달",
+        nextMonth: "다음 달",
         email: {
         step01: "달력에서 공휴일을 클릭하세요.",
         step02: "원하는 메일 톤을 선택하세요.",
@@ -40,16 +40,16 @@ export const translations = {
         legend: "범례",
         jpOnly: "상대국만 휴무 (협업 주의)",
         both: "양국 공통 휴무 (비즈니스 중단)",
-        hover: "휴무일 (마우스 오버)",
-        myEvent: "내 일정"
+        myEvent: "내 일정",
+        deleteEvent: "일정 삭제"
         }
     },
     ja: {
         subDescription: "韓国と日本の祝日を比較し、最適なコラボレーション日程を提案します。",
-        dashboard: "ダッシュボード",
         todayStatus: "本日のビジネス状況",
         bestDays: "ベストな協力日 (今後2週間)",
-        noEvents: "登録された予定がありません。",
+        prevMonth: "前の月",
+        nextMonth: "次の月",
         email: {
         step01: "カレンダーから祝日を選択してください。",
         step02: "メールのトーンを選択してください。",
@@ -85,8 +85,8 @@ export const translations = {
         legend: "凡例",
         jpOnly: "相手国のみ休務 (協力注意)",
         both: "両国共通の祝日 (ビジネス中断)",
-        hover: "休務日 (マウスオーバー)",
-        myEvent: "マイ予定"
+        myEvent: "マイ予定",
+        deleteEvent: "予定を削除"
         }
     }
 }

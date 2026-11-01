@@ -11,6 +11,12 @@ const CALENDAR_IDS: {[key: string]: string } = {
     JP: 'japanese__ja@holiday.calendar.google.com'
 };
 
+interface GoogleCalendarItem {
+    summary: string;
+    description?: string;
+    start: { date?: string; dateTime?: string };
+}
+
 // Google 캘린더 일정의 description 첫 줄이 공휴일 분류를 나타냄
 // (KR: 공휴일/기념일, JP: 祝日/祭日)
 const PUBLIC_HOLIDAY_LABELS = ["공휴일", "祝日"];
@@ -40,11 +46,11 @@ export async function getHolidays(countryCode: string, year: number): Promise<Ho
         throw new Error(`Holiday API failed for ${countryCode} ${year}: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: { items?: GoogleCalendarItem[] } = await response.json();
 
     // 우리 Holiday 인터페이스에 맞게 가공함
-    return (data.items ?? []).map((item: any) => ({
-        date: item.start.date || item.start.dateTime.split('T')[0],
+    return (data.items ?? []).map((item) => ({
+        date: item.start.date ?? item.start.dateTime?.split('T')[0] ?? "",
         localName: item.summary,
         name: item.summary,
         countryCode: countryCode,
