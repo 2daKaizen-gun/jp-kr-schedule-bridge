@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { translations } from '@/lib/translations';
+import { Lang } from '@/types/holiday';
 
 interface EmailGeneratorProps {
   data: {
@@ -9,27 +10,41 @@ interface EmailGeneratorProps {
     subject: string;
     body: string;
   } | null;
-  lang: 'ko' | 'ja'; // 언어 프롭
-  onAiGenerate?: (tone: string) => void;
-  onReset?:() => void;
-  aiDraft?: string;
-  aiSubject?: string | null;
-  aiError?: 'rate_limited' | 'failed' | null;
-  isAiLoading?: boolean;
-  activeMode?: string;
-  currentTone?: string;
+  lang: Lang;
+  onAiGenerate: (tone: string) => void;
+  onReset: () => void;
+  aiDraft: string;
+  aiSubject: string | null;
+  aiError: 'rate_limited' | 'failed' | null;
+  activeTone: string; // 생성 중인 톤 (비어 있으면 대기 상태)
+  currentTone: string;
 }
 
-export default function EmailGenerator({ 
-  data, 
+// AI 응답에 제목이 없을 때 사용할 대체 제목
+const FALLBACK_SUBJECTS: Record<Lang, Record<string, string>> = {
+  ko: {
+    formal: "[정중] 비즈니스 커뮤니케이션 초안",
+    urgent: "[긴급] 업무 협조 및 일정 확인 요청",
+    apology: "[사과] 일정 변경 및 조율 안내",
+    default: "AI 생성 메일 초안"
+  },
+  ja: {
+    formal: "[丁寧] ビジネスコミュニケーション下書き",
+    urgent: "[至急] 業務協力および日程確認の依頼",
+    apology: "[お詫び] 日程変更および調整のご案内",
+    default: "AI生成メールの下書き"
+  }
+};
+
+export default function EmailGenerator({
+  data,
   lang,
   onAiGenerate,
-  onReset, 
+  onReset,
   aiDraft,
   aiSubject,
   aiError,
-  isAiLoading,
-  activeMode,
+  activeTone,
   currentTone
 }: EmailGeneratorProps) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body'>('idle');
@@ -75,27 +90,11 @@ export default function EmailGenerator({
     );
   }
 
-  // AI 답변용 제목 맵을 다국어로 확장
-  const subjectMap: Record<string, Record<string, string>> = {
-    ko: {
-      formal: "[정중] 비즈니스 커뮤니케이션 초안",
-      urgent: "[긴급] 업무 협조 및 일정 확인 요청",
-      apology: "[사과] 일정 변경 및 조율 안내",
-      default: "AI 생성 메일 초안"
-    },
-    ja: {
-      formal: "[丁寧] ビジネスコミュニケーション下書き",
-      urgent: "[至急] 業務協力および日程確認の依頼",
-      apology: "[お詫び] 日程変更および調整のご案内",
-      default: "AI生成メールの下書き"
-    }
-  };
-  
-  const displaySubject = aiDraft 
-    ? (aiSubject || subjectMap[lang][currentTone || ""] || subjectMap[lang].default)
-    : data?.subject;
-  
-  const displayBody = aiDraft || data?.body;
+  const displaySubject = (aiDraft
+    ? (aiSubject || FALLBACK_SUBJECTS[lang][currentTone] || FALLBACK_SUBJECTS[lang].default)
+    : data?.subject) ?? "";
+
+  const displayBody = (aiDraft || data?.body) ?? "";
 
   return (
     <div className="bg-white rounded-3xl p-5 sm:p-8 border border-blue-100 shadow-2xl shadow-blue-500/10">
@@ -127,11 +126,11 @@ export default function EmailGenerator({
           ].map((btn) => (
             <button
               key={btn.id}
-              onClick={() => onAiGenerate?.(btn.id)}
-              disabled={isAiLoading}
+              onClick={() => onAiGenerate(btn.id)}
+              disabled={activeTone !== ""}
               className={`${btn.color} px-3 py-2 rounded-xl text-white text-xs font-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center gap-1.5`}
             >
-              {isAiLoading && activeMode === btn.id ? "..." : btn.label}
+              {activeTone === btn.id ? "..." : btn.label}
             </button>
           ))}
         </div>
@@ -155,7 +154,7 @@ export default function EmailGenerator({
               className="w-full bg-gray-50 border border-gray-100 p-4 pr-24 rounded-2xl text-sm font-bold text-gray-700 outline-none"
             />
             <button 
-              onClick={() => handleCopy(displaySubject || "", 'subject')}
+              onClick={() => handleCopy(displaySubject, 'subject')}
               className={`absolute right-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 copyStatus === 'subject' ? 'bg-green-500 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
@@ -176,7 +175,7 @@ export default function EmailGenerator({
             className="w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl text-sm leading-relaxed text-gray-600 font-medium resize-none outline-none" 
           />
           <button 
-            onClick={() => handleCopy(displayBody || "", 'body')}
+            onClick={() => handleCopy(displayBody, 'body')}
             className={`w-full mt-4 flex items-center justify-center gap-2 py-4 rounded-2xl font-black transition-all ${
               copyStatus === 'body' ? 'bg-green-500 text-white' : 'bg-gray-900 text-white hover:bg-black'
             }`}

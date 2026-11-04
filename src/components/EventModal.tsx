@@ -1,15 +1,15 @@
 "use client"
 
-import React, { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { translations } from '@/lib/translations';
 import { MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
+import { EventScope, Lang, UserEvent } from '@/types/holiday';
 
-type EventType = 'meeting' | 'holiday';
-type EventScope = 'KR' | 'JP' | 'Both';
+type EventType = UserEvent['type'];
 
 interface EventModalProps {
     date: string;
-    lang: 'ko' | 'ja'; // 언어 프롭 추가
+    lang: Lang;
     onClose: () => void;
     onSave: (title: string, type: EventType, country: EventScope) => void;
 }

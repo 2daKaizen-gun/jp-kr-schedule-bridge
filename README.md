@@ -18,7 +18,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 
   2. AI Business Agent: Integrated Gemini to generate context-aware business drafts (Formal/Urgent/Apology) based on specific calendar events
 
-  3. Extreme Optimization: Lighthouse score by resolving hydration mismatches and implementing server-side optimization
+  3. Optimization: Fast first paint through static generation with daily regeneration, and stable hydration of date-dependent UI
 
 - **Data Source**: Google Calendar API (KR/JP), User Input (LocalStorage), Gemini AI Analysis
 
@@ -41,7 +41,7 @@ graph TD
     HolidayAPI["Google Calendar API<br/>(KR/JP Holidays)"]
     Gemini{{"Gemini API <br/>(Contextual Drafting)"}}
     Storage[("LocalStorage<br/>(User Events)")]
-    Vercel["Vercel Edge Network"]
+    Vercel["Vercel"]
 
     User -->|Interaction| NextJS
     NextJS -->|Fetch Holidays| HolidayAPI
@@ -102,6 +102,7 @@ graph TD
   - [x] Phase 4-4: Implement Dynamic Calendar Navigation
   - [x] Phase 4-5: User-Defined Schedule Management & Data Persistence
   - [x] Phase 4-6: Integrate Gemini AI for Smart Email Generation
+  - [x] Phase 4-7: Ensure Responsive Web Design for Cross-Device Support
 
 - **Phase 5**: Deployment, Documentation & Portfolio Finalization
   - [x] Phase 5-1: Cloud Deployment & CI/CD Pipeline Setup (Vercel)

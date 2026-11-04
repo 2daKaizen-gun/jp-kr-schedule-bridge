@@ -4,21 +4,21 @@ import {
   format, startOfMonth, startOfWeek,
   isSameMonth, addDays, eachDayOfInterval 
 } from "date-fns";
-import { Holiday, UserEvent } from "@/types/holiday";
+import { ConflictMarkers, Holiday, Lang, UserEvent } from "@/types/holiday";
 import { translations } from "@/lib/translations";
 
 interface CalendarProps {
     month: Date;
     holidays: Holiday[];
     countryCode: "KR" | "JP";
-    conflictMarkers: Record<string, {type: 'kr' | 'jp' | 'both'}>;
+    conflictMarkers: ConflictMarkers;
     userEvents: UserEvent[]; // 사용자 일정 데이터
-    lang: 'ko' | 'ja';
-    onDateClick?: (date: string) => void;
-    onDeleteEvent?: (id: string) => void; // 일정 삭제 함수
+    lang: Lang;
+    onDateClick: (date: string) => void;
+    onDeleteEvent: (id: string) => void; // 일정 삭제 함수
 }
 
-export default function CalendarView({ month, holidays, countryCode, conflictMarkers, userEvents = [], lang, onDateClick, onDeleteEvent }: CalendarProps) {
+export default function CalendarView({ month, holidays, countryCode, conflictMarkers, userEvents, lang, onDateClick, onDeleteEvent }: CalendarProps) {
     const monthStart = startOfMonth(month);
 
     // 번역 객체 정의
@@ -53,7 +53,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                         const isCurrentMonth = isSameMonth(day, monthStart);
                         
                         // 공휴일/ 마커 데이터 
-                        const marker = conflictMarkers?.[formattedDate];
+                        const marker = conflictMarkers[formattedDate];
                         // 같은 날 기념일과 공휴일이 겹치면 공휴일을 우선
                         const dayHolidays = holidays.filter((h) => h.date === formattedDate);
                         const holiday = dayHolidays.find((h) => h.isPublicHoliday) ?? dayHolidays[0];
@@ -61,7 +61,6 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                         // 사용자 일정 필터링
                         const dayUserEvents = userEvents.filter(e => e.date === formattedDate);
 
-                        // 공휴일 판별 로직
                         const isPublicHoliday = holiday?.isPublicHoliday;
 
                         return (
@@ -69,7 +68,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 // Key를 국가 코드와 조합하여 유일하게 설정
                                 key={`${countryCode}-${formattedDate}`}
                                 // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
-                                onClick={() => onDateClick?.(formattedDate)}
+                                onClick={() => onDateClick(formattedDate)}
                                 className={`group cursor-pointer relative min-w-0 min-h-20 sm:min-h-24 border-t border-r last:border-r-0 p-1 sm:p-2 transition-all hover:bg-gray-50
                                     ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
                             >
@@ -88,7 +87,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     <div className="flex gap-0.5">
                                         {/* 공휴일 마커 */}
                                         {marker?.type === otherCountry && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title={t.jpOnly} />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" title={t.otherOnly} />
                                         )}
                                         {marker?.type === 'both' && (
                                             <span className="w-1.5 h-1.5 rounded-full bg-purple-500" title={t.both} />
@@ -119,11 +118,10 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                         <div
                                             key={event.id}
                                             onClick={(e) => {
-                                                e.stopPropagation(); // 부모 클릭 이벤트
-                                                e.preventDefault(); // 브라우저 기본 동작 차단
-                                                if (canDelete) onDeleteEvent?.(event.id);
+                                                e.stopPropagation(); // 칸 클릭(일정 추가)으로 전달되지 않게 함
+                                                if (canDelete) onDeleteEvent(event.id);
                                             }}
-                                            className={`mt-1 text-[10px] p-0.5 sm:p-1 rounded font-medium flex justify-between items-center group/event transition-colors ${
+                                            className={`mt-1 text-[10px] p-0.5 sm:p-1 rounded font-medium flex justify-between items-center transition-colors ${
                                                 canDelete 
                                                 ? "bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer" 
                                                 : "bg-gray-100 text-gray-500 cursor-default" // 권한 없으면 회색 처리
@@ -139,7 +137,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                                     className="sr-only focus:not-sr-only sm:not-sr-only ml-1 text-red-600 font-bold hover:scale-125 transition-transform px-1"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onDeleteEvent?.(event.id);
+                                                        onDeleteEvent(event.id);
                                                     }}
                                                 >
                                                     ✕
@@ -165,7 +163,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                 <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t.legend}:</span>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    <span className="text-xs text-gray-600 font-medium">{t.jpOnly}</span>
+                    <span className="text-xs text-gray-600 font-medium">{t.otherOnly}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-purple-500" />

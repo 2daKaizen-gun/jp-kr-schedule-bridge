@@ -1,13 +1,9 @@
+export type Lang = 'ko' | 'ja';
+export type EventScope = 'KR' | 'JP' | 'Both';
+
 export interface Holiday {
     date: string;
     localName: string;
-    name: string;
-    countryCode: string;
-    fixed: boolean;
-    global: boolean;
-    counties: string[] | null;
-    launchYear: number[] | null;
-    types: string[];
     isPublicHoliday: boolean; // 법정 공휴일 여부 (기념일·祭日은 false)
 }
 
@@ -15,12 +11,9 @@ export interface UserEvent {
     id: string;
     date: string;
     title: string;
-    type: 'meeting' | 'holiday' | 'personal' | 'deadline'; // 일정 성격
-    countryCode?: 'KR' | 'JP' | 'Both'; // 관련 국가
+    type: 'meeting' | 'holiday'; // 일정 성격
+    countryCode: EventScope; // 관련 국가
 }
-
-// 비즈니스 로직용 타입
-export type Lang = 'ko' | 'ja';
 
 export interface ConflictMarkers {
     [date: string]: {
@@ -36,9 +29,8 @@ export interface DashboardProps {
 }
 
 export interface ScheduleAdvice {
-    status: 'work' | 'holiday' | 'caution' | 'match' | 'kr-only' | 'jp-only';
+    status: 'work' | 'holiday' | 'match' | 'kr-only' | 'jp-only';
     message: string;
-    color: string; // UI 색상 제어용
 }
 
 // 추천 일정 아이템 타입

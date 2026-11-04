@@ -1,8 +1,9 @@
 import { useState, useMemo, useSyncExternalStore } from 'react';
 import { isSameMonth, format, addMonths, subMonths, parseISO, startOfMonth } from 'date-fns';
 import { getVacationBlocks, getRecommendedMeetingDays, analyzeBusinessDay } from '@/lib/holidays';
+import { translations } from '@/lib/translations';
 import { parseUserEvents, readUserEvents, readUserEventsOnServer, subscribeToUserEvents, writeUserEvents } from '@/lib/userEvents';
-import { Holiday, UserEvent, Lang, ConflictMarkers, RecommendedDay } from '@/types/holiday';
+import { Holiday, UserEvent, Lang, ConflictMarkers, EventScope } from '@/types/holiday';
 
 // 서버 렌더링과 하이드레이션 중에는 null, 그 이후에는 브라우저 기준 오늘 날짜를 반환
 const subscribeToNothing = () => () => {};
@@ -24,47 +25,30 @@ export function useScheduleLogic(
     const savedEvents = useSyncExternalStore(subscribeToUserEvents, readUserEvents, readUserEventsOnServer);
     const userEvents = useMemo(() => parseUserEvents(savedEvents), [savedEvents]);
 
-    // 훅 내부에서 관리해야 할 UI 상태들
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // 일정 추가 모달을 연 날짜 (null이면 닫힘)
     const [activeDate, setActiveDate] = useState<string | null>(null);
+    const closeEventModal = () => setActiveDate(null);
 
     // 내비게이션 함수들
     const goPrev = () => setSelectedMonth(subMonths(viewMonth, 1));
     const goNext = () => setSelectedMonth(addMonths(viewMonth, 1));
     const goToday = () => setSelectedMonth(null);
 
-    // 날짜 클릭 시 모달 오픈 로직
-    const openEventModal = (date: string) => {
-        setActiveDate(date);
-        setIsModalOpen(true);
-    };
-
-    const closeEventModal = () => {
-        setIsModalOpen(false);
-        setActiveDate(null);
-    };
-
-    // --- 비즈니스 로직 계산 섹션 (viewMonth에 반응함) ---
     const conflictMarkers = useMemo<ConflictMarkers>(() => {
+        const krDates = new Set(krHolidays.filter(h => h.isPublicHoliday).map(h => h.date));
+        const jpDates = new Set(jpHolidays.filter(h => h.isPublicHoliday).map(h => h.date));
+
         const markers: ConflictMarkers = {};
-        const trueKr = krHolidays.filter(h => h.isPublicHoliday);
-        const trueJp = jpHolidays.filter(h => h.isPublicHoliday);
-        
-        // 양국 날짜 합치기
-        const allDates = new Set([...trueKr.map(h => h.date), ...trueJp.map(h => h.date)]);
-        
-        allDates.forEach(date => {
-            const isKr = trueKr.some(h => h.date === date);
-            const isJp = trueJp.some(h => h.date === date);
-            if (isKr && isJp) markers[date] = { type: 'both' };
-            else if (isKr) markers[date] = { type: 'kr' };
-            else if (isJp) markers[date] = { type: 'jp' };
-        });
+        for (const date of new Set([...krDates, ...jpDates])) {
+            const isKr = krDates.has(date);
+            const isJp = jpDates.has(date);
+            markers[date] = { type: isKr && isJp ? 'both' : isKr ? 'kr' : 'jp' };
+        }
         return markers;
     }, [jpHolidays, krHolidays]);
 
     // 일정 추가 함수
-    const addUserEvent = (title: string, type: UserEvent['type'], country: 'KR' | 'JP' | 'Both') => {
+    const addUserEvent = (title: string, type: UserEvent['type'], country: EventScope) => {
         if (!activeDate) return;
 
         const newEvent: UserEvent = {
@@ -75,43 +59,29 @@ export function useScheduleLogic(
             countryCode: country
         };
         writeUserEvents([...userEvents, newEvent]);
-        closeEventModal(); // 모달 닫기 함수 사용
+        closeEventModal();
     };
 
     // 일정 삭제 함수
     const deleteUserEvent = (id: string) => {
-        const confirmMsg = lang === 'ko' ? "일정을 삭제하시겠습니까?" : "予定を削除しますか？";
-        if (window.confirm(confirmMsg)) {
+        if (window.confirm(translations[lang].calendar.deleteConfirm)) {
             writeUserEvents(userEvents.filter((event) => event.id !== id));
         }
     };
 
-    // 추천 일정 및 어드바이스 계산
-    // 오늘 기준 향후 2주 (보고 있는 달과 무관)
-    const recommendedDays = useMemo<RecommendedDay[]>(() => {
-      if (!today) return [];
+    // 오늘 기준 향후 2주 (보고 있는 달과 무관). 사용자 일정이 있는 날은 종류와 범위에 관계없이 제외
+    const recommendedDays = useMemo(() => {
+        if (!today) return [];
 
-      // 사용자가 추가한 모든 일정을 '차단된 날짜'로 변환
-      // 'holiday'뿐만 아니라 'meeting'도 추천에서 제외되도록 type 체크를 제거하거나 조정
-      const userHolidays = userEvents.map(e => ({
-        date: e.date,
-        countryCode: e.countryCode,
-        isPublicHoliday: true // 제목과 무관하게 항상 추천에서 제외
-      }));
-    
-      // 기존 공휴일 데이터에 사용자 휴무일을 병합하여 계산
-      // 한국 달력에 영향을 주는 것: KR 전용 + Both(공통)
-      const combinedKr = [
-        ...krHolidays,
-        ...userHolidays.filter(e => e.countryCode === 'KR' || e.countryCode === 'Both')
-      ];
-      // 일본 달력에 영향을 주는 것: JP 전용 + Both(공통)
-      const combinedJp = [
-        ...jpHolidays,
-        ...userHolidays.filter(e => e.countryCode === 'JP' || e.countryCode === 'Both')
-      ];
-    
-      return getRecommendedMeetingDays(combinedKr, combinedJp, parseISO(today), lang);
+        return getRecommendedMeetingDays(
+            [
+                ...krHolidays,
+                ...jpHolidays,
+                ...userEvents.map(e => ({ date: e.date, isPublicHoliday: true })),
+            ],
+            parseISO(today),
+            lang
+        );
     }, [krHolidays, jpHolidays, userEvents, today, lang]);
 
     // 비즈니스 어드바이스
@@ -125,8 +95,8 @@ export function useScheduleLogic(
         goPrev, goNext, goToday,
         userEvents,
         activeDate,
-        isModalOpen, setIsModalOpen,
-        openEventModal, closeEventModal,
+        openEventModal: setActiveDate,
+        closeEventModal,
         conflictMarkers,
         addUserEvent, deleteUserEvent,
         recommendedDays,

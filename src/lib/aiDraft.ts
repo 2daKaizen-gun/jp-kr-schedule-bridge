@@ -8,19 +8,19 @@ export const MAX_AI_TEXT_LENGTH = 100;
 
 export type AiErrorCode = "invalid_request" | "rate_limited" | "failed";
 
-export interface AiHoliday {
+interface AiHoliday {
   country: "KR" | "JP";
   date: string;
   name: string;
 }
 
-export interface AiUserEvent {
+interface AiUserEvent {
   date: string;
   title: string;
   countryCode?: "KR" | "JP" | "Both";
 }
 
-export interface AnalyzeRequest {
+interface AnalyzeRequest {
   tone: AiTone;
   lang: Lang;
   currentMonth: string;

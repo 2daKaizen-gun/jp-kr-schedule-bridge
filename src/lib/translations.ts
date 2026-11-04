@@ -5,6 +5,8 @@ export const translations = {
         bestDays: "최적의 협업일 (향후 2주)",
         prevMonth: "이전 달",
         nextMonth: "다음 달",
+        vacationJp: "일본 연휴 주의",
+        vacationKr: "한국 연휴 주의",
         noRecommendations: "향후 2주 안에 추천할 날이 없습니다.",
         email: {
         step01: "달력에서 공휴일을 클릭하세요.",
@@ -39,10 +41,11 @@ export const translations = {
         },
         calendar: {
         legend: "범례",
-        jpOnly: "상대국만 휴무 (협업 주의)",
+        otherOnly: "상대국만 휴무 (협업 주의)",
         both: "양국 공통 휴무 (비즈니스 중단)",
         myEvent: "내 일정",
-        deleteEvent: "일정 삭제"
+        deleteEvent: "일정 삭제",
+        deleteConfirm: "일정을 삭제하시겠습니까?"
         }
     },
     ja: {
@@ -51,6 +54,8 @@ export const translations = {
         bestDays: "ベストな協力日 (今後2週間)",
         prevMonth: "前の月",
         nextMonth: "次の月",
+        vacationJp: "日本の祝日に伴う注意",
+        vacationKr: "韓国の祝日に伴う注意",
         noRecommendations: "今後2週間におすすめできる日はありません。",
         email: {
         step01: "カレンダーから祝日を選択してください。",
@@ -85,10 +90,11 @@ export const translations = {
         },
         calendar: {
         legend: "凡例",
-        jpOnly: "相手国のみ休務 (協力注意)",
+        otherOnly: "相手国のみ休務 (協力注意)",
         both: "両国共通の祝日 (ビジネス中断)",
         myEvent: "マイ予定",
-        deleteEvent: "予定を削除"
+        deleteEvent: "予定を削除",
+        deleteConfirm: "予定を削除しますか？"
         }
     }
 }

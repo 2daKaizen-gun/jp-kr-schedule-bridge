@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { DashboardProps, Holiday } from '@/types/holiday';
+import { DashboardProps, Holiday, Lang, ScheduleAdvice } from '@/types/holiday';
 import { MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
 
-const ADVICE_STYLES: Record<string, string> = {
+const ADVICE_STYLES: Record<ScheduleAdvice['status'], string> = {
   work: 'bg-green-50 border-green-200',
   holiday: 'bg-gray-50 border-gray-200',
   match: 'bg-gray-50 border-gray-200',
@@ -19,21 +19,19 @@ const ADVICE_STYLES: Record<string, string> = {
   'jp-only': 'bg-blue-50 border-blue-200',
 };
 
-export default function ScheduleDashboard({ 
+export default function ScheduleDashboard({
   jpHolidays,
   krHolidays,
   initialMonth
 }: DashboardProps) {
 
-  const [lang, setLang] = useState<'ko' | 'ja'>('ko');
+  const [lang, setLang] = useState<Lang>('ko');
   const [selectedHolidayDate, setSelectedHolidayDate] = useState<string | null>(null);
   const [emailDraft, setEmailDraft] = useState("");
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
-  const [activeMode, setActiveMode] = useState("");
+  const [activeTone, setActiveTone] = useState(""); // 생성 중인 톤 (비어 있으면 대기 상태)
   const [currentTone, setCurrentTone] = useState("");
   const [aiSubject, setAiSubject] = useState<string | null>(null);
   const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
-
   const aiRequest = useRef<AbortController | null>(null);
 
   const currentT = translations[lang];
@@ -55,7 +53,6 @@ export default function ScheduleDashboard({
     advice,
     jpVacations,
     krVacations,
-    isModalOpen,
     activeDate,
     openEventModal,
     closeEventModal
@@ -65,8 +62,7 @@ export default function ScheduleDashboard({
   const callAiApi = async (tone: string) => {
     const request = new AbortController();
     aiRequest.current = request;
-    setActiveMode(tone);
-    setIsEmailLoading(true);
+    setActiveTone(tone);
     setAiError(null);
 
     // 보고 있는 달의 공휴일과 일정만 전달
@@ -83,7 +79,7 @@ export default function ScheduleDashboard({
         body: JSON.stringify({
           tone,
           currentMonth,
-          lang, // AI에게 현재 언어 설정 전달
+          lang,
           holidays: [...toAiHolidays(jpHolidays, 'JP'), ...toAiHolidays(krHolidays, 'KR')],
           userEvents: userEvents
             .filter(e => e.date.startsWith(currentMonth))
@@ -103,10 +99,7 @@ export default function ScheduleDashboard({
       // 다른 공휴일을 선택해 취소한 요청은 오류로 표시하지 않음
       if (!request.signal.aborted) setAiError('failed');
     } finally {
-      if (aiRequest.current === request) {
-        setIsEmailLoading(false);
-        setActiveMode("");
-      }
+      if (aiRequest.current === request) setActiveTone("");
     }
   };
 
@@ -114,12 +107,10 @@ export default function ScheduleDashboard({
   const handleReset = () => {
     aiRequest.current?.abort();
     aiRequest.current = null;
-    setIsEmailLoading(false);
-    setActiveMode("");
+    setActiveTone("");
     setEmailDraft("");
     setAiSubject(null);
     setAiError(null);
-    // 초기화 시 톤 기억 삭제
     setCurrentTone("");
   };
 
@@ -145,14 +136,13 @@ export default function ScheduleDashboard({
     };
   })();
 
-  // 날짜 클릭 핸들러 (공휴일이면 메일 초안 설정, 훅 모달 열기 호출)
+  // 날짜 클릭 핸들러 (공휴일이면 메일 초안 설정, 일정 추가 모달 열기)
   const handleDateClick = (date: string) => {
     if (conflictMarkers[date]) {
       setSelectedHolidayDate(date);
       handleReset(); // 이전 공휴일 기준의 AI 초안이 남지 않도록 초기화
     }
 
-    // 훅 모달 열기 기능 호출
     openEventModal(date);
   };
 
@@ -164,10 +154,10 @@ export default function ScheduleDashboard({
           Business Calendar Dashboard
         </h2>
         <p className="text-base sm:text-lg text-gray-500 font-medium">
-          {currentT.subDescription} {/* [핵심] 언어 변경 시 이 문구도 바뀜! */}
+          {currentT.subDescription}
         </p>
       </header>
-      
+
       {/* 월 이동 컨트롤러 */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-3 sm:gap-4">
@@ -177,9 +167,9 @@ export default function ScheduleDashboard({
           <button
             onClick={goToday}
             className="px-3 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              TODAY
-            </button>
+          >
+            TODAY
+          </button>
         </div>
 
         <div className='flex gap-2 sm:gap-4 items-center'>
@@ -200,30 +190,28 @@ export default function ScheduleDashboard({
         <section className="min-w-0">
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇯🇵 Japan Calendar</h3>
           <CalendarView
-            key="cv-jp" // 고유 키 추가
             month={viewMonth}
             holidays={jpHolidays}
             countryCode="JP"
             conflictMarkers={conflictMarkers}
             userEvents={userEvents}
-            lang={lang} // 언어 프롭 전달
+            lang={lang}
             onDateClick={handleDateClick}
-            onDeleteEvent={deleteUserEvent} // 추가
+            onDeleteEvent={deleteUserEvent}
           />
         </section>
 
         <section className="min-w-0">
           <h3 className="text-lg font-bold mb-4 text-gray-700">🇰🇷 Korea Calendar</h3>
           <CalendarView
-            key="cv-kr" // 고유 키 추가
             month={viewMonth}
             holidays={krHolidays}
             countryCode="KR"
             conflictMarkers={conflictMarkers}
             userEvents={userEvents}
-            lang={lang} // 언어 프롭 전달
+            lang={lang}
             onDateClick={handleDateClick}
-            onDeleteEvent={deleteUserEvent} // 추가
+            onDeleteEvent={deleteUserEvent}
           />
         </section>
       </div>
@@ -231,18 +219,18 @@ export default function ScheduleDashboard({
       {/* 연휴 알림 섹션 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-4">
-          {jpVacations.map((block, idx) => (
-            <div key={`jp-vac-${idx}`} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl">
-              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 {lang === 'ko' ? "일본 연휴 주의" : "日本の祝日に伴う注意"}</span>
+          {jpVacations.map((block) => (
+            <div key={block.start} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl">
+              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 {currentT.vacationJp}</span>
               <p className="text-orange-900 font-extrabold">{block.displayNames}</p>
               <p className="text-orange-700 text-sm">📅 {block.start} ~ {block.end}</p>
             </div>
           ))}
         </div>
         <div className="flex flex-col gap-4">
-          {krVacations.map((block, idx) => (
-            <div key={`kr-vac-${idx}`} className="bg-red-50 border border-red-200 p-5 rounded-2xl">
-              <span className="text-red-800 font-bold block mb-2 text-lg">🇰🇷 {lang === 'ko' ? "한국 연휴 주의" : "韓国の祝日に伴う注意"}</span>
+          {krVacations.map((block) => (
+            <div key={block.start} className="bg-red-50 border border-red-200 p-5 rounded-2xl">
+              <span className="text-red-800 font-bold block mb-2 text-lg">🇰🇷 {currentT.vacationKr}</span>
               <p className="text-red-900 font-extrabold">{block.displayNames}</p>
               <p className="text-red-700 text-sm">📅 {block.start} ~ {block.end}</p>
             </div>
@@ -251,17 +239,16 @@ export default function ScheduleDashboard({
       </div>
 
       {/* 이메일 생성기 */}
-      <EmailGenerator 
-        data={selectedEmail} 
+      <EmailGenerator
+        data={selectedEmail}
         onAiGenerate={callAiApi}
         onReset={handleReset}
         aiDraft={emailDraft}
         aiSubject={aiSubject}
         aiError={aiError}
-        isAiLoading={isEmailLoading}
-        activeMode={activeMode}
+        activeTone={activeTone}
         currentTone={currentTone}
-        lang={lang} //언어 프롭 전달
+        lang={lang}
       />
 
       {/* 추천 일정 및 비즈니스 조언 */}
@@ -271,10 +258,10 @@ export default function ScheduleDashboard({
           <p className="text-sm text-gray-600">{currentT.noRecommendations}</p>
         )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {recommendedDays.map((item, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200">
+          {recommendedDays.map((item) => (
+            <div key={item.date} className="p-4 rounded-2xl bg-green-50 border border-green-200">
               <span className="text-green-700 font-bold">{item.date}</span>
-              <p className="text-xs text-green-600 mt-2">{item.reason}</p>
+              <p className="text-xs text-green-700 mt-2">{item.reason}</p>
             </div>
           ))}
         </div>
@@ -287,12 +274,12 @@ export default function ScheduleDashboard({
         <p className="text-sm font-medium">{advice?.message ?? "..."}</p>
       </section>
 
-      {isModalOpen && activeDate && (
-        <EventModal 
-          date={activeDate} 
-          onClose={closeEventModal} 
+      {activeDate && (
+        <EventModal
+          date={activeDate}
+          onClose={closeEventModal}
           onSave={addUserEvent}
-          lang={lang} // 언어 프롭 전달
+          lang={lang}
         />
       )}
     </div>
