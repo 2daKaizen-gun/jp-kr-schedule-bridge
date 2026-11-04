@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { AiErrorCode, AiTone, parseAiDraft, parseAnalyzeRequest } from "@/lib/aiDraft";
+import { AiErrorCode, AiTone, parseAiDraft, parseAnalyzeRequest, retryWhen } from "@/lib/aiDraft";
 import { createRateLimiter, getClientKey } from "@/lib/rateLimit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -15,6 +15,12 @@ const TONE_SETTINGS: Record<AiTone, string> = {
 // Gemini 할당량 보호: 클라이언트별 분당 10회, 서버 인스턴스 전체 분당 60회
 const checkClientLimit = createRateLimiter(10, 60_000);
 const checkInstanceLimit = createRateLimiter(60, 60_000);
+
+// Gemini가 일시적으로 과부하일 때 재시도할 대기 시간
+const OVERLOAD_RETRY_DELAYS_MS = [1000, 3000];
+
+const isOverloaded = (error: unknown) =>
+  error instanceof GoogleGenerativeAIFetchError && error.status === 503;
 
 const errorResponse = (code: AiErrorCode, status: number, headers?: HeadersInit) =>
   NextResponse.json({ error: code }, { status, headers });
@@ -65,13 +71,16 @@ export async function POST(req: Request) {
       4. **출력**: 다른 설명 없이 메일 내용만 출력해줘.
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await retryWhen(() => model.generateContent(prompt), isOverloaded, OVERLOAD_RETRY_DELAYS_MS);
     const { subject, body: text } = parseAiDraft(result.response.text());
     return NextResponse.json({ subject, text });
   } catch (error) {
     console.error("Gemini Error:", error);
     if (error instanceof GoogleGenerativeAIFetchError && error.status === 429) {
       return errorResponse("rate_limited", 429);
+    }
+    if (isOverloaded(error)) {
+      return errorResponse("unavailable", 503);
     }
     return errorResponse("failed", 500);
   }

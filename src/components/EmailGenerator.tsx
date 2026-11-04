@@ -16,7 +16,7 @@ interface EmailGeneratorProps {
   onAddEvent: () => void;
   aiDraft: string;
   aiSubject: string | null;
-  aiError: 'rate_limited' | 'failed' | null;
+  aiError: 'rate_limited' | 'unavailable' | 'failed' | null;
   activeTone: string; // 생성 중인 톤 (비어 있으면 대기 상태)
   currentTone: string;
 }
@@ -157,7 +157,7 @@ export default function EmailGenerator({
 
       {aiError && (
         <p role="alert" className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-red-700">
-          {aiError === 'rate_limited' ? t.aiRateLimited : t.aiFailed}
+          {aiError === 'rate_limited' ? t.aiRateLimited : aiError === 'unavailable' ? t.aiUnavailable : t.aiFailed}
         </p>
       )}
 

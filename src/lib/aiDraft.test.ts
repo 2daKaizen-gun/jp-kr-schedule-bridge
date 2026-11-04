@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_AI_ITEMS, parseAiDraft, parseAnalyzeRequest } from "./aiDraft";
+import { MAX_AI_ITEMS, parseAiDraft, parseAnalyzeRequest, retryWhen } from "./aiDraft";
 
 const validRequest = {
   tone: "formal",
@@ -35,6 +35,43 @@ describe("parseAnalyzeRequest", () => {
     ["too many events", { ...validRequest, userEvents: Array(MAX_AI_ITEMS + 1).fill({ date: "2026-11-10", title: "x" }) }],
   ])("rejects %s", (_name, body) => {
     expect(parseAnalyzeRequest(body)).toBeNull();
+  });
+});
+
+describe("retryWhen", () => {
+  const noWait = async () => {};
+  const failThenSucceed = (failures: number, error: Error = new Error("busy")) => {
+    let calls = 0;
+    const run = async () => {
+      calls += 1;
+      if (calls <= failures) throw error;
+      return "ok";
+    };
+    return { run, calls: () => calls };
+  };
+
+  it("returns immediately on success", async () => {
+    const { run, calls } = failThenSucceed(0);
+    await expect(retryWhen(run, () => true, [1, 1], noWait)).resolves.toBe("ok");
+    expect(calls()).toBe(1);
+  });
+
+  it("retries temporary errors", async () => {
+    const { run, calls } = failThenSucceed(2);
+    await expect(retryWhen(run, () => true, [1, 1], noWait)).resolves.toBe("ok");
+    expect(calls()).toBe(3);
+  });
+
+  it("gives up after the last attempt", async () => {
+    const { run, calls } = failThenSucceed(5);
+    await expect(retryWhen(run, () => true, [1, 1], noWait)).rejects.toThrow("busy");
+    expect(calls()).toBe(3);
+  });
+
+  it("does not retry other errors", async () => {
+    const { run, calls } = failThenSucceed(5);
+    await expect(retryWhen(run, () => false, [1, 1], noWait)).rejects.toThrow("busy");
+    expect(calls()).toBe(1);
   });
 });
 

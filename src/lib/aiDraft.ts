@@ -6,7 +6,7 @@ export type AiTone = (typeof AI_TONES)[number];
 export const MAX_AI_ITEMS = 100;
 export const MAX_AI_TEXT_LENGTH = 100;
 
-export type AiErrorCode = "invalid_request" | "rate_limited" | "failed";
+export type AiErrorCode = "invalid_request" | "rate_limited" | "unavailable" | "failed";
 
 interface AiHoliday {
   country: "KR" | "JP";
@@ -73,6 +73,24 @@ export function parseAnalyzeRequest(body: unknown): AnalyzeRequest | null {
     holidays: holidays.map(({ country, date, name }) => ({ country, date, name })),
     userEvents: userEvents.map(({ date, title, countryCode }) => ({ date, title, countryCode })),
   };
+}
+
+// 일시적 오류일 때만 잠시 기다렸다가 다시 시도하고, 그래도 실패하면 마지막 오류를 전달
+export async function retryWhen<T>(
+  run: () => Promise<T>,
+  isTemporary: (error: unknown) => boolean,
+  delaysMs: number[],
+  wait: (ms: number) => Promise<void> = ms => new Promise(resolve => setTimeout(resolve, ms))
+): Promise<T> {
+  for (const delay of delaysMs) {
+    try {
+      return await run();
+    } catch (error) {
+      if (!isTemporary(error)) throw error;
+      await wait(delay);
+    }
+  }
+  return run();
 }
 
 // 응답의 "件名: ..." 줄을 제목으로 분리하고, 없으면 본문을 그대로 반환

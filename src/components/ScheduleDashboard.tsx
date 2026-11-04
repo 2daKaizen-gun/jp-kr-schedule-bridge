@@ -51,7 +51,7 @@ export default function ScheduleDashboard({
   const [activeTone, setActiveTone] = useState(""); // 생성 중인 톤 (비어 있으면 대기 상태)
   const [currentTone, setCurrentTone] = useState("");
   const [aiSubject, setAiSubject] = useState<string | null>(null);
-  const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
+  const [aiError, setAiError] = useState<'rate_limited' | 'unavailable' | 'failed' | null>(null);
   const aiRequest = useRef<AbortController | null>(null);
   const emailPanel = useRef<HTMLDivElement>(null);
 
@@ -110,7 +110,7 @@ export default function ScheduleDashboard({
       });
       const data = await res.json();
       if (!res.ok) {
-        setAiError(data.error === 'rate_limited' ? 'rate_limited' : 'failed');
+        setAiError(data.error === 'rate_limited' || data.error === 'unavailable' ? data.error : 'failed');
         return;
       }
       setEmailDraft(data.text);
