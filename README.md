@@ -73,7 +73,7 @@ graph TD
 3. Run `npm test` for the unit tests and `npm run lint` for static checks
 
 ## ⚠️ Known Limitations
-- `/analyze` validates its input but has no rate limiting, so public traffic can consume the Gemini quota
+- `/analyze` limits requests per client (10/min) and per server instance (60/min) in memory, so limits are best-effort across serverless instances
 - Calendars cover the previous, current, and next year only
 
 ## ✅ Milestone

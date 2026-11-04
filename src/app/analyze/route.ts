@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { AiErrorCode, AiTone, parseAiDraft, parseAnalyzeRequest } from "@/lib/aiDraft";
+import { createRateLimiter, getClientKey } from "@/lib/rateLimit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -11,8 +12,12 @@ const TONE_SETTINGS: Record<AiTone, string> = {
   apology: "일정 충돌에 대해 깊은 사과와 함께 대안 날짜를 제시하는 낮은 자세의 말투."
 };
 
-const errorResponse = (code: AiErrorCode, status: number) =>
-  NextResponse.json({ error: code }, { status });
+// Gemini 할당량 보호: 클라이언트별 분당 10회, 서버 인스턴스 전체 분당 60회
+const checkClientLimit = createRateLimiter(10, 60_000);
+const checkInstanceLimit = createRateLimiter(60, 60_000);
+
+const errorResponse = (code: AiErrorCode, status: number, headers?: HeadersInit) =>
+  NextResponse.json({ error: code }, { status, headers });
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -24,6 +29,12 @@ export async function POST(req: Request) {
 
   const input = parseAnalyzeRequest(body);
   if (!input) return errorResponse("invalid_request", 400);
+
+  // Gemini를 호출하는 유효한 요청만 횟수에 포함
+  const retryAfter = checkClientLimit(getClientKey(req.headers)) ?? checkInstanceLimit("all");
+  if (retryAfter !== null) {
+    return errorResponse("rate_limited", 429, { "Retry-After": String(retryAfter) });
+  }
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
