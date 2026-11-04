@@ -84,7 +84,7 @@ export default function EmailGenerator({
             { step: "03", text: t.step03 }
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col items-center">
-              <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">STEP {item.step}</div>
+              <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">{t.step} {item.step}</div>
               <p className="text-xs font-bold text-gray-700">{item.text}</p>
             </div>
           ))}
@@ -103,9 +103,9 @@ export default function EmailGenerator({
     <div className="bg-white rounded-3xl p-5 sm:p-8 border border-blue-100 shadow-2xl shadow-blue-500/10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">Email Draft</h4>
+          <h4 className="text-2xl font-black text-gray-800 tracking-tight">{t.draftTitle}</h4>
           <p className="text-blue-500 text-sm font-bold uppercase mt-1 tracking-widest">
-            {aiDraft ? "AI Powered Draft" : data?.title}
+            {aiDraft ? t.aiDraftLabel : data?.title}
           </p>
         </div>
         
@@ -164,7 +164,7 @@ export default function EmailGenerator({
       <div className="space-y-6">
         {/* Subject Line */}
         <div className="group relative">
-          <label htmlFor="email-subject" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Email Subject</label>
+          <label htmlFor="email-subject" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{t.subjectLabel}</label>
           <div className="relative flex items-center">
             <input
               id="email-subject"
@@ -185,7 +185,7 @@ export default function EmailGenerator({
 
         {/* Message Body */}
         <div className="relative">
-          <label htmlFor="email-body" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">Message Body</label>
+          <label htmlFor="email-body" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{t.bodyLabel}</label>
           <textarea
             id="email-body"
             readOnly

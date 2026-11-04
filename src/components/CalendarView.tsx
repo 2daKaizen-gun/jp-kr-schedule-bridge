@@ -38,8 +38,8 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
                 {/* 요일 헤더 */}
                 <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-[10px] sm:text-xs font-bold py-2">
-                    {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => (
-                        <div key={d} className={d === "SUN" ? "text-red-500" : d === "SAT" ? "text-blue-500" : "text-gray-500"}>
+                    {t.weekdays.map((d, index) => (
+                        <div key={d} className={index === 0 ? "text-red-600" : index === 6 ? "text-blue-600" : "text-gray-600"}>
                             {d}
                         </div>
                     ))}

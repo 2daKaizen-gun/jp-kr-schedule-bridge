@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { DashboardProps, Holiday, Lang, ScheduleAdvice } from '@/types/holiday';
+import { DashboardProps, Holiday, ScheduleAdvice } from '@/types/holiday';
+import { readLang, readLangOnServer, subscribeToLang, writeLang } from '@/lib/language';
 import { MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
@@ -44,7 +45,7 @@ export default function ScheduleDashboard({
   initialMonth
 }: DashboardProps) {
 
-  const [lang, setLang] = useState<Lang>('ko');
+  const lang = useSyncExternalStore(subscribeToLang, readLang, readLangOnServer);
   const [selectedHolidayDate, setSelectedHolidayDate] = useState<string | null>(null);
   const [emailDraft, setEmailDraft] = useState("");
   const [activeTone, setActiveTone] = useState(""); // 생성 중인 톤 (비어 있으면 대기 상태)
@@ -174,7 +175,7 @@ export default function ScheduleDashboard({
       {/* Page Header: 언어 토글에 반응하는 설명 섹션 */}
       <header className="mb-6 sm:mb-10">
         <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-gray-900 mb-2">
-          Business Calendar Dashboard
+          {currentT.title}
         </h2>
         <p className="text-base sm:text-lg text-gray-500 font-medium">
           {currentT.subDescription}
@@ -191,15 +192,15 @@ export default function ScheduleDashboard({
             onClick={goToday}
             className="px-3 py-1 text-xs font-bold text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
-            TODAY
+            {currentT.today}
           </button>
         </div>
 
         <div className='flex gap-2 sm:gap-4 items-center'>
           {/* 언어 스위처 */}
           <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button aria-pressed={lang === 'ko'} onClick={() => setLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
-            <button aria-pressed={lang === 'ja'} onClick={() => setLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>JA</button>
+            <button aria-pressed={lang === 'ko'} onClick={() => writeLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
+            <button aria-pressed={lang === 'ja'} onClick={() => writeLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>JA</button>
           </div>
           <div className='flex gap-1'>
             <button aria-label={currentT.prevMonth} onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
@@ -211,7 +212,7 @@ export default function ScheduleDashboard({
       {/* 달력 그리드 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
         <section className="min-w-0">
-          <h3 className="text-lg font-bold mb-4 text-gray-700">🇯🇵 Japan Calendar</h3>
+          <h3 className="text-lg font-bold mb-4 text-gray-700">🇯🇵 {currentT.japanCalendar}</h3>
           <CalendarView
             month={viewMonth}
             holidays={jpHolidays}
@@ -225,7 +226,7 @@ export default function ScheduleDashboard({
         </section>
 
         <section className="min-w-0">
-          <h3 className="text-lg font-bold mb-4 text-gray-700">🇰🇷 Korea Calendar</h3>
+          <h3 className="text-lg font-bold mb-4 text-gray-700">🇰🇷 {currentT.koreaCalendar}</h3>
           <CalendarView
             month={viewMonth}
             holidays={krHolidays}

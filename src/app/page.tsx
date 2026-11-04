@@ -7,7 +7,7 @@ export const revalidate = 86400;
 
 export default async function Home() {
   const now = new Date();
-  const years = [now.getFullYear(), now.getFullYear() + 1];
+  const years = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
   // 데이터 가져오기 (병렬)
   const [jpHolidays, krHolidays] = await Promise.all([

@@ -1,5 +1,9 @@
 export const translations = {
     ko: {
+        title: "비즈니스 캘린더 대시보드",
+        today: "오늘",
+        japanCalendar: "일본 달력",
+        koreaCalendar: "한국 달력",
         subDescription: "한국과 일본 공휴일을 비교해 최적의 협업 일정을 제안합니다.",
         todayStatus: "오늘의 비즈니스 상태",
         bestDays: "최적의 협업일 (향후 2주)",
@@ -11,6 +15,11 @@ export const translations = {
         holidayKr: "한국 공휴일 주의",
         noRecommendations: "향후 2주 안에 추천할 날이 없습니다.",
         email: {
+        draftTitle: "메일 초안",
+        aiDraftLabel: "AI 생성 초안",
+        subjectLabel: "메일 제목",
+        bodyLabel: "메일 본문",
+        step: "단계",
         step01: "달력에서 공휴일을 클릭하세요.",
         step02: "원하는 메일 톤을 선택하세요.",
         step03: "생성된 문구를 복사해 사용하세요.",
@@ -44,6 +53,7 @@ export const translations = {
         save: "일정 저장"
         },
         calendar: {
+        weekdays: ["일", "월", "화", "수", "목", "금", "토"],
         legend: "범례",
         otherOnly: "상대국만 휴무 (협업 주의)",
         both: "양국 공통 휴무 (비즈니스 중단)",
@@ -53,6 +63,10 @@ export const translations = {
         }
     },
     ja: {
+        title: "ビジネスカレンダーダッシュボード",
+        today: "今日",
+        japanCalendar: "日本カレンダー",
+        koreaCalendar: "韓国カレンダー",
         subDescription: "韓国と日本の祝日を比較し、最適なコラボレーション日程を提案します。",
         todayStatus: "本日のビジネス状況",
         bestDays: "ベストな協力日 (今後2週間)",
@@ -64,6 +78,11 @@ export const translations = {
         holidayKr: "韓国の祝日に伴う注意",
         noRecommendations: "今後2週間におすすめできる日はありません。",
         email: {
+        draftTitle: "メール下書き",
+        aiDraftLabel: "AI生成の下書き",
+        subjectLabel: "件名",
+        bodyLabel: "本文",
+        step: "ステップ",
         step01: "カレンダーから祝日を選択してください。",
         step02: "メールのトーンを選択してください。",
         step03: "テキストをコピーして使用してください。",
@@ -97,6 +116,7 @@ export const translations = {
         save: "予定を保存"
         },
         calendar: {
+        weekdays: ["日", "月", "火", "水", "木", "金", "土"],
         legend: "凡例",
         otherOnly: "相手国のみ休務 (協力注意)",
         both: "両国共通の祝日 (ビジネス中断)",

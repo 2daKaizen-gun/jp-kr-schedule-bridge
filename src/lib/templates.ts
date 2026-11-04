@@ -10,7 +10,7 @@ interface TemplateContent {
 export const emailTemplates: Record<'ko' | 'ja', Record<TemplateType, TemplateContent>> = {
   ko: {
     JP_HOLIDAY: {
-      title: "일본 공휴일 배려 (JP Holiday)",
+      title: "일본 공휴일 배려",
       subject: (date, holidayName) => `[확인 요청] ${date} 일본 공휴일(${holidayName})에 따른 업무 일정 확인의 건`,
       body: (date, holidayName) =>
 `いつも大変お世話になっております。 (항상 신세를 지고 있습니다.)
@@ -23,7 +23,7 @@ ${date}일은 일본의 공휴일인 [${holidayName}]으로 알고 있습니다.
 何卒、よろしくお願い申し上げます。 (아무쪼록 잘 부탁드립니다.)`
     },
     KR_HOLIDAY: {
-      title: "한국 공휴일 알림 (KR Holiday)",
+      title: "한국 공휴일 알림",
       subject: (date, holidayName) => `[안내] ${date} 한국 공휴일(${holidayName})에 따른 휴무 안내의 건`,
       body: (date, holidayName) =>
 `いつもお世話になっております。 (언제나 신세를 지고 있습니다.)
@@ -38,7 +38,7 @@ ${date}일은 일본의 공휴일인 [${holidayName}]으로 알고 있습니다.
 引き続き、よろしくお願いいたします。 (앞으로도 잘 부탁드립니다.)`
     },
     BOTH_HOLIDAY: {
-      title: "양국 공휴일 공통 (Joint Holiday)",
+      title: "양국 공휴일 공통",
       subject: (date) => `[안내] ${date} 한일 공통 공휴일로 인한 일정 조정 안내`,
       body: (date) =>
 `いつも大変お世話になっております。 (항상 신세를 지고 있습니다.)
@@ -53,7 +53,7 @@ ${date}일은 일본의 공휴일인 [${holidayName}]으로 알고 있습니다.
   },
   ja: {
     JP_HOLIDAY: {
-      title: "日本の祝日への配慮 (JP Holiday)",
+      title: "日本の祝日への配慮",
       subject: (date, holidayName) => `【ご確認】${date} 日本の祝日（${holidayName}）に伴う進行スケジュール調整の件`,
       body: (date, holidayName) =>
 `いつも大変お世話になっております。
@@ -66,7 +66,7 @@ ${date}は日本の祝日（${holidayName}）にあたると存じておりま�
 何卒、よろしくお願い申し上げます。`
     },
     KR_HOLIDAY: {
-      title: "韓国の祝日による休業 (KR Holiday)",
+      title: "韓国の祝日による休業",
       subject: (date, holidayName) => `【お知らせ】${date} 韓国の祝日（${holidayName}）に伴う休業のご案内`,
       body: (date, holidayName) =>
 `いつもお世話になっております。
@@ -81,7 +81,7 @@ ${date}は日本の祝日（${holidayName}）にあたると存じておりま�
 引き続き、よろしくお願いいたします。`
     },
     BOTH_HOLIDAY: {
-      title: "両国共通の祝日による調整 (Joint Holiday)",
+      title: "両国共通の祝日による調整",
       subject: (date) => `【ご連絡】${date} 韓日共通の祝日に伴う日程調整のお願い`,
       body: (date) =>
 `いつも大変お世話になっております。

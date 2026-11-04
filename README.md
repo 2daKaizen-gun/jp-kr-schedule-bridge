@@ -74,7 +74,7 @@ graph TD
 
 ## ⚠️ Known Limitations
 - `/analyze` validates its input but has no rate limiting, so public traffic can consume the Gemini quota
-- Calendars cover the current and next year only
+- Calendars cover the previous, current, and next year only
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
