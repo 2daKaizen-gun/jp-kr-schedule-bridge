@@ -11,6 +11,25 @@ import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
 
+function VacationNotice({ names, start, end, label, tone }: {
+  names: string;
+  start: string;
+  end: string;
+  label: string;
+  tone: { box: string; title: string; name: string; date: string };
+}) {
+  return (
+    <div className={`${tone.box} border p-5 rounded-2xl`}>
+      <span className={`${tone.title} font-bold block mb-2 text-lg`}>{label}</span>
+      <p className={`${tone.name} font-extrabold`}>{names}</p>
+      <p className={`${tone.date} text-sm`}>📅 {start === end ? start : `${start} ~ ${end}`}</p>
+    </div>
+  );
+}
+
+const JP_NOTICE = { box: 'bg-orange-50 border-orange-200', title: 'text-orange-800', name: 'text-orange-900', date: 'text-orange-700' };
+const KR_NOTICE = { box: 'bg-red-50 border-red-200', title: 'text-red-800', name: 'text-red-900', date: 'text-red-700' };
+
 const ADVICE_STYLES: Record<ScheduleAdvice['status'], string> = {
   work: 'bg-green-50 border-green-200',
   holiday: 'bg-gray-50 border-gray-200',
@@ -33,6 +52,7 @@ export default function ScheduleDashboard({
   const [aiSubject, setAiSubject] = useState<string | null>(null);
   const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
   const aiRequest = useRef<AbortController | null>(null);
+  const emailPanel = useRef<HTMLDivElement>(null);
 
   const currentT = translations[lang];
 
@@ -136,14 +156,17 @@ export default function ScheduleDashboard({
     };
   })();
 
-  // 날짜 클릭 핸들러 (공휴일이면 메일 초안 설정, 일정 추가 모달 열기)
+  // 공휴일은 메일 초안으로 이동하고, 그 외 날짜는 일정 추가 모달을 염
   const handleDateClick = (date: string) => {
-    if (conflictMarkers[date]) {
-      setSelectedHolidayDate(date);
-      handleReset(); // 이전 공휴일 기준의 AI 초안이 남지 않도록 초기화
+    if (!conflictMarkers[date]) {
+      openEventModal(date);
+      return;
     }
 
-    openEventModal(date);
+    setSelectedHolidayDate(date);
+    handleReset(); // 이전 공휴일 기준의 AI 초안이 남지 않도록 초기화
+    emailPanel.current?.scrollIntoView({ block: 'start' });
+    emailPanel.current?.focus({ preventScroll: true });
   };
 
   return (
@@ -220,36 +243,45 @@ export default function ScheduleDashboard({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-4">
           {jpVacations.map((block) => (
-            <div key={block.start} className="bg-orange-50 border border-orange-200 p-5 rounded-2xl">
-              <span className="text-orange-800 font-bold block mb-2 text-lg">🇯🇵 {currentT.vacationJp}</span>
-              <p className="text-orange-900 font-extrabold">{block.displayNames}</p>
-              <p className="text-orange-700 text-sm">📅 {block.start} ~ {block.end}</p>
-            </div>
+            <VacationNotice
+              key={block.start}
+              names={block.displayNames}
+              start={block.start}
+              end={block.end}
+              label={`🇯🇵 ${block.start === block.end ? currentT.holidayJp : currentT.vacationJp}`}
+              tone={JP_NOTICE}
+            />
           ))}
         </div>
         <div className="flex flex-col gap-4">
           {krVacations.map((block) => (
-            <div key={block.start} className="bg-red-50 border border-red-200 p-5 rounded-2xl">
-              <span className="text-red-800 font-bold block mb-2 text-lg">🇰🇷 {currentT.vacationKr}</span>
-              <p className="text-red-900 font-extrabold">{block.displayNames}</p>
-              <p className="text-red-700 text-sm">📅 {block.start} ~ {block.end}</p>
-            </div>
+            <VacationNotice
+              key={block.start}
+              names={block.displayNames}
+              start={block.start}
+              end={block.end}
+              label={`🇰🇷 ${block.start === block.end ? currentT.holidayKr : currentT.vacationKr}`}
+              tone={KR_NOTICE}
+            />
           ))}
         </div>
       </div>
 
       {/* 이메일 생성기 */}
-      <EmailGenerator
-        data={selectedEmail}
-        onAiGenerate={callAiApi}
-        onReset={handleReset}
-        aiDraft={emailDraft}
-        aiSubject={aiSubject}
-        aiError={aiError}
-        activeTone={activeTone}
-        currentTone={currentTone}
-        lang={lang}
-      />
+      <div ref={emailPanel} tabIndex={-1} className="scroll-mt-4 outline-none">
+        <EmailGenerator
+          data={selectedEmail}
+          onAiGenerate={callAiApi}
+          onReset={handleReset}
+          onAddEvent={() => selectedHolidayDate && openEventModal(selectedHolidayDate)}
+          aiDraft={emailDraft}
+          aiSubject={aiSubject}
+          aiError={aiError}
+          activeTone={activeTone}
+          currentTone={currentTone}
+          lang={lang}
+        />
+      </div>
 
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-5 sm:p-8 bg-white rounded-3xl shadow-sm border border-green-100">

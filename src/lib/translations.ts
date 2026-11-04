@@ -7,6 +7,8 @@ export const translations = {
         nextMonth: "다음 달",
         vacationJp: "일본 연휴 주의",
         vacationKr: "한국 연휴 주의",
+        holidayJp: "일본 공휴일 주의",
+        holidayKr: "한국 공휴일 주의",
         noRecommendations: "향후 2주 안에 추천할 날이 없습니다.",
         email: {
         step01: "달력에서 공휴일을 클릭하세요.",
@@ -24,6 +26,8 @@ export const translations = {
         apology: "사과",
         aiRateLimited: "AI 사용량 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.",
         aiFailed: "메일을 생성하지 못했습니다. 다시 시도해 주세요.",
+        copyFailed: "복사하지 못했습니다. 내용을 직접 선택해 복사해 주세요.",
+        addEvent: "이 날짜에 일정 추가",
         },
         modal: {
         title: "새 일정 추가",
@@ -54,8 +58,10 @@ export const translations = {
         bestDays: "ベストな協力日 (今後2週間)",
         prevMonth: "前の月",
         nextMonth: "次の月",
-        vacationJp: "日本の祝日に伴う注意",
-        vacationKr: "韓国の祝日に伴う注意",
+        vacationJp: "日本の連休に伴う注意",
+        vacationKr: "韓国の連休に伴う注意",
+        holidayJp: "日本の祝日に伴う注意",
+        holidayKr: "韓国の祝日に伴う注意",
         noRecommendations: "今後2週間におすすめできる日はありません。",
         email: {
         step01: "カレンダーから祝日を選択してください。",
@@ -73,6 +79,8 @@ export const translations = {
         apology: "お詫び",
         aiRateLimited: "AIの利用上限に達しました。しばらくしてからもう一度お試しください。",
         aiFailed: "メールを生成できませんでした。もう一度お試しください。",
+        copyFailed: "コピーできませんでした。内容を選択して手動でコピーしてください。",
+        addEvent: "この日に予定を追加",
         },
         modal: {
         title: "予定を追加",

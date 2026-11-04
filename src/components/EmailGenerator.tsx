@@ -13,6 +13,7 @@ interface EmailGeneratorProps {
   lang: Lang;
   onAiGenerate: (tone: string) => void;
   onReset: () => void;
+  onAddEvent: () => void;
   aiDraft: string;
   aiSubject: string | null;
   aiError: 'rate_limited' | 'failed' | null;
@@ -41,13 +42,14 @@ export default function EmailGenerator({
   lang,
   onAiGenerate,
   onReset,
+  onAddEvent,
   aiDraft,
   aiSubject,
   aiError,
   activeTone,
   currentTone
 }: EmailGeneratorProps) {
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body'>('idle');
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body' | 'failed'>('idle');
 
   // 현재 언어에 맞는 번역 데이터 가져오기
   const t = translations[lang].email;
@@ -60,6 +62,7 @@ export default function EmailGenerator({
       setTimeout(() => setCopyStatus('idle'), 2000); // 2초 후 상태 초기화
     } catch (err) {
       console.error('복사 실패:', err);
+      setCopyStatus('failed');
     }
   };
 
@@ -135,6 +138,22 @@ export default function EmailGenerator({
           ))}
         </div>
       </div>
+
+      {data && (
+        <button
+          type="button"
+          onClick={onAddEvent}
+          className="mb-6 px-3 py-2 rounded-xl text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+        >
+          + {t.addEvent}
+        </button>
+      )}
+
+      {copyStatus === 'failed' && (
+        <p role="alert" className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-red-700">
+          {t.copyFailed}
+        </p>
+      )}
 
       {aiError && (
         <p role="alert" className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-red-700">
