@@ -111,6 +111,7 @@ export default function EmailGenerator({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={onReset}
+            disabled={!aiDraft}
             className={`px-3 py-2 rounded-xl text-xs font-black transition-all border-2 ${
               aiDraft
                 ? 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50 active:scale-95'

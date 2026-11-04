@@ -164,7 +164,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
             <div className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 items-center">
                 <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{t.legend}:</span>
                 <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
                     <span className="text-xs text-gray-600 font-medium">{t.jpOnly}</span>
                 </div>
                 <div className="flex items-center gap-1.5">

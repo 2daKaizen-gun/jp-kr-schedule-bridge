@@ -32,6 +32,10 @@ export default function EventModal({ date, lang, onClose, onSave }: EventModalPr
         { id: 'holiday', label: t.personal }
     ];
 
+    const handleSave = () => {
+        if (title.trim()) onSave(title.trim(), type, country);
+    };
+
     // showModal이 포커스 가두기, Esc 닫기, 배경 비활성화를 처리
     // showModal은 첫 번째 버튼으로 포커스를 옮기므로 이후에 입력칸으로 이동
     useEffect(() => {
@@ -65,6 +69,10 @@ export default function EventModal({ date, lang, onClose, onSave }: EventModalPr
                         placeholder={t.placeholder} // 플레이스홀더 현지화
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                            // 한글·일본어 조합을 확정하는 Enter로는 저장하지 않음
+                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSave();
+                        }}
                     />
                 </div>
 
@@ -111,7 +119,7 @@ export default function EventModal({ date, lang, onClose, onSave }: EventModalPr
                 </button>
                 <button
                     type="button"
-                    onClick={() => title.trim() && onSave(title.trim(), type, country)}
+                    onClick={handleSave}
                     className="flex-1 p-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-200"
                 >
                     {t.save}

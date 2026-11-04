@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
@@ -10,6 +10,14 @@ import { MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
+
+const ADVICE_STYLES: Record<string, string> = {
+  work: 'bg-green-50 border-green-200',
+  holiday: 'bg-gray-50 border-gray-200',
+  match: 'bg-gray-50 border-gray-200',
+  'kr-only': 'bg-red-50 border-red-200',
+  'jp-only': 'bg-blue-50 border-blue-200',
+};
 
 export default function ScheduleDashboard({ 
   jpHolidays,
@@ -25,6 +33,8 @@ export default function ScheduleDashboard({
   const [currentTone, setCurrentTone] = useState("");
   const [aiSubject, setAiSubject] = useState<string | null>(null);
   const [aiError, setAiError] = useState<'rate_limited' | 'failed' | null>(null);
+
+  const aiRequest = useRef<AbortController | null>(null);
 
   const currentT = translations[lang];
 
@@ -53,6 +63,8 @@ export default function ScheduleDashboard({
 
   // AI 관련 로직
   const callAiApi = async (tone: string) => {
+    const request = new AbortController();
+    aiRequest.current = request;
     setActiveMode(tone);
     setIsEmailLoading(true);
     setAiError(null);
@@ -67,6 +79,7 @@ export default function ScheduleDashboard({
       const res = await fetch('/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: request.signal,
         body: JSON.stringify({
           tone,
           currentMonth,
@@ -87,15 +100,22 @@ export default function ScheduleDashboard({
       setAiSubject(data.subject);
       setCurrentTone(tone);
     } catch {
-      setAiError('failed');
+      // 다른 공휴일을 선택해 취소한 요청은 오류로 표시하지 않음
+      if (!request.signal.aborted) setAiError('failed');
     } finally {
-      setIsEmailLoading(false);
-      setActiveMode("");
+      if (aiRequest.current === request) {
+        setIsEmailLoading(false);
+        setActiveMode("");
+      }
     }
   };
 
   // 기본으로 되돌림
   const handleReset = () => {
+    aiRequest.current?.abort();
+    aiRequest.current = null;
+    setIsEmailLoading(false);
+    setActiveMode("");
     setEmailDraft("");
     setAiSubject(null);
     setAiError(null);
@@ -247,6 +267,9 @@ export default function ScheduleDashboard({
       {/* 추천 일정 및 비즈니스 조언 */}
       <section className="mt-10 p-5 sm:p-8 bg-white rounded-3xl shadow-sm border border-green-100">
         <h3 className="text-xl font-bold text-green-800 mb-6">{currentT.bestDays}</h3>
+        {today && recommendedDays.length === 0 && (
+          <p className="text-sm text-gray-600">{currentT.noRecommendations}</p>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {recommendedDays.map((item, idx) => (
             <div key={idx} className="p-4 rounded-2xl bg-green-50 border border-green-200">
@@ -257,7 +280,7 @@ export default function ScheduleDashboard({
         </div>
       </section>
 
-      <section className={`p-6 rounded-2xl border-2 ${advice?.status === 'jp-only' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+      <section className={`p-6 rounded-2xl border-2 ${advice ? ADVICE_STYLES[advice.status] : 'bg-gray-50 border-gray-200'}`}>
         <h3 className="font-bold mb-2">
           {currentT.todayStatus} ({today ? format(parseISO(today), lang === 'ko' ? "yyyy. MM. dd" : "yyyy/MM/dd") : "..."})
         </h3>

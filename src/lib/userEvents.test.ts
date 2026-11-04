@@ -20,4 +20,11 @@ describe("parseUserEvents", () => {
     expect(parseUserEvents('{"id":"1"}')).toEqual([]);
     expect(parseUserEvents(JSON.stringify([event, { id: 1 }, null]))).toEqual([event]);
   });
+
+  it("keeps events saved by earlier versions", () => {
+    const saved = JSON.stringify([{ id: 1700000000000, date: "2026-11-10", title: "미팅", type: "personal" }]);
+    expect(parseUserEvents(saved)).toEqual([
+      { id: "1700000000000", date: "2026-11-10", title: "미팅", type: "meeting", countryCode: "Both" },
+    ]);
+  });
 });

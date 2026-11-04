@@ -5,6 +5,7 @@ export const translations = {
         bestDays: "최적의 협업일 (향후 2주)",
         prevMonth: "이전 달",
         nextMonth: "다음 달",
+        noRecommendations: "향후 2주 안에 추천할 날이 없습니다.",
         email: {
         step01: "달력에서 공휴일을 클릭하세요.",
         step02: "원하는 메일 톤을 선택하세요.",
@@ -50,6 +51,7 @@ export const translations = {
         bestDays: "ベストな協力日 (今後2週間)",
         prevMonth: "前の月",
         nextMonth: "次の月",
+        noRecommendations: "今後2週間におすすめできる日はありません。",
         email: {
         step01: "カレンダーから祝日を選択してください。",
         step02: "メールのトーンを選択してください。",
