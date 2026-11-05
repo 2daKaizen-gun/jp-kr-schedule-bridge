@@ -66,6 +66,7 @@ graph TD
 - **Deployment**: <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"> | CI/CD Pipeline
 - **Libraries**: <img src="https://img.shields.io/badge/datefns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> | Date
 - **Testing**: <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white"> | Date & Validation Logic
+- **CI**: <img src="https://img.shields.io/badge/github%20actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"> | Type Check, Lint, Test, Build
 
 ## 🚀 Getting Started
 1. Create `.env.local` with `GOOGLE_CALENDAR_API_KEY` and `GEMINI_API_KEY`
@@ -75,6 +76,7 @@ graph TD
 ## ⚠️ Known Limitations
 - `/analyze` limits requests per client (10/min) and per server instance (60/min) in memory, so limits are best-effort across serverless instances
 - Calendars cover the previous, current, and next year only
+- When Gemini models are busy, falling back to the next model can make email generation take up to about 45 seconds
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -111,6 +113,7 @@ graph TD
   - [x] Phase 5-4: Global Localization & UX Optimization 
   - [x] Phase 5-5: Code Refactoring & TypeScript Strict Mode Audit
   - [x] Phase 5-6: Final Project Retrospective
+  - [x] Phase 5-7: Add CI Pipeline (GitHub Actions)
 
 ## 🔥 Troubleshooting & Lessons Learned
 **1. Hydration Mismatch (React Error #418)**
@@ -123,21 +126,22 @@ graph TD
 
   - **Resolution**: Switched to gemini-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
 
+  - **Follow-up**: During a Gemini demand spike the primary model returned 503 errors or stopped responding, so each model now has a 15-second limit and requests fall back to the next model.
+
 **3. Accessibility & Contrast**
   - **Challenge**: Minimalist design with light grays (text-gray-400) failed WCAG accessibility standards.
 
-  - **Resolution**: Conducted a comprehensive color audit, remapping text colors (text-gray-400 → 600) to achieve a near-perfect Accessibility score without sacrificing the professional design.
+  - **Resolution**: Conducted a comprehensive color audit, darkening low-contrast text and buttons to reach a Lighthouse Accessibility score of 100 without sacrificing the professional design.
 
 ## 📈 Results
-> Lighthouse scores below predate the November 2026 fixes and should be re-measured after the next deployment.
+Measured on the live site with Lighthouse 12.8 on November 5, 2026. Performance varies between runs.
 
-- **Performance**: 100 (FCP: 0.3s, LCP: 0.5s)
+| | Performance | Accessibility | Best Practices | SEO | FCP | LCP |
+|---|---|---|---|---|---|---|
+| **Desktop** | 100 | 100 | 100 | 100 | 0.5s | 0.6s |
+| **Mobile** | 91 | 100 | 100 | 100 | 1.9s | 2.3s |
 
-- **Accessibility**: 95 (WCAG Compliant)
-
-- **Best Practices**: 100 (Modern Web Standards)
-
-- **SEO**: 100 (Optimized Meta-tags)
+An axe scan (WCAG 2.1 A/AA rules) of the main screens, the email draft, and the event dialog found no violations. Automated checks cover only part of WCAG.
 
 ## 🧐 Self-Reflection
 - **Technical Growth**
@@ -151,9 +155,9 @@ graph TD
 ## 🧐 Final Project Retrospective
 
 ### 💡Engineering for Reliability
-This project was built with a core focus on 'Reliability'. I achieved perfect 100/100/100 scores in Lighthouse Performance, Best Practices, and SEO, while securing a high score of 95 in Accessibility. Beyond mere feature implementation, I proved that AI technology can be stable enough for professional business environments through production-level optimization and robust error handling. The Accessibility score of 95 is a strategic result of finding the optimal balance between maintaining a minimalist design identity and ensuring high legibility for users.
+This project was built with a core focus on 'Reliability'. On desktop, the live site scores 100 in all four Lighthouse categories; on mobile, it scores 100 in Accessibility, Best Practices, and SEO, and 91 in Performance. Beyond mere feature implementation, I worked to keep AI features usable in professional business environments through production-level optimization, model fallback, and robust error handling.
 
-- **Lighthouse Score**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_95%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
+- **Lighthouse Score (Desktop)**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_100%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
 
 ### 🚀 Technical Evolution: Beyond CRUD
 Moving from Project 2 (Python/Streamlit) to Project 3 (Next.js/TypeScript), I mastered the nuances of Modern Web Architecture. Dealing with Hydration errors and SSR/ISR taught me how to manage the lifecycle of data in a high-performance production environment.
