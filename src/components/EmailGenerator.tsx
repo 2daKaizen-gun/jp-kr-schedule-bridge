@@ -84,7 +84,7 @@ export default function EmailGenerator({
             { step: "03", text: t.step03 }
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col items-center">
-              <div className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full mb-2">{t.step} {item.step}</div>
+              <div className="text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full mb-2">{t.step} {item.step}</div>
               <p className="text-xs font-bold text-gray-700">{item.text}</p>
             </div>
           ))}
@@ -104,7 +104,7 @@ export default function EmailGenerator({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h4 className="text-2xl font-black text-gray-800 tracking-tight">{t.draftTitle}</h4>
-          <p className="text-blue-500 text-sm font-bold uppercase mt-1 tracking-widest">
+          <p className="text-blue-700 text-sm font-bold uppercase mt-1 tracking-widest">
             {aiDraft ? t.aiDraftLabel : data?.title}
           </p>
         </div>
@@ -124,7 +124,7 @@ export default function EmailGenerator({
           </button>
           {[
             { id: 'formal', label: t.formal, color: 'bg-indigo-600' },
-            { id: 'urgent', label: t.urgent, color: 'bg-amber-600' },
+            { id: 'urgent', label: t.urgent, color: 'bg-amber-700' },
             { id: 'apology', label: t.apology, color: 'bg-rose-600' },
           ].map((btn) => (
             <button

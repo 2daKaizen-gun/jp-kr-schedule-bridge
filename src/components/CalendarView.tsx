@@ -39,7 +39,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                 {/* 요일 헤더 */}
                 <div className="grid grid-cols-7 bg-gray-100 border-b text-center text-[10px] sm:text-xs font-bold py-2">
                     {t.weekdays.map((d, index) => (
-                        <div key={d} className={index === 0 ? "text-red-600" : index === 6 ? "text-blue-600" : "text-gray-600"}>
+                        <div key={d} className={index === 0 ? "text-red-700" : index === 6 ? "text-blue-700" : "text-gray-600"}>
                             {d}
                         </div>
                     ))}
@@ -70,7 +70,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                 // 공휴일이 아니더라도 개인 일정 추가를 위해 항상 클릭 가능
                                 onClick={() => onDateClick(formattedDate)}
                                 className={`group cursor-pointer relative min-w-0 min-h-20 sm:min-h-24 border-t border-r last:border-r-0 p-1 sm:p-2 transition-all hover:bg-gray-50
-                                    ${!isCurrentMonth ? "bg-gray-50/50 opacity-30" : "bg-white"}`}
+                                    ${!isCurrentMonth ? "bg-gray-50" : "bg-white"}`}
                             >
                                 <div className="flex justify-between items-start">
                                     {/* 키보드 조작용 버튼. 클릭은 상위 칸의 onClick으로 전달됨 */}
@@ -78,7 +78,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                         type="button"
                                         aria-label={`${formattedDate}${holiday ? ` ${holiday.localName}` : ""}`}
                                         className={`text-sm font-semibold rounded ${
-                                            (format(day, "i") === "7" || isPublicHoliday) ? "text-red-600" : "text-gray-700"
+                                            !isCurrentMonth ? "text-gray-500" : (format(day, "i") === "7" || isPublicHoliday) ? "text-red-700" : "text-gray-700"
                                         }`}
                                     >
                                         {format(day, "d")}
@@ -104,7 +104,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                     <div className={`mt-1 text-[10px] leading-tight font-bold break-keep [overflow-wrap:anywhere] p-0.5 sm:p-1 rounded ${
                                         isPublicHoliday
                                             ? (countryCode === "KR" ? "text-red-700 bg-red-100" : "text-blue-700 bg-blue-100")
-                                            : "text-gray-500 bg-gray-100"
+                                            : "text-gray-600 bg-gray-100"
                                     }`}>
                                         {holiday.localName}
                                     </div>
@@ -124,7 +124,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                             className={`mt-1 text-[10px] p-0.5 sm:p-1 rounded font-medium flex justify-between items-center transition-colors ${
                                                 canDelete 
                                                 ? "bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer" 
-                                                : "bg-gray-100 text-gray-500 cursor-default" // 권한 없으면 회색 처리
+                                                : "bg-gray-100 text-gray-600 cursor-default" // 권한 없으면 회색 처리
                                             }`}
                                         >
                                             <span className="truncate flex-1 min-w-0">{event.title}</span>
@@ -134,7 +134,7 @@ export default function CalendarView({ month, holidays, countryCode, conflictMar
                                                 <button
                                                     type="button"
                                                     aria-label={`${t.deleteEvent}: ${event.title}`}
-                                                    className="sr-only focus:not-sr-only sm:not-sr-only ml-1 text-red-600 font-bold hover:scale-125 transition-transform px-1"
+                                                    className="sr-only focus:not-sr-only sm:not-sr-only ml-1 text-red-700 font-bold hover:scale-125 transition-transform px-1"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onDeleteEvent(event.id);
