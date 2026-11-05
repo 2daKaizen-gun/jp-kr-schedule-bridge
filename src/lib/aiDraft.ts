@@ -75,22 +75,23 @@ export function parseAnalyzeRequest(body: unknown): AnalyzeRequest | null {
   };
 }
 
-// 일시적 오류일 때만 잠시 기다렸다가 다시 시도하고, 그래도 실패하면 마지막 오류를 전달
-export async function retryWhen<T>(
-  run: () => Promise<T>,
-  isTemporary: (error: unknown) => boolean,
-  delaysMs: number[],
-  wait: (ms: number) => Promise<void> = ms => new Promise(resolve => setTimeout(resolve, ms))
+// 일시적 오류면 다음 모델로 넘어가고, 모든 모델이 실패하면 마지막 오류를 전달
+export async function tryModels<T>(
+  models: readonly string[],
+  run: (model: string) => Promise<T>,
+  isTemporary: (error: unknown) => boolean
 ): Promise<T> {
-  for (const delay of delaysMs) {
+  let lastError: unknown = new Error("No models configured");
+  for (const model of models) {
     try {
-      return await run();
+      return await run(model);
     } catch (error) {
       if (!isTemporary(error)) throw error;
-      await wait(delay);
+      console.warn(`Gemini model ${model} is temporarily unavailable; trying the next one.`);
+      lastError = error;
     }
   }
-  return run();
+  throw lastError;
 }
 
 // 응답의 "件名: ..." 줄을 제목으로 분리하고, 없으면 본문을 그대로 반환

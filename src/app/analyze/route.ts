@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from "@google/generative-ai";
+import { GoogleGenerativeAI, GoogleGenerativeAIAbortError, GoogleGenerativeAIFetchError } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { AiErrorCode, AiTone, parseAiDraft, parseAnalyzeRequest, retryWhen } from "@/lib/aiDraft";
+import { AiErrorCode, AiTone, parseAiDraft, parseAnalyzeRequest, tryModels } from "@/lib/aiDraft";
 import { createRateLimiter, getClientKey } from "@/lib/rateLimit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -16,11 +16,21 @@ const TONE_SETTINGS: Record<AiTone, string> = {
 const checkClientLimit = createRateLimiter(10, 60_000);
 const checkInstanceLimit = createRateLimiter(60, 60_000);
 
-// Gemini가 일시적으로 과부하일 때 재시도할 대기 시간
-const OVERLOAD_RETRY_DELAYS_MS = [1000, 3000];
+// 앞 모델이 과부하이거나 응답하지 않으면 다음 모델을 사용
+const MODELS = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"];
+const MODEL_TIMEOUT_MS = 15_000;
 
-const isOverloaded = (error: unknown) =>
-  error instanceof GoogleGenerativeAIFetchError && error.status === 503;
+// 모든 모델이 제한 시간까지 응답하지 않아도 오류를 돌려줄 수 있는 실행 시간
+export const maxDuration = 50;
+
+const isRateLimited = (error: unknown) =>
+  error instanceof GoogleGenerativeAIFetchError && error.status === 429;
+
+const isUnavailable = (error: unknown) =>
+  error instanceof GoogleGenerativeAIAbortError ||
+  (error instanceof GoogleGenerativeAIFetchError && error.status === 503);
+
+const isTemporary = (error: unknown) => isRateLimited(error) || isUnavailable(error);
 
 const errorResponse = (code: AiErrorCode, status: number, headers?: HeadersInit) =>
   NextResponse.json({ error: code }, { status, headers });
@@ -43,8 +53,6 @@ export async function POST(req: Request) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-
     const translationRule = input.lang === "ko"
       ? "일본어 원문 아래에 한국어 번역본을 반드시 포함할 것."
       : "일본어 원문만 작성하고 번역본은 포함하지 말 것.";
@@ -71,15 +79,19 @@ export async function POST(req: Request) {
       4. **출력**: 다른 설명 없이 메일 내용만 출력해줘.
     `;
 
-    const result = await retryWhen(() => model.generateContent(prompt), isOverloaded, OVERLOAD_RETRY_DELAYS_MS);
+    const result = await tryModels(
+      MODELS,
+      model => genAI.getGenerativeModel({ model }, { timeout: MODEL_TIMEOUT_MS }).generateContent(prompt),
+      isTemporary
+    );
     const { subject, body: text } = parseAiDraft(result.response.text());
     return NextResponse.json({ subject, text });
   } catch (error) {
     console.error("Gemini Error:", error);
-    if (error instanceof GoogleGenerativeAIFetchError && error.status === 429) {
+    if (isRateLimited(error)) {
       return errorResponse("rate_limited", 429);
     }
-    if (isOverloaded(error)) {
+    if (isUnavailable(error)) {
       return errorResponse("unavailable", 503);
     }
     return errorResponse("failed", 500);

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { MAX_AI_ITEMS, parseAiDraft, parseAnalyzeRequest, retryWhen } from "./aiDraft";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MAX_AI_ITEMS, parseAiDraft, parseAnalyzeRequest, tryModels } from "./aiDraft";
 
 const validRequest = {
   tone: "formal",
@@ -38,40 +38,47 @@ describe("parseAnalyzeRequest", () => {
   });
 });
 
-describe("retryWhen", () => {
-  const noWait = async () => {};
-  const failThenSucceed = (failures: number, error: Error = new Error("busy")) => {
-    let calls = 0;
-    const run = async () => {
-      calls += 1;
-      if (calls <= failures) throw error;
-      return "ok";
-    };
-    return { run, calls: () => calls };
-  };
+describe("tryModels", () => {
+  const busy = new Error("busy");
+  const models = ["first", "second", "third"];
 
-  it("returns immediately on success", async () => {
-    const { run, calls } = failThenSucceed(0);
-    await expect(retryWhen(run, () => true, [1, 1], noWait)).resolves.toBe("ok");
-    expect(calls()).toBe(1);
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
-  it("retries temporary errors", async () => {
-    const { run, calls } = failThenSucceed(2);
-    await expect(retryWhen(run, () => true, [1, 1], noWait)).resolves.toBe("ok");
-    expect(calls()).toBe(3);
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("gives up after the last attempt", async () => {
-    const { run, calls } = failThenSucceed(5);
-    await expect(retryWhen(run, () => true, [1, 1], noWait)).rejects.toThrow("busy");
-    expect(calls()).toBe(3);
+  it("uses the first model when it succeeds", async () => {
+    const run = vi.fn(async (model: string) => model);
+    await expect(tryModels(models, run, () => true)).resolves.toBe("first");
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
-  it("does not retry other errors", async () => {
-    const { run, calls } = failThenSucceed(5);
-    await expect(retryWhen(run, () => false, [1, 1], noWait)).rejects.toThrow("busy");
-    expect(calls()).toBe(1);
+  it("moves to the next model on a temporary error", async () => {
+    const run = vi.fn(async (model: string) => {
+      if (model === "first") throw busy;
+      return model;
+    });
+    await expect(tryModels(models, run, () => true)).resolves.toBe("second");
+  });
+
+  it("reports the last error when every model fails", async () => {
+    const last = new Error("last");
+    const run = vi.fn(async (model: string) => {
+      throw model === "third" ? last : busy;
+    });
+    await expect(tryModels(models, run, () => true)).rejects.toBe(last);
+    expect(run).toHaveBeenCalledTimes(3);
+  });
+
+  it("stops immediately on a permanent error", async () => {
+    const run = vi.fn(async () => {
+      throw busy;
+    });
+    await expect(tryModels(models, run, () => false)).rejects.toBe(busy);
+    expect(run).toHaveBeenCalledTimes(1);
   });
 });
 
