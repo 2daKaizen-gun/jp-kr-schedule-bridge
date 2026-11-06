@@ -76,7 +76,7 @@ graph TD
 ## ⚠️ Known Limitations
 - `/analyze` limits requests per client (10/min) and per server instance (60/min) in memory, so limits are best-effort across serverless instances
 - Calendars cover the previous, current, and next year only
-- When Gemini models are busy, falling back to the next model can make email generation take up to about 45 seconds
+- When Gemini models are busy, falling back to the next model can make email generation take up to about 75 seconds
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -126,7 +126,7 @@ graph TD
 
   - **Resolution**: Switched to gemini-flash-latest for faster response times and implemented defensive error handling to notify users when quotas are reached.
 
-  - **Follow-up**: During a Gemini demand spike the primary model returned 503 errors or stopped responding, so each model now has a 15-second limit and requests fall back to the next model.
+  - **Follow-up**: During a Gemini demand spike the primary model returned 503 errors or stopped responding, so each model now has a 25-second limit and requests fall back to the next model.
 
 **3. Accessibility & Contrast**
   - **Challenge**: Minimalist design with light grays (text-gray-400) failed WCAG accessibility standards.

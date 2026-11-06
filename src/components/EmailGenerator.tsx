@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { translations } from '@/lib/translations';
 import { Lang } from '@/types/holiday';
+import type { AiDraft } from '@/lib/aiDraft';
 
 interface EmailGeneratorProps {
   data: {
@@ -14,28 +15,71 @@ interface EmailGeneratorProps {
   onAiGenerate: (tone: string) => void;
   onReset: () => void;
   onAddEvent: () => void;
-  aiDraft: string;
-  aiSubject: string | null;
+  aiDraft: AiDraft | null;
   aiError: 'rate_limited' | 'unavailable' | 'failed' | null;
   activeTone: string; // 생성 중인 톤 (비어 있으면 대기 상태)
-  currentTone: string;
 }
 
-// AI 응답에 제목이 없을 때 사용할 대체 제목
-const FALLBACK_SUBJECTS: Record<Lang, Record<string, string>> = {
-  ko: {
-    formal: "[정중] 비즈니스 커뮤니케이션 초안",
-    urgent: "[긴급] 업무 협조 및 일정 확인 요청",
-    apology: "[사과] 일정 변경 및 조율 안내",
-    default: "AI 생성 메일 초안"
-  },
-  ja: {
-    formal: "[丁寧] ビジネスコミュニケーション下書き",
-    urgent: "[至急] 業務協力および日程確認の依頼",
-    apology: "[お詫び] 日程変更および調整のご案内",
-    default: "AI生成メールの下書き"
-  }
-};
+interface DraftPanelProps {
+  id: string;
+  heading?: string;
+  subject: string;
+  body: string;
+  rows: number;
+  labels: { subject: string; body: string; copy: string; copied: string; copyFull: string; fullCopied: string };
+  copyStatus: string;
+  onCopy: (text: string, type: string) => void;
+}
+
+// 제목과 본문을 복사 버튼과 함께 보여주는 영역
+function DraftPanel({ id, heading, subject, body, rows, labels, copyStatus, onCopy }: DraftPanelProps) {
+  const subjectKey = `${id}-subject`;
+  const bodyKey = `${id}-body`;
+
+  return (
+    <div className="min-w-0 space-y-6">
+      {heading && <h5 className="text-sm font-black text-gray-800">{heading}</h5>}
+      <div>
+        <label htmlFor={subjectKey} className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{labels.subject}</label>
+        <div className="relative flex items-center">
+          <input
+            id={subjectKey}
+            readOnly
+            value={subject}
+            className="w-full bg-gray-50 border border-gray-100 p-4 pr-24 rounded-2xl text-sm font-bold text-gray-700 outline-none"
+          />
+          <button
+            onClick={() => onCopy(subject, subjectKey)}
+            className={`absolute right-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              copyStatus === subjectKey ? 'bg-green-700 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {copyStatus === subjectKey ? labels.copied : labels.copy}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor={bodyKey} className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{labels.body}</label>
+        <textarea
+          id={bodyKey}
+          readOnly
+          rows={rows}
+          value={body}
+          className="w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl text-sm leading-relaxed text-gray-600 font-medium resize-none outline-none"
+        />
+        <button
+          onClick={() => onCopy(body, bodyKey)}
+          className={`w-full mt-4 flex items-center justify-center gap-2 py-4 rounded-2xl font-black transition-all ${
+            copyStatus === bodyKey ? 'bg-green-700 text-white' : 'bg-gray-900 text-white hover:bg-black'
+          }`}
+        >
+          {copyStatus === bodyKey ? labels.fullCopied : labels.copyFull}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function EmailGenerator({
   data,
@@ -44,18 +88,16 @@ export default function EmailGenerator({
   onReset,
   onAddEvent,
   aiDraft,
-  aiSubject,
   aiError,
-  activeTone,
-  currentTone
+  activeTone
 }: EmailGeneratorProps) {
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'subject' | 'body' | 'failed'>('idle');
+  const [copyStatus, setCopyStatus] = useState<string>('idle');
 
   // 현재 언어에 맞는 번역 데이터 가져오기
   const t = translations[lang].email;
 
   // 클립보드 복사 함수
-  const handleCopy = async (text: string, type: 'subject' | 'body') => {
+  const handleCopy = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopyStatus(type);
@@ -93,11 +135,14 @@ export default function EmailGenerator({
     );
   }
 
-  const displaySubject = (aiDraft
-    ? (aiSubject || FALLBACK_SUBJECTS[lang][currentTone] || FALLBACK_SUBJECTS[lang].default)
-    : data?.subject) ?? "";
-
-  const displayBody = (aiDraft || data?.body) ?? "";
+  const panelLabels = {
+    subject: t.subjectLabel,
+    body: t.bodyLabel,
+    copy: t.copy,
+    copied: t.copied,
+    copyFull: t.copyFull,
+    fullCopied: t.fullCopied,
+  };
 
   return (
     <div className="bg-white rounded-3xl p-5 sm:p-8 border border-blue-100 shadow-2xl shadow-blue-500/10">
@@ -161,48 +206,40 @@ export default function EmailGenerator({
         </p>
       )}
 
-      <div className="space-y-6">
-        {/* Subject Line */}
-        <div className="group relative">
-          <label htmlFor="email-subject" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{t.subjectLabel}</label>
-          <div className="relative flex items-center">
-            <input
-              id="email-subject"
-              readOnly
-              value={displaySubject} 
-              className="w-full bg-gray-50 border border-gray-100 p-4 pr-24 rounded-2xl text-sm font-bold text-gray-700 outline-none"
-            />
-            <button 
-              onClick={() => handleCopy(displaySubject, 'subject')}
-              className={`absolute right-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                copyStatus === 'subject' ? 'bg-green-500 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {copyStatus === 'subject' ? t.copied : t.copy}
-            </button>
-          </div>
-        </div>
-
-        {/* Message Body */}
-        <div className="relative">
-          <label htmlFor="email-body" className="text-[10px] font-black text-gray-500 mb-1.5 block uppercase tracking-tighter">{t.bodyLabel}</label>
-          <textarea
-            id="email-body"
-            readOnly
-            rows={10} 
-            value={displayBody} 
-            className="w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl text-sm leading-relaxed text-gray-600 font-medium resize-none outline-none" 
+      {aiDraft ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <DraftPanel
+            id="email"
+            heading={t.mailPanel}
+            subject={aiDraft.subject}
+            body={aiDraft.body}
+            rows={16}
+            labels={panelLabels}
+            copyStatus={copyStatus}
+            onCopy={handleCopy}
           />
-          <button 
-            onClick={() => handleCopy(displayBody, 'body')}
-            className={`w-full mt-4 flex items-center justify-center gap-2 py-4 rounded-2xl font-black transition-all ${
-              copyStatus === 'body' ? 'bg-green-500 text-white' : 'bg-gray-900 text-white hover:bg-black'
-            }`}
-          >
-            {copyStatus === 'body' ? t.fullCopied : t.copyFull}
-          </button>
+          <DraftPanel
+            id="translation"
+            heading={t.translationPanel}
+            subject={aiDraft.translationSubject}
+            body={aiDraft.translationBody}
+            rows={16}
+            labels={panelLabels}
+            copyStatus={copyStatus}
+            onCopy={handleCopy}
+          />
         </div>
-      </div>
+      ) : (
+        <DraftPanel
+          id="email"
+          subject={data?.subject ?? ""}
+          body={data?.body ?? ""}
+          rows={10}
+          labels={panelLabels}
+          copyStatus={copyStatus}
+          onCopy={handleCopy}
+        />
+      )}
     </div>
   );
 }

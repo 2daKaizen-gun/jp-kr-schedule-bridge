@@ -16,6 +16,8 @@ export const translations = {
         noRecommendations: "향후 2주 안에 추천할 날이 없습니다.",
         email: {
         draftTitle: "메일 초안",
+        mailPanel: "보낼 메일 (일본어)",
+        translationPanel: "참고 번역 (한국어)",
         aiDraftLabel: "AI 생성 초안",
         subjectLabel: "메일 제목",
         bodyLabel: "메일 본문",
@@ -80,6 +82,8 @@ export const translations = {
         noRecommendations: "今後2週間におすすめできる日はありません。",
         email: {
         draftTitle: "メール下書き",
+        mailPanel: "送信メール（韓国語）",
+        translationPanel: "参考訳（日本語）",
         aiDraftLabel: "AI生成の下書き",
         subjectLabel: "件名",
         bodyLabel: "本文",

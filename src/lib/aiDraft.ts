@@ -94,10 +94,31 @@ export async function tryModels<T>(
   throw lastError;
 }
 
-// 응답의 "件名: ..." 줄을 제목으로 분리하고, 없으면 본문을 그대로 반환
-export function parseAiDraft(text: string): { subject: string | null; body: string } {
-  const match = text.match(/^[ \t*#]*件名[ \t*]*[:：][ \t*]*(.+?)[ \t*]*$/m);
-  if (!match) return { subject: null, body: text.trim() };
+export interface AiDraft {
+  subject: string;
+  body: string;
+  translationSubject: string;
+  translationBody: string;
+}
 
-  return { subject: match[1], body: text.replace(match[0], "").trim() };
+// 모델 응답(JSON)을 검증하고, 형식이 맞지 않으면 null을 반환
+export function parseAiDraft(text: string): AiDraft | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  if (!isRecord(parsed)) return null;
+
+  const { subject, body, translationSubject, translationBody } = parsed;
+  const fields = [subject, body, translationSubject, translationBody];
+  if (!fields.every(field => typeof field === "string" && field.trim() !== "")) return null;
+
+  return {
+    subject: (subject as string).trim(),
+    body: (body as string).trim(),
+    translationSubject: (translationSubject as string).trim(),
+    translationBody: (translationBody as string).trim(),
+  };
 }

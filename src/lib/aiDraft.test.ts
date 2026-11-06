@@ -83,18 +83,28 @@ describe("tryModels", () => {
 });
 
 describe("parseAiDraft", () => {
-  it("separates the subject from the body", () => {
-    expect(parseAiDraft("件名: 日程調整のお願い\n\nいつもお世話になっております。")).toEqual({
-      subject: "日程調整のお願い",
-      body: "いつもお世話になっております。",
-    });
+  const draft = {
+    subject: "日程調整のお願い",
+    body: "いつもお世話になっております。",
+    translationSubject: "일정 조정 부탁",
+    translationBody: "항상 신세를 지고 있습니다.",
+  };
+
+  it("keeps the draft and its translation separate", () => {
+    expect(parseAiDraft(JSON.stringify(draft))).toEqual(draft);
   });
 
-  it("handles a full-width colon and markdown emphasis", () => {
-    expect(parseAiDraft("**件名：日程調整のお願い**\n本文").subject).toBe("日程調整のお願い");
+  it("trims surrounding whitespace and drops unknown fields", () => {
+    expect(parseAiDraft(JSON.stringify({ ...draft, subject: " 件名 ", extra: "x" }))).toEqual({ ...draft, subject: "件名" });
   });
 
-  it("keeps the text when there is no subject line", () => {
-    expect(parseAiDraft(" 本文のみ ")).toEqual({ subject: null, body: "本文のみ" });
+  it.each([
+    ["text that is not JSON", "件名: 日程調整"],
+    ["a non-object", "[]"],
+    ["a missing translation", JSON.stringify({ ...draft, translationBody: undefined })],
+    ["an empty body", JSON.stringify({ ...draft, body: "  " })],
+    ["a non-string field", JSON.stringify({ ...draft, subject: 1 })],
+  ])("rejects %s", (_name, text) => {
+    expect(parseAiDraft(text)).toBeNull();
   });
 });

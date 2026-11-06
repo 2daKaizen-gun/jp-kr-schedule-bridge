@@ -5,9 +5,9 @@ import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
 import { emailTemplates, TemplateType } from '@/lib/templates';
-import { DashboardProps, Holiday, ScheduleAdvice } from '@/types/holiday';
+import { DashboardProps, Holiday, Lang, ScheduleAdvice } from '@/types/holiday';
 import { readLang, readLangOnServer, subscribeToLang, writeLang } from '@/lib/language';
-import { MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
+import { AiDraft, MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
 import EventModal from './EventModal';
 import { translations } from '@/lib/translations';
 import { useScheduleLogic } from '@/hook/useScheduleLogic';
@@ -47,10 +47,8 @@ export default function ScheduleDashboard({
 
   const lang = useSyncExternalStore(subscribeToLang, readLang, readLangOnServer);
   const [selectedHolidayDate, setSelectedHolidayDate] = useState<string | null>(null);
-  const [emailDraft, setEmailDraft] = useState("");
+  const [emailDraft, setEmailDraft] = useState<AiDraft | null>(null);
   const [activeTone, setActiveTone] = useState(""); // 생성 중인 톤 (비어 있으면 대기 상태)
-  const [currentTone, setCurrentTone] = useState("");
-  const [aiSubject, setAiSubject] = useState<string | null>(null);
   const [aiError, setAiError] = useState<'rate_limited' | 'unavailable' | 'failed' | null>(null);
   const aiRequest = useRef<AbortController | null>(null);
   const emailPanel = useRef<HTMLDivElement>(null);
@@ -113,9 +111,7 @@ export default function ScheduleDashboard({
         setAiError(data.error === 'rate_limited' || data.error === 'unavailable' ? data.error : 'failed');
         return;
       }
-      setEmailDraft(data.text);
-      setAiSubject(data.subject);
-      setCurrentTone(tone);
+      setEmailDraft(data);
     } catch {
       // 다른 공휴일을 선택해 취소한 요청은 오류로 표시하지 않음
       if (!request.signal.aborted) setAiError('failed');
@@ -129,10 +125,15 @@ export default function ScheduleDashboard({
     aiRequest.current?.abort();
     aiRequest.current = null;
     setActiveTone("");
-    setEmailDraft("");
-    setAiSubject(null);
+    setEmailDraft(null);
     setAiError(null);
-    setCurrentTone("");
+  };
+
+  // AI 초안은 생성한 언어 기준이므로 언어를 바꾸면 초기화
+  const switchLang = (next: Lang) => {
+    if (next === lang) return;
+    handleReset();
+    writeLang(next);
   };
 
   // 선택한 공휴일의 메일 초안 (언어를 바꾸면 함께 바뀌도록 렌더링 시 계산)
@@ -199,8 +200,8 @@ export default function ScheduleDashboard({
         <div className='flex gap-2 sm:gap-4 items-center'>
           {/* 언어 스위처 */}
           <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button aria-pressed={lang === 'ko'} onClick={() => writeLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
-            <button aria-pressed={lang === 'ja'} onClick={() => writeLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>JA</button>
+            <button aria-pressed={lang === 'ko'} onClick={() => switchLang('ko')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ko' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>KO</button>
+            <button aria-pressed={lang === 'ja'} onClick={() => switchLang('ja')} className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all ${lang === 'ja' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600'}`}>JA</button>
           </div>
           <div className='flex gap-1'>
             <button aria-label={currentT.prevMonth} onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-xl">◀</button>
@@ -276,10 +277,8 @@ export default function ScheduleDashboard({
           onReset={handleReset}
           onAddEvent={() => selectedHolidayDate && openEventModal(selectedHolidayDate)}
           aiDraft={emailDraft}
-          aiSubject={aiSubject}
           aiError={aiError}
           activeTone={activeTone}
-          currentTone={currentTone}
           lang={lang}
         />
       </div>
