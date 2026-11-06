@@ -4,13 +4,10 @@ import { useState } from 'react';
 import { translations } from '@/lib/translations';
 import { Lang } from '@/types/holiday';
 import type { AiDraft } from '@/lib/aiDraft';
+import type { TemplateDraft } from '@/lib/templates';
 
 interface EmailGeneratorProps {
-  data: {
-    title: string;
-    subject: string;
-    body: string;
-  } | null;
+  data: TemplateDraft | null;
   lang: Lang;
   onAiGenerate: (tone: string) => void;
   onReset: () => void;
@@ -206,40 +203,34 @@ export default function EmailGenerator({
         </p>
       )}
 
-      {aiDraft ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <DraftPanel
-            id="email"
-            heading={t.mailPanel}
-            subject={aiDraft.subject}
-            body={aiDraft.body}
-            rows={16}
-            labels={panelLabels}
-            copyStatus={copyStatus}
-            onCopy={handleCopy}
-          />
-          <DraftPanel
-            id="translation"
-            heading={t.translationPanel}
-            subject={aiDraft.translationSubject}
-            body={aiDraft.translationBody}
-            rows={16}
-            labels={panelLabels}
-            copyStatus={copyStatus}
-            onCopy={handleCopy}
-          />
-        </div>
-      ) : (
-        <DraftPanel
-          id="email"
-          subject={data?.subject ?? ""}
-          body={data?.body ?? ""}
-          rows={10}
-          labels={panelLabels}
-          copyStatus={copyStatus}
-          onCopy={handleCopy}
-        />
-      )}
+      {(aiDraft ?? data) && (() => {
+        const draft = (aiDraft ?? data)!;
+        const rows = aiDraft ? 16 : 10;
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <DraftPanel
+              id="email"
+              heading={t.mailPanel}
+              subject={draft.subject}
+              body={draft.body}
+              rows={rows}
+              labels={panelLabels}
+              copyStatus={copyStatus}
+              onCopy={handleCopy}
+            />
+            <DraftPanel
+              id="translation"
+              heading={t.translationPanel}
+              subject={draft.translationSubject}
+              body={draft.translationBody}
+              rows={rows}
+              labels={panelLabels}
+              copyStatus={copyStatus}
+              onCopy={handleCopy}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 }

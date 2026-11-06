@@ -1,97 +1,201 @@
-export type TemplateType = 'JP_HOLIDAY' | 'KR_HOLIDAY' | 'BOTH_HOLIDAY';
+import type { Lang } from "@/types/holiday";
+
+// 받는 사람 기준의 역할: 상대방 공휴일 배려, 우리 쪽 휴무 안내, 양국 공통 공휴일
+export type TemplateRole = 'PARTNER_HOLIDAY' | 'OUR_HOLIDAY' | 'BOTH_HOLIDAY';
+
+interface Message {
+    subject: string;
+    body: string;
+}
 
 interface TemplateContent {
     title: string;
-    subject: (date: string, holidayName: string) => string;
-    body: (date: string, holidayName: string) => string;
+    mail: (date: string, holidayName: string) => Message;
+    translation: (date: string, holidayName: string) => Message;
 }
 
-// 언어별로 템플릿을 분리하여 관리
-export const emailTemplates: Record<'ko' | 'ja', Record<TemplateType, TemplateContent>> = {
+export interface TemplateDraft {
+    title: string;
+    subject: string;
+    body: string;
+    translationSubject: string;
+    translationBody: string;
+}
+
+// 한국어 화면은 일본 파트너사에, 일본어 화면은 한국 파트너사에 보내므로 쉬는 나라에 따라 역할이 달라짐
+export function templateRole(lang: Lang, holidayType: 'kr' | 'jp' | 'both'): TemplateRole {
+    if (holidayType === 'both') return 'BOTH_HOLIDAY';
+    const partnerCountry = lang === 'ko' ? 'jp' : 'kr';
+    return holidayType === partnerCountry ? 'PARTNER_HOLIDAY' : 'OUR_HOLIDAY';
+}
+
+// 메일은 받는 사람의 언어로, 번역은 화면 언어로 작성
+const emailTemplates: Record<Lang, Record<TemplateRole, TemplateContent>> = {
   ko: {
-    JP_HOLIDAY: {
+    PARTNER_HOLIDAY: {
       title: "일본 공휴일 배려",
-      subject: (date, holidayName) => `[확인 요청] ${date} 일본 공휴일(${holidayName})에 따른 업무 일정 확인의 건`,
-      body: (date, holidayName) =>
-`いつも大変お世話になっております。 (항상 신세를 지고 있습니다.)
-
-${date}일은 일본의 공휴일인 [${holidayName}]으로 알고 있습니다.
-귀사의 연휴 기간 동안은 업무 대응이 어려우실 것으로 생각되어, 급한 건은 연휴 전까지 마무리하고 나머지는 연휴 이후에 확인해 주셔도 괜찮습니다.
-
-즐거운 연휴 보내시길 바라며, 항상 협력해 주셔서 감사합니다.
-
-何卒、よろしくお願い申し上げます。 (아무쪼록 잘 부탁드립니다.)`
-    },
-    KR_HOLIDAY: {
-      title: "한국 공휴일 알림",
-      subject: (date, holidayName) => `[안내] ${date} 한국 공휴일(${holidayName})에 따른 휴무 안내의 건`,
-      body: (date, holidayName) =>
-`いつもお世話になっております。 (언제나 신세를 지고 있습니다.)
-
-誠に勝手ながら (무례를 무릅쓰고), 한국의 공휴일인 [${holidayName}]로 인해 다음과 같이 저희 쪽 업무가 중단됨을 안내드립니다.
-
-■ 휴무 일자: ${date}
-해당 기간 접수된 문의는 업무 복귀 후 순차적으로 답변 드리겠습니다.
-
-너른 양해 부탁드리며, 업무에 참고해 주시기 바랍니다.
-
-引き続き、よろしくお願いいたします。 (앞으로도 잘 부탁드립니다.)`
-    },
-    BOTH_HOLIDAY: {
-      title: "양국 공휴일 공통",
-      subject: (date) => `[안내] ${date} 한일 공통 공휴일로 인한 일정 조정 안내`,
-      body: (date) =>
-`いつも大変お世話になっております。 (항상 신세를 지고 있습니다.)
-
-오는 ${date}일은 한국과 일본 모두 공휴일인 날입니다.
-양사 모두 휴무인 관계로, 진행 중인 프로젝트 일정에 차질이 없도록 사전에 일정을 조율하고자 합니다.
-
-추가적인 논의가 필요하시면 말씀 부탁드리며, 편안한 연휴 되시길 바랍니다.
-
-今後ともよろしくお願い申し上げます。 (앞으로도 잘 부탁드립니다.)`
-    }
-  },
-  ja: {
-    JP_HOLIDAY: {
-      title: "日本の祝日への配慮",
-      subject: (date, holidayName) => `【ご確認】${date} 日本の祝日（${holidayName}）に伴う進行スケジュール調整の件`,
-      body: (date, holidayName) =>
+      mail: (date, holidayName) => ({
+        subject: `【ご確認】${date} 日本の祝日（${holidayName}）に伴う業務日程の件`,
+        body:
 `いつも大変お世話になっております。
 
 ${date}は日本の祝日（${holidayName}）にあたると存じております。
-連休期間中は業務へのご対応が難しいかと存じますので、急ぎの案件は連休前までに進め、その他は連休明けにご確認いただければ幸いです。
+祝日前後はご対応が難しいかと存じますので、お急ぎの案件は祝日前までに進め、その他の案件は祝日明けにご確認いただければ幸いです。
 
-充実した連休をお過ごしください。いつも多大なるご協力をいただき、誠にありがとうございます。
+引き続き、よろしくお願い申し上げます。`
+      }),
+      translation: (date, holidayName) => ({
+        subject: `[확인] ${date} 일본 공휴일(${holidayName})에 따른 업무 일정 건`,
+        body:
+`항상 신세를 지고 있습니다.
 
-何卒、よろしくお願い申し上げます。`
+일본의 공휴일(${holidayName})인 ${date}에는 대응이 어려우실 것으로 알고 있습니다.
+급한 건은 공휴일 전까지 진행하고, 나머지는 공휴일이 지난 뒤에 확인해 주시면 감사하겠습니다.
+
+앞으로도 잘 부탁드립니다.`
+      })
     },
-    KR_HOLIDAY: {
-      title: "韓国の祝日による休業",
-      subject: (date, holidayName) => `【お知らせ】${date} 韓国の祝日（${holidayName}）に伴う休業のご案内`,
-      body: (date, holidayName) =>
+    OUR_HOLIDAY: {
+      title: "한국 공휴일 휴무 안내",
+      mail: (date, holidayName) => ({
+        subject: `【お知らせ】${date} 韓国の祝日（${holidayName}）に伴う休業のご案内`,
+        body:
 `いつもお世話になっております。
 
-誠に勝手ながら、韓国の祝日である [${holidayName}] に伴い、下記の通り弊社の業務を一時休止させていただきます。
+誠に勝手ながら、韓国の祝日（${holidayName}）に伴い、下記の日程は弊社の業務を休止させていただきます。
 
-■ 休業日: ${date}
-休業期間中にいただいたお問い合わせにつきましては、業務再開後、順次対応させていただきます。
+■ 休業日：${date}
 
-ご不便をおかけいたしますが、何卒ご了承くださいますようお願い申し上げます。
+休業日にいただいたお問い合わせにつきましては、業務再開後に順次対応いたします。
+ご不便をおかけいたしますが、何卒ご了承くださいますようお願い申し上げます。`
+      }),
+      translation: (date, holidayName) => ({
+        subject: `[안내] ${date} 한국 공휴일(${holidayName})에 따른 휴무 안내`,
+        body:
+`항상 신세를 지고 있습니다.
 
-引き続き、よろしくお願いいたします。`
+송구하오나 한국의 공휴일(${holidayName})로 인해 아래 일정에는 저희 업무를 쉬게 되었습니다.
+
+■ 휴무일: ${date}
+
+휴무일에 주신 문의는 업무 재개 후 순차적으로 답변드리겠습니다.
+불편을 드려 죄송하며, 너른 양해 부탁드립니다.`
+      })
     },
     BOTH_HOLIDAY: {
-      title: "両国共通の祝日による調整",
-      subject: (date) => `【ご連絡】${date} 韓日共通の祝日に伴う日程調整のお願い`,
-      body: (date) =>
+      title: "양국 공통 공휴일 일정 조정",
+      mail: (date) => ({
+        subject: `【ご連絡】${date} 日韓共通の祝日に伴う日程調整のお願い`,
+        body:
 `いつも大変お世話になっております。
 
-来る ${date} は韓国と日本の両国において祝日となります。
-貴社・弊社ともに休業となりますため、進行中のプロジェクトに支障が出ないよう、事前にスケジュールを調整させていただきたく存じます。
+${date}は日本と韓国の両国で祝日となり、貴社・弊社ともに休業となります。
+進行中のプロジェクトに支障が出ないよう、事前に日程を調整させていただければと存じます。
 
-追加のご相談がございましたら、いつでもお申し付けください。穏やかな休日をお過ごしください。
+ご相談事項がございましたら、お気軽にお知らせください。
+今後とも、よろしくお願い申し上げます。`
+      }),
+      translation: (date) => ({
+        subject: `[연락] ${date} 한일 공통 공휴일에 따른 일정 조정 요청`,
+        body:
+`항상 신세를 지고 있습니다.
 
-今後ともよろしくお願い申し上げます。`
+${date}에는 한국과 일본 모두 공휴일이라 귀사와 저희 모두 휴무입니다.
+진행 중인 프로젝트에 차질이 없도록 미리 일정을 조정하고자 합니다.
+
+상의하실 내용이 있으면 편하게 알려 주십시오.
+앞으로도 잘 부탁드립니다.`
+      })
+    }
+  },
+  ja: {
+    PARTNER_HOLIDAY: {
+      title: "韓国の祝日への配慮",
+      mail: (date, holidayName) => ({
+        subject: `[확인] ${date} 한국 공휴일(${holidayName})에 따른 업무 일정 건`,
+        body:
+`항상 신세를 지고 있습니다.
+
+한국의 공휴일(${holidayName})인 ${date}에는 대응이 어려우실 것으로 알고 있습니다.
+급한 건은 공휴일 전까지 진행하고, 나머지는 공휴일이 지난 뒤에 확인해 주시면 감사하겠습니다.
+
+앞으로도 잘 부탁드립니다.`
+      }),
+      translation: (date, holidayName) => ({
+        subject: `【ご確認】${date} 韓国の祝日（${holidayName}）に伴う業務日程の件`,
+        body:
+`いつも大変お世話になっております。
+
+${date}は韓国の祝日（${holidayName}）にあたると存じております。
+お急ぎの案件は祝日前までに進め、その他の案件は祝日明けにご確認いただければ幸いです。
+
+引き続き、よろしくお願い申し上げます。`
+      })
+    },
+    OUR_HOLIDAY: {
+      title: "日本の祝日による休業のご案内",
+      mail: (date, holidayName) => ({
+        subject: `[안내] ${date} 일본 공휴일(${holidayName})에 따른 휴무 안내`,
+        body:
+`항상 신세를 지고 있습니다.
+
+송구하오나 일본의 공휴일(${holidayName})로 인해 아래 일정에는 저희 업무를 쉬게 되었습니다.
+
+■ 휴무일: ${date}
+
+휴무일에 주신 문의는 업무 재개 후 순차적으로 답변드리겠습니다.
+불편을 드려 죄송하며, 너른 양해 부탁드립니다.`
+      }),
+      translation: (date, holidayName) => ({
+        subject: `【お知らせ】${date} 日本の祝日（${holidayName}）に伴う休業のご案内`,
+        body:
+`いつもお世話になっております。
+
+誠に勝手ながら、日本の祝日（${holidayName}）に伴い、下記の日程は弊社の業務を休止させていただきます。
+
+■ 休業日：${date}
+
+休業日にいただいたお問い合わせにつきましては、業務再開後に順次対応いたします。
+ご不便をおかけいたしますが、何卒ご了承くださいますようお願い申し上げます。`
+      })
+    },
+    BOTH_HOLIDAY: {
+      title: "両国共通の祝日による日程調整",
+      mail: (date) => ({
+        subject: `[연락] ${date} 한일 공통 공휴일에 따른 일정 조정 요청`,
+        body:
+`항상 신세를 지고 있습니다.
+
+${date}에는 한국과 일본 모두 공휴일이라 귀사와 저희 모두 휴무입니다.
+진행 중인 프로젝트에 차질이 없도록 미리 일정을 조정하고자 합니다.
+
+상의하실 내용이 있으면 편하게 알려 주십시오.
+앞으로도 잘 부탁드립니다.`
+      }),
+      translation: (date) => ({
+        subject: `【ご連絡】${date} 日韓共通の祝日に伴う日程調整のお願い`,
+        body:
+`いつも大変お世話になっております。
+
+${date}は日本と韓国の両国で祝日となり、貴社・弊社ともに休業となります。
+進行中のプロジェクトに支障が出ないよう、事前に日程を調整させていただければと存じます。
+
+ご相談事項がございましたら、お気軽にお知らせください。
+今後とも、よろしくお願い申し上げます。`
+      })
     }
   }
 };
+
+export function buildTemplateDraft(lang: Lang, role: TemplateRole, date: string, holidayName: string): TemplateDraft {
+    const template = emailTemplates[lang][role];
+    const mail = template.mail(date, holidayName);
+    const translation = template.translation(date, holidayName);
+    return {
+        title: template.title,
+        subject: mail.subject,
+        body: mail.body,
+        translationSubject: translation.subject,
+        translationBody: translation.body,
+    };
+}

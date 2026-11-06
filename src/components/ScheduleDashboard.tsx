@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { format, parseISO } from 'date-fns';
 import CalendarView from './CalendarView';
 import EmailGenerator from './EmailGenerator';
-import { emailTemplates, TemplateType } from '@/lib/templates';
+import { buildTemplateDraft, templateRole } from '@/lib/templates';
 import { DashboardProps, Holiday, Lang, ScheduleAdvice } from '@/types/holiday';
 import { readLang, readLangOnServer, subscribeToLang, writeLang } from '@/lib/language';
 import { AiDraft, MAX_AI_ITEMS, MAX_AI_TEXT_LENGTH } from '@/lib/aiDraft';
@@ -141,21 +141,11 @@ export default function ScheduleDashboard({
     const marker = selectedHolidayDate ? conflictMarkers[selectedHolidayDate] : null;
     if (!selectedHolidayDate || !marker) return null;
 
-    const templateKeys: Record<typeof marker.type, TemplateType> = {
-      kr: 'KR_HOLIDAY',
-      jp: 'JP_HOLIDAY',
-      both: 'BOTH_HOLIDAY',
-    };
     // 클릭한 달력과 무관하게 실제로 쉬는 나라의 공휴일 이름을 사용
     const source = marker.type === 'jp' ? jpHolidays : krHolidays;
     const holidayName = source.find(h => h.date === selectedHolidayDate && h.isPublicHoliday)?.localName ?? "";
-    const template = emailTemplates[lang][templateKeys[marker.type]];
 
-    return {
-      title: template.title,
-      subject: template.subject(selectedHolidayDate, holidayName),
-      body: template.body(selectedHolidayDate, holidayName),
-    };
+    return buildTemplateDraft(lang, templateRole(lang, marker.type), selectedHolidayDate, holidayName);
   })();
 
   // 공휴일은 메일 초안으로 이동하고, 그 외 날짜는 일정 추가 모달을 염
