@@ -136,12 +136,12 @@ graph TD
   - **Resolution**: Conducted a comprehensive color audit, darkening low-contrast text and buttons to reach a Lighthouse Accessibility score of 100 without sacrificing the professional design.
 
 ## 📈 Results
-Measured on the live site with Lighthouse 12.8 on November 5, 2026. Performance varies between runs.
+Measured on the live site with Lighthouse 12.8 on November 6, 2026, after the final release. Performance varies between runs.
 
 | | Performance | Accessibility | Best Practices | SEO | FCP | LCP |
 |---|---|---|---|---|---|---|
-| **Desktop** | 100 | 100 | 100 | 100 | 0.5s | 0.6s |
-| **Mobile** | 91 | 100 | 100 | 100 | 1.9s | 2.3s |
+| **Desktop** | 100 | 100 | 100 | 100 | 0.3s | 0.5s |
+| **Mobile** | 92 | 100 | 100 | 100 | 1.4s | 2.0s |
 
 An axe scan (WCAG 2.1 A/AA rules) of the main screens, the email draft, and the event dialog found no violations. Automated checks cover only part of WCAG.
 
@@ -157,7 +157,7 @@ An axe scan (WCAG 2.1 A/AA rules) of the main screens, the email draft, and the 
 ## 🧐 Final Project Retrospective
 
 ### 💡Engineering for Reliability
-This project was built with a core focus on 'Reliability'. On desktop, the live site scores 100 in all four Lighthouse categories; on mobile, it scores 100 in Accessibility, Best Practices, and SEO, and 91 in Performance. Beyond mere feature implementation, I worked to keep AI features usable in professional business environments through production-level optimization, model fallback, and robust error handling.
+This project was built with a core focus on 'Reliability'. On desktop, the live site scores 100 in all four Lighthouse categories; on mobile, it scores 100 in Accessibility, Best Practices, and SEO, and 92 in Performance. Beyond mere feature implementation, I worked to keep AI features usable in professional business environments through production-level optimization, model fallback, and robust error handling.
 
 - **Lighthouse Score (Desktop)**: ![Lighthouse Score](https://img.shields.io/badge/Lighthouse-Performance_100%20|%20Access_100%20|%20Best_100%20|%20SEO_100-brightgreen?style=for-the-badge)
 
