@@ -94,6 +94,14 @@ describe("parseAiDraft", () => {
     expect(parseAiDraft(JSON.stringify(draft))).toEqual(draft);
   });
 
+  it("turns escaped line breaks into real ones", () => {
+    // 실제 줄바꿈이 아니라 백슬래시와 n 문자가 들어 있는 경우
+    const escaped = { ...draft, body: "いつも\\n\\nよろしく", translationBody: "항상\\r\\n감사" };
+    const parsed = parseAiDraft(JSON.stringify(escaped));
+    expect(parsed?.body).toBe("いつも\n\nよろしく");
+    expect(parsed?.translationBody).toBe("항상\n감사");
+  });
+
   it("trims surrounding whitespace and drops unknown fields", () => {
     expect(parseAiDraft(JSON.stringify({ ...draft, subject: " 件名 ", extra: "x" }))).toEqual({ ...draft, subject: "件名" });
   });
@@ -118,6 +126,8 @@ describe("buildDraftPrompt", () => {
     expect(prompt).toContain("subject와 body는 일본어로만");
     expect(prompt).toContain("translationSubject와 translationBody는 한국어로만");
     expect(prompt).toContain("country가 JP이면 받는 사람(상대방) 쪽 휴무");
+    expect(prompt).toContain("subject와 body에는 [会社名], [名前]");
+    expect(prompt).toContain("translationSubject와 translationBody에는 [회사명], [이름]");
   });
 
   it("writes Korean mail with a Japanese translation from the Japanese UI", () => {

@@ -84,8 +84,8 @@ const TONE_SETTINGS: Record<AiTone, string> = {
 
 // 한국어 화면은 일본 파트너사에, 일본어 화면은 한국 파트너사에 보내는 메일을 작성
 const AUDIENCES = {
-  ko: { writer: "일본 파트너사와 일하는 한국인 엔지니어", recipient: "일본 파트너사", mail: "일본어", translation: "한국어", ours: "KR", theirs: "JP" },
-  ja: { writer: "한국 파트너사와 일하는 일본인 엔지니어", recipient: "한국 파트너사", mail: "한국어", translation: "일본어", ours: "JP", theirs: "KR" },
+  ko: { writer: "일본 파트너사와 일하는 한국인 엔지니어", recipient: "일본 파트너사", mail: "일본어", translation: "한국어", ours: "KR", theirs: "JP", mailPlaceholders: "[会社名], [名前]", translationPlaceholders: "[회사명], [이름]" },
+  ja: { writer: "한국 파트너사와 일하는 일본인 엔지니어", recipient: "한국 파트너사", mail: "한국어", translation: "일본어", ours: "JP", theirs: "KR", mailPlaceholders: "[회사명], [이름]", translationPlaceholders: "[会社名], [名前]" },
 } as const;
 
 export function buildDraftPrompt(input: AnalyzeRequest) {
@@ -108,8 +108,8 @@ ${JSON.stringify({
 
 [작성 가이드라인]
 1. 상황 인지: 데이터상 상대방이나 내가 쉬는 날을 언급하며, 해당 기간을 피한 구체적인 진행 날짜를 제안할 것. 제안 날짜는 주말과 데이터의 공휴일을 피할 것.
-2. 사실: 데이터에 없는 공휴일, 실수, 지연, 회의, 사람이나 회사 이름을 지어내지 말 것. 이름이 필요하면 [회사명], [이름]처럼 대괄호 자리표시를 쓸 것.
-3. 구성: 서두 인사, 본문, 맺음말 순서의 비즈니스 메일 형식을 갖추고, 인사, 본문의 각 내용, 맺음말은 줄바꿈 문자 두 개로 구분된 별도 문단으로 쓸 것.
+2. 사실: 데이터에 없는 공휴일, 실수, 지연, 회의, 사람이나 회사 이름을 지어내지 말 것. 이름이 필요하면 대괄호 자리표시를 쓰되, subject와 body에는 ${audience.mailPlaceholders}, translationSubject와 translationBody에는 ${audience.translationPlaceholders}처럼 각 필드의 언어로 쓸 것.
+3. 구성: 서두 인사, 본문, 맺음말 순서의 비즈니스 메일 형식을 갖추고, 인사, 본문의 각 내용, 맺음말은 실제 줄바꿈 문자 두 개로 구분된 별도 문단으로 쓸 것. 줄바꿈을 백슬래시와 n 두 글자로 쓰지 말 것.
 4. 언어: subject와 body는 ${audience.mail}로만, translationSubject와 translationBody는 ${audience.translation}로만 작성할 것. 공휴일 이름도 각 언어로 옮기고, 한 필드 안에서 두 언어를 섞지 말 것. 맞춤법과 띄어쓰기를 정확하게 쓸 것.
 5. 번역: translationSubject와 translationBody는 subject와 body를 같은 문단 구성으로 충실히 번역할 것.
 6. 필드: subject에는 제목만, body에는 본문만 넣고 "件名:" 같은 머리표는 쓰지 말 것.
@@ -142,6 +142,9 @@ export interface AiDraft {
   translationBody: string;
 }
 
+// 모델이 줄바꿈을 백슬래시와 n 두 글자로 이스케이프해 보내는 경우가 있어 실제 줄바꿈으로 되돌림
+const normalizeLineBreaks = (text: string) => text.replace(/\\r\\n|\\n/g, "\n").trim();
+
 // 모델 응답(JSON)을 검증하고, 형식이 맞지 않으면 null을 반환
 export function parseAiDraft(text: string): AiDraft | null {
   let parsed: unknown;
@@ -157,9 +160,9 @@ export function parseAiDraft(text: string): AiDraft | null {
   if (!fields.every(field => typeof field === "string" && field.trim() !== "")) return null;
 
   return {
-    subject: (subject as string).trim(),
-    body: (body as string).trim(),
-    translationSubject: (translationSubject as string).trim(),
-    translationBody: (translationBody as string).trim(),
+    subject: normalizeLineBreaks(subject as string),
+    body: normalizeLineBreaks(body as string),
+    translationSubject: normalizeLineBreaks(translationSubject as string),
+    translationBody: normalizeLineBreaks(translationBody as string),
   };
 }
