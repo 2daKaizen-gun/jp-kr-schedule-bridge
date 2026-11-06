@@ -3,6 +3,8 @@ import { format, addDays, differenceInCalendarDays, getDay, parseISO } from 'dat
 
 // Google Calendar API
 const GOOGLE_API_KEY = process.env.GOOGLE_CALENDAR_API_KEY;
+// 브라우저 테스트에서는 고정된 공휴일 데이터를 주는 로컬 서버로 바꿀 수 있음
+const CALENDAR_API_BASE = process.env.GOOGLE_CALENDAR_API_BASE ?? "https://www.googleapis.com/calendar/v3";
 
 // 국가별 캘린더 ID
 const CALENDAR_IDS = {
@@ -35,7 +37,7 @@ async function getHolidays(countryCode: keyof typeof CALENDAR_IDS, year: number)
     const timeMin = `${year}-01-01T00:00:00Z`;
     const timeMax = `${year}-12-31T23:59:59Z`;
 
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
+    const url = `${CALENDAR_API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
 
     const response = await fetch(url, { next: { revalidate: 86400 } });
 

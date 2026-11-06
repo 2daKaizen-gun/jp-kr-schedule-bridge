@@ -1,0 +1,4 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["e2e/*.e2e.ts", "e2e/holiday-server.mjs"]
+}
