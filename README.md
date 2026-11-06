@@ -27,7 +27,7 @@ An AI-powered collaboration assistant that synchronizes Korean and Japanese busi
 
   2. Smart Business Advice: Real-time status analysis (e.g., "Today is a holiday in JP, expect delays")
 
-  3. One-Click AI Mailer: Contextual email drafting with 3 distinct tones
+  3. One-Click AI Mailer: Contextual email drafting with 3 distinct tones, shown beside a translation in the UI language (Japanese mail from the Korean UI, Korean mail from the Japanese UI)
 
   4. User Event Management: Add/Delete personal meetings with persistent storage
 
@@ -65,18 +65,20 @@ graph TD
 - **AI/LLM**: ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white) | API
 - **Deployment**: <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white"> | CI/CD Pipeline
 - **Libraries**: <img src="https://img.shields.io/badge/datefns-770C56?style=for-the-badge&logo=datefns&logoColor=white"> | Date
-- **Testing**: <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white"> | Date & Validation Logic
-- **CI**: <img src="https://img.shields.io/badge/github%20actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"> | Type Check, Lint, Test, Build
+- **Testing**: <img src="https://img.shields.io/badge/vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white"> | Date & Validation Logic <img src="https://img.shields.io/badge/playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white"> | Browser Tests
+- **CI**: <img src="https://img.shields.io/badge/github%20actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white"> | Type Check, Lint, Unit & Browser Tests, Build
 
 ## 🚀 Getting Started
 1. Create `.env.local` with `GOOGLE_CALENDAR_API_KEY` and `GEMINI_API_KEY`
 2. Run `npm install`, then `npm run dev`
 3. Run `npm test` for the unit tests and `npm run lint` for static checks
+4. Run `npm run test:e2e` for the browser tests. They build the app against a local holiday fixture server and mock AI responses, so no API keys or Gemini quota are needed. The fixtures contain 2026 holidays, which the app requests while the current year is between 2025 and 2027.
 
 ## ⚠️ Known Limitations
 - `/analyze` limits requests per client (10/min) and per server instance (60/min) in memory, so limits are best-effort across serverless instances
 - Calendars cover the previous, current, and next year only
 - When Gemini models are busy, falling back to the next model can make email generation take up to about 75 seconds
+- AI drafts can still contain wording mistakes, so review them before sending
 
 ## ✅ Milestone
 - **Phase 1**: Foundation & Frontend Environment Setup
@@ -113,7 +115,7 @@ graph TD
   - [x] Phase 5-4: Global Localization & UX Optimization 
   - [x] Phase 5-5: Code Refactoring & TypeScript Strict Mode Audit
   - [x] Phase 5-6: Final Project Retrospective
-  - [x] Phase 5-7: Add CI Pipeline (GitHub Actions)
+  - [x] Phase 5-7: Add CI Pipeline & Browser Tests (GitHub Actions, Playwright)
 
 ## 🔥 Troubleshooting & Lessons Learned
 **1. Hydration Mismatch (React Error #418)**
