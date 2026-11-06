@@ -29,3 +29,26 @@ jobs:
       # API 키가 없으면 공휴일이 빈 상태로 빌드되며, 컴파일 오류만 검증함
       - name: Build
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      # 고정 공휴일 데이터와 가짜 AI 응답을 쓰므로 비밀 값이 필요 없음
+      - name: Browser tests
+        run: npm run test:e2e
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
